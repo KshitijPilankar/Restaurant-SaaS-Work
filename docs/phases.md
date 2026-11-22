@@ -7,10 +7,10 @@
 - [x] Build `/super-admin` dashboard with **2-Minute Pitch Cloner** (creates tenant, stations, categories, menu items, tables `T1..Tn`, and default staff PINs).
 
 ## Phase 2: Guest Web App (Menu, Shared Cart & Service Calls)
-- [ ] Build `/r/[slug]/t/[tableCode]` dynamic brand wrapper (`--brand-primary` + status check for `PAUSED` tenants).
-- [ ] Build Guest Name onboarding modal & `table_sessions` join/create logic.
-- [ ] Build Menu UI (Veg/Non-Veg filter, spice/allergen badges, variants modal, "Pairs Well With" upsells).
-- [ ] Implement Supabase Realtime **Shared Table Cart** (`cart_items`) and **1-Tap Call Waiter** (`service_requests`).
+- [x] Build `/r/[slug]/t/[tableCode]` dynamic brand wrapper (`--brand-primary` + status check for `PAUSED` tenants).
+- [x] Build Guest Name onboarding modal & `table_sessions` join/create logic.
+- [x] Build Menu UI (Veg/Non-Veg filter, spice/allergen badges, variants modal, "Pairs Well With" upsells).
+- [x] Implement Supabase Realtime **Shared Table Cart** (`cart_items`) and **1-Tap Call Waiter** (`service_requests`).
 
 ## Phase 3: Staff Floor Map & Kitchen Display System (KDS)
 - [ ] Build `/staff/[slug]/login` 4-digit PIN authentication + audio chime unlock.

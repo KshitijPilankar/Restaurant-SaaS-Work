@@ -4,8 +4,6 @@ import { SuperAdminLogin } from '@/components/super-admin/SuperAdminLogin';
 import { SuperAdminDashboard } from '@/components/super-admin/SuperAdminDashboard';
 import { Restaurant } from '@/types/database';
 
-export const dynamic = 'force-dynamic';
-
 export default async function SuperAdminPage() {
     const cookieStore = await cookies();
     const isAuthed = cookieStore.get('dineos_super_admin')?.value === 'authenticated';

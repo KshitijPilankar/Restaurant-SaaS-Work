@@ -6,6 +6,7 @@
 - **Order Safety:** Guest orders enter as `PENDING_APPROVAL` and require 1-tap Floor Staff approval before hitting KDS to prevent prank orders.
 - **Staff Auth:** 4-digit PIN per restaurant (`staff_users`) instead of email/password for fast floor/kitchen tablet login.
 - **Super Admin Auth:** Master passkey validated server-side setting a 7-day secure HTTP-only cookie (`dineos_super_admin=authenticated`).
+- **Dynamic White-Label Tokens:** `--brand-primary` injected at `/r/[slug]` layout level from `restaurants.primary_color`, guaranteeing zero hardcoded colors on Guest surfaces.
 
 ## Completed Milestones
 - [x] Documentation & architecture specifications finalized (`PRD.md`, `database.md`, `Architecture.md`, `design.md`, `phases.md`, `CLAUDE.md`).
@@ -17,6 +18,19 @@
   - `src/components/super-admin/SuperAdminDashboard.tsx`: High-contrast control room with live slug preview, color picker, preset selector, table count slider, tenant listing with live status badges, 1-click links for all 3 surfaces, and printable Table 1 QR preview modal (`qrcode.react`).
   - `src/app/super-admin/page.tsx`: Server component handling cookie verification and tenant fetching.
   - Tailwind CSS v4 & PostCSS pipeline configured (`@tailwindcss/postcss` in `postcss.config.mjs`, verified production build and live `/super-admin` styling).
+- [x] **Phase 2 Completed**: Guest Mobile Web App, Dynamic White-Label Branding & Realtime Shared Table Cart:
+  - `src/app/r/[slug]/layout.tsx`: Dynamic `--brand-primary` CSS variable wrapper + tenant status guard (`PAUSED`, demo expiration).
+  - `src/app/r/[slug]/t/[tableCode]/page.tsx`: Table validator, category/menu item loader, active session & order loader.
+  - `src/app/r/[slug]/actions.ts`: Multi-tenant scoped server actions (`joinOrCreateTableSession`, `addToSharedCart`, `updateCartItemQuantity`, `placeSharedOrder`, `createServiceRequest`).
+  - `src/components/guest/*`: Mobile-first 375px components:
+    - `GuestAppShell.tsx`: Supabase Realtime channel subscription, local identity sync, sticky cart/tracker bottom bar.
+    - `TableJoinModal.tsx`: Branded welcome bottom-sheet with existing tablemates list and guest name onboarding.
+    - `GuestHeader.tsx`: Restaurant branding, table badge, active diners counter, Wi-Fi popover with 1-click password copy, service call button.
+    - `ServiceRequestModal.tsx`: 1-tap presets for Water, Napkins, Call Waiter, Request Bill.
+    - `MenuExplorer.tsx`: Search, Pure Veg filter, category scroll bar, and rich dish cards.
+    - `DishDetailDrawer.tsx`: Variant selection, spice badges, allergen tags, special instructions notes, quantity stepper.
+    - `SharedCartDrawer.tsx`: Shared live table cart showing who added which dish, quantity controls, GST breakdown, "Pairs Well With" upsells, and "Place Table Order" action.
+    - `LiveOrderTracker.tsx`: Live order status stepper (`Sent to Staff` → `In Kitchen` → `Food Ready` → `Served`) + running bill summary modal.
 
 ## Known Issues / Pending Setup
 - Supabase project SQL execution pending (run SQL blocks from `database.md` in Supabase SQL Editor).
