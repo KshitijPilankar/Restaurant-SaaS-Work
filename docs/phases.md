@@ -18,9 +18,9 @@
 - [x] Build `/staff/[slug]/kds` Station-filtered KDS board with live color-coded prep timers and "Mark Ready" actions.
 
 ## Phase 4: Guest Tracker, Split Bill, Razorpay & Review Gate
-- [ ] Build `/r/[slug]/t/[tableCode]/tracker` live order progress stepper + 1-tap Wi-Fi password copy.
-- [ ] Build `/r/[slug]/t/[tableCode]/bill` with Equal Split, Item-wise Split, Tip selector, Razorpay Test Mode integration, and Cash payment request.
-- [ ] Build Smart Review Gate (4–5 stars → Google Review URL; 1–3 stars → internal DB feedback).
+- [x] Build `/r/[slug]/t/[tableCode]/tracker` live order progress stepper + 1-tap Wi-Fi password copy.
+- [x] Build `/r/[slug]/t/[tableCode]/bill` with Equal Split, Item-wise Split, Tip selector, Razorpay Test Mode integration, and Cash payment request.
+- [x] Build Smart Review Gate (4–5 stars → Google Review URL; 1–3 stars → internal DB feedback).
 
 ## Phase 5: Restaurant Owner Admin Panel
 - [ ] Build `/admin/[slug]` Menu CRUD, Station assignment, In-Stock toggle, Table & Printable QR Code exporter, Staff PIN manager, and Branding settings.

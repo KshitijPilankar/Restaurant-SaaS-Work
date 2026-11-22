@@ -36,6 +36,13 @@
   - `src/components/staff/StaffPinGate.tsx`: Dark-mode 4-digit numeric keypad with touch targets, PIN dots, and quick demo presets (1111 Manager, 2222 Waiter, 3333 Kitchen).
   - `src/app/staff/[slug]/floor/page.tsx` & `src/components/staff/FloorDashboard.tsx`: High-contrast dark operational floor map subscribing to Supabase Realtime (`tables`, `orders`, `service_requests`, `table_sessions`), live color-coded table tiles (FREE, ORDERING, PENDING_APPROVAL, EATING, HELP, BILL), incoming order approval queue with 1-tap Send to Kitchen, live service request alert bar with 1-tap Resolve, synthesised Web Audio chimes, and table detail drawer.
   - `src/app/staff/[slug]/kds/page.tsx` & `src/components/staff/KdsBoard.tsx`: Station-routed Kitchen Display System with dynamic station filter tabs (Tandoor, Main Course, Beverages & Desserts), elapsed timers with color-coded tickets (emerald <8m, amber 8-15m, red >15m), item-level status advancement (QUEUED -> PREPARING -> READY), and 1-tap "Bump Entire Order Ready" button.
+- [x] **Phase 4 Completed**: Smart Bill & Split Engine, Razorpay/UPI Checkout & Smart Google Review Funnel:
+  - `src/app/r/[slug]/checkout-actions.ts`: Server actions scoped by `restaurant_id` (`recordTablePayment`, `submitGuestReview`) inserting `PAID` payments records, transitioning table status to `'BILL'`, creating service notifications, and persisting guest feedback.
+  - `src/app/api/payments/razorpay/route.ts`: App Router POST endpoint creating Razorpay orders with automatic fallback to `{ demoMode: true }` when test placeholders are present, preventing live demo crashes.
+  - `src/components/guest/BillCheckoutDrawer.tsx`: Multi-mode checkout drawer supporting Full Bill, Equal Split (stepper for 2-10 diners), and Itemized By Person split (with proportional GST allocation), Tip chips (₹0, ₹20, ₹50, 10%), dynamic payment selection (Instant UPI, Card/Razorpay, Cash to Staff), and order settlement trigger.
+  - `src/components/guest/PostPaymentReviewModal.tsx`: Post-checkout star review funnel intercepting ratings (4–5 stars redirects to Google Review URL or Google Maps search; 1–3 stars routes feedback privately to the internal owner reviews database).
+  - Connected `LiveOrderTracker.tsx` and `GuestAppShell.tsx` to launch the unified bill and review flow.
+  - Updated `FloorDashboard.tsx` with a distinct `BILL PAID` emerald/violet badge on floor map tiles and in the table drawer.
 
 ## Known Issues / Pending Setup
 - Supabase project SQL execution pending (run SQL blocks from `database.md` in Supabase SQL Editor).

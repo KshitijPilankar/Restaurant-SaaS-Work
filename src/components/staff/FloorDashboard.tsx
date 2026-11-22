@@ -65,7 +65,7 @@ const TABLE_STATUS_COLORS: Record<
     PENDING_APPROVAL: { label: 'New Order', border: 'border-amber-500', bg: 'bg-amber-950/30', text: 'text-amber-400', dot: 'bg-amber-400', pulse: true },
     EATING: { label: 'Eating', border: 'border-emerald-600/80', bg: 'bg-emerald-950/20', text: 'text-emerald-400', dot: 'bg-emerald-400', pulse: false },
     HELP: { label: 'Service Call', border: 'border-red-500', bg: 'bg-red-950/40', text: 'text-red-400', dot: 'bg-red-500', pulse: true },
-    BILL: { label: 'Bill Requested', border: 'border-purple-500', bg: 'bg-purple-950/30', text: 'text-purple-400', dot: 'bg-purple-400', pulse: true },
+    BILL: { label: 'BILL PAID', border: 'border-purple-500 shadow-lg shadow-purple-950/50', bg: 'bg-purple-950/40', text: 'text-purple-300', dot: 'bg-purple-400', pulse: true },
 };
 
 export function FloorDashboard({
@@ -540,11 +540,22 @@ export function FloorDashboard({
                                 <h3 className="text-lg font-bold text-white">{selectedTable.display_name}</h3>
                             </div>
                             <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400">
-                                <span>Status: <strong className="text-white uppercase">{selectedTable.status}</strong></span>
+                                <span>Status: <strong className="text-white uppercase">{selectedTable.status === 'BILL' ? 'BILL PAID / SETTLE' : selectedTable.status}</strong></span>
                                 <span>•</span>
                                 <span>Capacity: {selectedTable.capacity} Seats</span>
                             </div>
                         </div>
+
+                        {/* Bill Paid Alert Banner */}
+                        {selectedTable.status === 'BILL' && (
+                            <div className="p-3 bg-purple-950/60 border border-purple-800 rounded-2xl flex items-center gap-2.5 text-xs text-purple-200">
+                                <Receipt className="w-5 h-5 text-purple-400 shrink-0" />
+                                <div>
+                                    <strong className="block text-white">Table Payment Settled</strong>
+                                    <span>Guests have completed payment or requested physical bill. Reset table when ready.</span>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Seated Diners */}
                         {(() => {

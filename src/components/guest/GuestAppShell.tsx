@@ -20,6 +20,7 @@ import { MenuExplorer } from '@/components/guest/MenuExplorer';
 import { DishDetailDrawer } from '@/components/guest/DishDetailDrawer';
 import { SharedCartDrawer } from '@/components/guest/SharedCartDrawer';
 import { LiveOrderTracker } from '@/components/guest/LiveOrderTracker';
+import { BillCheckoutDrawer } from '@/components/guest/BillCheckoutDrawer';
 
 interface OrderWithItems extends Order {
     order_items?: OrderItem[];
@@ -58,6 +59,7 @@ export function GuestAppShell({
     const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isTrackerOpen, setIsTrackerOpen] = useState(false);
+    const [isBillOpen, setIsBillOpen] = useState(false);
 
     const storageKey = `dineos_guest_${table.id}`;
 
@@ -337,7 +339,21 @@ export function GuestAppShell({
                 orders={orders}
                 isOpen={isTrackerOpen}
                 onClose={() => setIsTrackerOpen(false)}
+                onOpenCheckout={() => setIsBillOpen(true)}
             />
+
+            {/* Bill & Checkout Drawer */}
+            {session && currentGuestName && (
+                <BillCheckoutDrawer
+                    restaurant={restaurant}
+                    table={table}
+                    sessionId={session.id}
+                    orders={orders}
+                    currentGuestName={currentGuestName}
+                    isOpen={isBillOpen}
+                    onClose={() => setIsBillOpen(false)}
+                />
+            )}
 
             {/* Table Join Modal */}
             <TableJoinModal

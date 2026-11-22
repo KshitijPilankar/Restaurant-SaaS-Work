@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Clock, ChefHat, CheckCircle2, Utensils, ArrowLeft, Receipt, Sparkles, X } from 'lucide-react';
+import React from 'react';
+import { Clock, ChefHat, CheckCircle2, Utensils, ArrowLeft, Receipt, Sparkles } from 'lucide-react';
 import { Order, OrderItem, Restaurant, RestaurantTable, OrderStatus } from '@/types/database';
 
 interface OrderWithItems extends Order {
@@ -14,6 +14,7 @@ interface LiveOrderTrackerProps {
     orders: OrderWithItems[];
     isOpen: boolean;
     onClose: () => void;
+    onOpenCheckout: () => void;
 }
 
 const STATUS_STEPS: { status: OrderStatus; label: string; desc: string; icon: React.ElementType }[] = [
@@ -29,9 +30,8 @@ export function LiveOrderTracker({
     orders,
     isOpen,
     onClose,
+    onOpenCheckout,
 }: LiveOrderTrackerProps) {
-    const [showBillModal, setShowBillModal] = useState(false);
-
     if (!isOpen) return null;
 
     // Sort newest first
@@ -41,8 +41,9 @@ export function LiveOrderTracker({
 
     const latestOrder = sortedOrders[0];
 
-    // Compute bill totals
-    const grandSubtotal = orders.reduce((sum, ord) => sum + Number(ord.subtotal), 0);
+    // Compute bill totals for non-cancelled orders
+    const validOrders = orders.filter((o) => o.status !== 'CANCELLED');
+    const grandSubtotal = validOrders.reduce((sum, ord) => sum + Number(ord.subtotal), 0);
     const taxRate = Number(restaurant.tax_percentage) || 5.0;
     const grandTax = Math.round((grandSubtotal * taxRate) / 100);
     const grandTotal = grandSubtotal + grandTax;
@@ -236,68 +237,18 @@ export function LiveOrderTracker({
 
                     <button
                         type="button"
-                        onClick={() => setShowBillModal(true)}
+                        onClick={() => {
+                            onClose();
+                            onOpenCheckout();
+                        }}
                         className="flex-1 py-3 px-3 rounded-2xl font-bold text-xs text-white transition shadow cursor-pointer text-center flex items-center justify-center gap-1.5"
                         style={{ backgroundColor: 'var(--brand-primary)' }}
                     >
                         <Receipt className="w-3.5 h-3.5" />
-                        <span>View Bill (₹{grandTotal})</span>
+                        <span>Pay Bill (₹{grandTotal})</span>
                     </button>
                 </div>
             </div>
-
-            {/* Bill Summary Preview Modal (Placeholder for Phase 4) */}
-            {showBillModal && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-slideUp text-center relative">
-                        <button
-                            onClick={() => setShowBillModal(false)}
-                            className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-600"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto text-zinc-900">
-                            <Receipt className="w-6 h-6" />
-                        </div>
-
-                        <div>
-                            <span className="text-[11px] font-bold uppercase text-zinc-400 tracking-wider">
-                                Current Running Bill
-                            </span>
-                            <h3 className="text-xl font-bold text-zinc-900">{restaurant.name}</h3>
-                            <p className="text-xs text-zinc-500 font-medium">{table.display_name}</p>
-                        </div>
-
-                        <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200/80 space-y-2 text-xs text-left">
-                            <div className="flex justify-between text-zinc-600">
-                                <span>Items Subtotal</span>
-                                <span className="font-mono font-semibold">₹{grandSubtotal}</span>
-                            </div>
-                            <div className="flex justify-between text-zinc-600">
-                                <span>Taxes & GST ({taxRate}%)</span>
-                                <span className="font-mono font-semibold">₹{grandTax}</span>
-                            </div>
-                            <div className="pt-2 border-t border-zinc-200 flex justify-between font-extrabold text-sm text-zinc-900">
-                                <span>Grand Total</span>
-                                <span className="font-mono">₹{grandTotal}</span>
-                            </div>
-                        </div>
-
-                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] text-left">
-                            Split bill, UPI Razorpay payment, and review gate will be unlocked in Phase 4. You can ask your server for cash/card settlement right now.
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={() => setShowBillModal(false)}
-                            className="w-full py-3 rounded-xl font-bold text-xs bg-zinc-900 text-white hover:bg-zinc-800 transition"
-                        >
-                            Got It
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
