@@ -24,7 +24,8 @@ export interface StaffSessionData {
  */
 export async function verifyStaffPin(
     slug: string,
-    pinCode: string
+    pinCode: string,
+    requiredRole?: StaffRole
 ): Promise<ActionResult<{ staff: { id: string; name: string; role: StaffRole } }>> {
     const trimmedPin = pinCode.trim();
     if (trimmedPin.length !== 4) {
@@ -53,6 +54,11 @@ export async function verifyStaffPin(
 
     if (staffErr || !staff) {
         return { success: false, error: 'Invalid PIN. Check your 4-digit staff passcode.' };
+    }
+
+    // If a specific role is required (e.g. OWNER), enforce it
+    if (requiredRole && staff.role !== requiredRole && staff.role !== 'OWNER') {
+        return { success: false, error: `Access denied. ${requiredRole} PIN required for this portal.` };
     }
 
     const sessionPayload: StaffSessionData = {

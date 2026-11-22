@@ -43,6 +43,16 @@
   - `src/components/guest/PostPaymentReviewModal.tsx`: Post-checkout star review funnel intercepting ratings (4–5 stars redirects to Google Review URL or Google Maps search; 1–3 stars routes feedback privately to the internal owner reviews database).
   - Connected `LiveOrderTracker.tsx` and `GuestAppShell.tsx` to launch the unified bill and review flow.
   - Updated `FloorDashboard.tsx` with a distinct `BILL PAID` emerald/violet badge on floor map tiles and in the table drawer.
+- [x] **Phase 5 Completed**: Restaurant Owner Admin Portal, Branded SaaS Landing Page & Production RLS Security:
+  - `src/app/admin/[slug]/page.tsx`: Server component protected by `StaffPinGate` enforcing `OWNER` role (`1111` PIN), loading real-time revenue, tables, categories, menu items, stations, orders, payments, and reviews in parallel.
+  - `src/app/admin/[slug]/actions.ts`: Multi-tenant scoped server actions (`toggleMenuItemAvailability`, `updateMenuItemPrice`, `createMenuItem`, `deleteMenuItem`, `updateRestaurantSettings`, `logoutOwner`).
+  - `src/components/admin/OwnerAdminDashboard.tsx`: High-contrast SaaS owner control room with 4 tabs:
+    - **Overview & Revenue**: KPI cards (Today's Revenue, Total Paid Bills, Total Orders, Average Rating), recent payments ledger table, and private feedback inbox highlighting 1–3★ private feedback vs 4–5★ Google redirects.
+    - **Menu & Live Stock Manager**: Category & Veg filtering, live search, 1-tap 86'd stock toggle (`is_available`), inline price editor, dish deletion, and full "Add New Dish" modal.
+    - **QR Standees & Tables**: Grid of all tables (`T1..Tn`) with `QRCodeSVG` cards, live URLs, 1-click copy, and "Print All Table QRs" print-friendly view (`@media print` formatted for table tent cards).
+    - **Restaurant Settings**: Live configuration form for name, primary brand color (hex + picker), tax percentage, Wi-Fi SSID & password, UPI ID, and Google Review URL.
+  - `src/app/page.tsx`: Sleek, modern DineOS showcase landing page highlighting the 4 core pillars, live interactive demo switcher for tenant `garnish-annex`, architecture breakdown, and zero-DNS multi-tenancy highlights.
+  - `supabase/rls_policies.sql`: Production PostgreSQL script enabling Row-Level Security across all 13 tables (`restaurants`, `staff_users`, `kitchen_stations`, `tables`, `menu_categories`, `menu_items`, `table_sessions`, `cart_items`, `orders`, `order_items`, `service_requests`, `payments`, `reviews`) with scoped policies for public anonymous guests and service role bypass.
 
 ## Known Issues / Pending Setup
 - Supabase project SQL execution pending (run SQL blocks from `database.md` in Supabase SQL Editor).

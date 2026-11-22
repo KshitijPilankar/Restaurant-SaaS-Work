@@ -22,5 +22,7 @@
 - [x] Build `/r/[slug]/t/[tableCode]/bill` with Equal Split, Item-wise Split, Tip selector, Razorpay Test Mode integration, and Cash payment request.
 - [x] Build Smart Review Gate (4–5 stars → Google Review URL; 1–3 stars → internal DB feedback).
 
-## Phase 5: Restaurant Owner Admin Panel
-- [ ] Build `/admin/[slug]` Menu CRUD, Station assignment, In-Stock toggle, Table & Printable QR Code exporter, Staff PIN manager, and Branding settings.
+## Phase 5: Restaurant Owner Admin Panel & Platform Completion
+- [x] Build `/admin/[slug]` Menu CRUD, Station assignment, In-Stock toggle, Table & Printable QR Code exporter, Staff PIN manager, and Branding settings.
+- [x] Build branded DineOS Home Page (`src/app/page.tsx`) with live architecture highlights and quick navigation to all surfaces.
+- [x] Generate production PostgreSQL Row-Level Security script (`supabase/rls_policies.sql`) covering all 13 core tables.

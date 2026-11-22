@@ -49,7 +49,7 @@ export function StaffPinGate({
     const submitPin = (pinToSubmit: string) => {
         setError(null);
         startTransition(async () => {
-            const res = await verifyStaffPin(slug, pinToSubmit);
+            const res = await verifyStaffPin(slug, pinToSubmit, targetRole);
             if (res.success) {
                 if (onSuccess) {
                     onSuccess();
@@ -79,6 +79,8 @@ export function StaffPinGate({
                     <div className="w-14 h-14 rounded-2xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center mx-auto text-orange-400 shadow-md">
                         {targetRole === 'KITCHEN' ? (
                             <ChefHat className="w-7 h-7" />
+                        ) : targetRole === 'OWNER' ? (
+                            <ShieldCheck className="w-7 h-7 text-amber-400" />
                         ) : (
                             <Bell className="w-7 h-7" />
                         )}
@@ -87,11 +89,15 @@ export function StaffPinGate({
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700 mb-1">
                             <span>{restaurantName}</span>
                             <span>•</span>
-                            <span className="text-orange-400">{surfaceTitle}</span>
+                            <span className={targetRole === 'OWNER' ? 'text-amber-400' : 'text-orange-400'}>{surfaceTitle}</span>
                         </div>
-                        <h1 className="text-xl font-bold text-white tracking-tight">Staff PIN Access</h1>
+                        <h1 className="text-xl font-bold text-white tracking-tight">
+                            {targetRole === 'OWNER' ? 'Owner Portal Access' : 'Staff PIN Access'}
+                        </h1>
                         <p className="text-xs text-zinc-400 mt-0.5">
-                            Enter your 4-digit PIN on the tablet keypad to unlock this station.
+                            {targetRole === 'OWNER'
+                                ? 'Enter your 4-digit Owner PIN to manage menu, view revenue & print QR codes.'
+                                : 'Enter your 4-digit PIN on the tablet keypad to unlock this station.'}
                         </p>
                     </div>
                 </div>
@@ -166,6 +172,18 @@ export function StaffPinGate({
                     <div className="grid grid-cols-3 gap-1.5 text-xs">
                         <button
                             type="button"
+                            onClick={() => handleQuickPreset('1111')}
+                            className={`p-2 rounded-xl border transition text-center ${
+                                targetRole === 'OWNER'
+                                    ? 'bg-amber-950/60 border-amber-500/80 text-amber-200 ring-1 ring-amber-500/50'
+                                    : 'bg-zinc-800/60 hover:bg-zinc-700/60 border-zinc-700/40 text-zinc-300'
+                            }`}
+                        >
+                            <span className="font-mono font-bold block text-amber-400">1111</span>
+                            <span className="text-[10px] text-zinc-400 block">Owner</span>
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => handleQuickPreset('2222')}
                             className="p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/40 text-zinc-300 hover:text-white transition text-center"
                         >
@@ -179,14 +197,6 @@ export function StaffPinGate({
                         >
                             <span className="font-mono font-bold block text-emerald-400">3333</span>
                             <span className="text-[10px] text-zinc-400 block">Kitchen</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleQuickPreset('1111')}
-                            className="p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/40 text-zinc-300 hover:text-white transition text-center"
-                        >
-                            <span className="font-mono font-bold block text-blue-400">1111</span>
-                            <span className="text-[10px] text-zinc-400 block">Manager</span>
                         </button>
                     </div>
                 </div>
