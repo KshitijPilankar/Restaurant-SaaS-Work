@@ -13,9 +13,9 @@
 - [x] Implement Supabase Realtime **Shared Table Cart** (`cart_items`) and **1-Tap Call Waiter** (`service_requests`).
 
 ## Phase 3: Staff Floor Map & Kitchen Display System (KDS)
-- [ ] Build `/staff/[slug]/login` 4-digit PIN authentication + audio chime unlock.
-- [ ] Build `/staff/[slug]/floor` Live Floor Map (`FREE`, `ORDERING`, `PENDING_APPROVAL`, `EATING`, `HELP`, `BILL`), Order Approval modal, and Waiter Call resolver.
-- [ ] Build `/staff/[slug]/kds` Station-filtered KDS board with live color-coded prep timers and "Mark Ready" actions.
+- [x] Build `/staff/[slug]/login` 4-digit PIN authentication + audio chime unlock.
+- [x] Build `/staff/[slug]/floor` Live Floor Map (`FREE`, `ORDERING`, `PENDING_APPROVAL`, `EATING`, `HELP`, `BILL`), Order Approval modal, and Waiter Call resolver.
+- [x] Build `/staff/[slug]/kds` Station-filtered KDS board with live color-coded prep timers and "Mark Ready" actions.
 
 ## Phase 4: Guest Tracker, Split Bill, Razorpay & Review Gate
 - [ ] Build `/r/[slug]/t/[tableCode]/tracker` live order progress stepper + 1-tap Wi-Fi password copy.

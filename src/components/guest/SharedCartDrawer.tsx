@@ -116,6 +116,8 @@ export function SharedCartDrawer({
                             {cartItems.map((item) => {
                                 const isAddedByMe = item.added_by_guest_id === currentGuestId;
                                 const itemTotal = Number(item.unit_price) * item.quantity;
+                                const dish = menuItems.find((m) => m.id === item.menu_item_id);
+                                const dishName = dish?.name || 'Dish';
 
                                 return (
                                     <div
@@ -125,8 +127,7 @@ export function SharedCartDrawer({
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-1.5">
                                                 <h4 className="text-sm font-bold text-zinc-900 truncate">
-                                                    {/* We can infer or render name from cart_items if joined or item_name */}
-                                                    Item
+                                                    {dishName}
                                                 </h4>
                                                 {item.variant_name && (
                                                     <span className="text-[11px] font-semibold text-zinc-500">

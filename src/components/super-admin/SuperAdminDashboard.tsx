@@ -692,7 +692,11 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                         <span>•</span>
                                                         <span className="flex items-center gap-1">
                                                             <Calendar className="w-3 h-3" />
-                                                            {new Date(restaurant.created_at).toLocaleDateString()}
+                                                            {new Date(restaurant.created_at).toLocaleDateString('en-IN', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            })}
                                                         </span>
                                                         {restaurant.status === 'DEMO' && remainingDays !== null && (
                                                             <>

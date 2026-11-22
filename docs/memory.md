@@ -31,6 +31,11 @@
     - `DishDetailDrawer.tsx`: Variant selection, spice badges, allergen tags, special instructions notes, quantity stepper.
     - `SharedCartDrawer.tsx`: Shared live table cart showing who added which dish, quantity controls, GST breakdown, "Pairs Well With" upsells, and "Place Table Order" action.
     - `LiveOrderTracker.tsx`: Live order status stepper (`Sent to Staff` → `In Kitchen` → `Food Ready` → `Served`) + running bill summary modal.
+- [x] **Phase 3 Completed**: Staff Operations, PIN Gate, Waiter Floor Map & Station-Routed KDS:
+  - `src/app/staff/[slug]/actions.ts`: 4-digit PIN verification (`verifyStaffPin`), HTTP-only 12-hour session cookies (`dineos_staff_<slug>`), order approval (`approveOrder`), rejection (`rejectOrder`), item prep updates (`updateOrderItemPrepStatus`), order ready bump (`bumpOrderReady`), order served (`markOrderServed`), service request resolver (`resolveServiceRequest`), and table reset (`resetTableSession`).
+  - `src/components/staff/StaffPinGate.tsx`: Dark-mode 4-digit numeric keypad with touch targets, PIN dots, and quick demo presets (1111 Manager, 2222 Waiter, 3333 Kitchen).
+  - `src/app/staff/[slug]/floor/page.tsx` & `src/components/staff/FloorDashboard.tsx`: High-contrast dark operational floor map subscribing to Supabase Realtime (`tables`, `orders`, `service_requests`, `table_sessions`), live color-coded table tiles (FREE, ORDERING, PENDING_APPROVAL, EATING, HELP, BILL), incoming order approval queue with 1-tap Send to Kitchen, live service request alert bar with 1-tap Resolve, synthesised Web Audio chimes, and table detail drawer.
+  - `src/app/staff/[slug]/kds/page.tsx` & `src/components/staff/KdsBoard.tsx`: Station-routed Kitchen Display System with dynamic station filter tabs (Tandoor, Main Course, Beverages & Desserts), elapsed timers with color-coded tickets (emerald <8m, amber 8-15m, red >15m), item-level status advancement (QUEUED -> PREPARING -> READY), and 1-tap "Bump Entire Order Ready" button.
 
 ## Known Issues / Pending Setup
 - Supabase project SQL execution pending (run SQL blocks from `database.md` in Supabase SQL Editor).
