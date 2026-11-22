@@ -1,10 +1,10 @@
 # Build Execution Roadmap (`phases.md`)
 
 ## Phase 1: Project Setup, Database & Super Admin Demo Cloner
-- [ ] Initialize Next.js 15 (TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, Lucide, `qrcode.react`).
-- [ ] Configure Supabase clients (`client.ts`, `server.ts`) and TypeScript types from `database.md`.
-- [ ] Build `src/lib/presets/cuisines.ts` (North Indian, Cafe & Bakery, Fast Food/QSR seed data).
-- [ ] Build `/super-admin` dashboard with **2-Minute Pitch Cloner** (creates tenant, stations, categories, menu items, tables `T1..Tn`, and default staff PINs).
+- [x] Initialize Next.js 15 (TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, Lucide, `qrcode.react`).
+- [x] Configure Supabase clients (`client.ts`, `server.ts`) and TypeScript types from `database.md`.
+- [x] Build `src/lib/presets/cuisines.ts` (North Indian, Cafe & Bakery, Fast Food/QSR seed data).
+- [x] Build `/super-admin` dashboard with **2-Minute Pitch Cloner** (creates tenant, stations, categories, menu items, tables `T1..Tn`, and default staff PINs).
 
 ## Phase 2: Guest Web App (Menu, Shared Cart & Service Calls)
 - [ ] Build `/r/[slug]/t/[tableCode]` dynamic brand wrapper (`--brand-primary` + status check for `PAUSED` tenants).
