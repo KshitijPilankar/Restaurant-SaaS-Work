@@ -1,0 +1,33 @@
+{
+  "run_id": "dineos-post-remediation-audit-20261122",
+  "repo": "KshitijPilankar/Restaurant-SaaS-Work",
+  "target": "c:\\Antigravity Work\\Restaurant SaaS Work",
+  "source_ref": "07e508ef30f3749796ddcee8412d92e60897f5d9",
+  "profile": "standard",
+  "scope_paths": [
+    "src/",
+    "next.config.ts",
+    "supabase/rls_policies.sql"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companion_files": [
+    "ATTACK-CLASSES.md",
+    "CLOUD-AND-DEPLOYMENT.md",
+    "DATA-ISOLATION-AND-LIFECYCLE.md",
+    "WEB-PROTOCOL-AND-AUTH.md"
+  ],
+  "prior_run_paths": [
+    "audits/full-audit"
+  ],
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "coverage-ledger.json": "parent",
+    "findings.json": "parent",
+    "REPORT.md": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent"
+  },
+  "run_status": "complete"
+}

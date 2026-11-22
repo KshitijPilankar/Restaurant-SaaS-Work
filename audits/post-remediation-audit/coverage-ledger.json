@@ -1,0 +1,299 @@
+[
+  {
+    "coverage_id": "next.config.ts%23images_remotePatterns::next.config.ts%23origin_allowlist::configuration::CLOUD-AND-DEPLOYMENT.md%23Runtime%20configuration",
+    "canonical_refs": {
+      "surface": "next.config.ts#images_remotePatterns",
+      "boundary": "next.config.ts#origin_allowlist",
+      "subsystem": "configuration",
+      "attack_class": "CLOUD-AND-DEPLOYMENT.md#Runtime configuration"
+    },
+    "surface": "Next.js image remotePatterns configuration",
+    "boundary": "SSRF and remote asset allowlist",
+    "subsystem": "Deployment Configuration",
+    "attack_class": "Runtime configuration",
+    "starting_paths": [
+      "next.config.ts"
+    ],
+    "ordinary_attack_class_block": "CLOUD-AND-DEPLOYMENT.md#Runtime configuration",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "next.config.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "next.config.ts"
+        ],
+        "invariant": "Image optimization remotePatterns should be bounded to trusted CDNs or specific hosts.",
+        "method": "source",
+        "result": "Verified: next.config.ts uses explicit hostname allowlist (images.unsplash.com, *.supabase.co, res.cloudinary.com, lh3.googleusercontent.com, placehold.co) with wildcard hosts removed.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fr%2F%5Bslug%5D%2Factions.ts%23addToSharedCart::src%2Fapp%2Fr%2F%5Bslug%5D%2Factions.ts%23price_validation::src%2Fapp%2Fguest::ATTACK-CLASSES.md%23Input%20validation",
+    "canonical_refs": {
+      "surface": "src/app/r/[slug]/actions.ts#addToSharedCart",
+      "boundary": "src/app/r/[slug]/actions.ts#price_validation",
+      "subsystem": "src/app/guest",
+      "attack_class": "ATTACK-CLASSES.md#Input validation"
+    },
+    "surface": "Guest shared cart insertion",
+    "boundary": "Price integrity verification",
+    "subsystem": "Guest Web App",
+    "attack_class": "Input validation",
+    "starting_paths": [
+      "src/app/r/[slug]/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Input validation",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "src/app/r/[slug]/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "src/app/r/[slug]/actions.ts"
+        ],
+        "invariant": "Item prices must be derived server-side from menu_items.base_price.",
+        "method": "source",
+        "result": "Verified: addToSharedCart validates active table session and queries menu_items to compute authoritativeUnitPrice server-side, ignoring client price input.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fr%2F%5Bslug%5D%2Fcheckout-actions.ts%23recordTablePayment::src%2Fapp%2Fr%2F%5Bslug%5D%2Fcheckout-actions.ts%23payment_verification::src%2Fapp%2Fcheckout::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "src/app/r/[slug]/checkout-actions.ts#recordTablePayment",
+      "boundary": "src/app/r/[slug]/checkout-actions.ts#payment_verification",
+      "subsystem": "src/app/checkout",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "Guest checkout settlement",
+    "boundary": "Payment gateway cryptographic verification",
+    "subsystem": "Billing & Payments",
+    "attack_class": "Business logic",
+    "starting_paths": [
+      "src/app/r/[slug]/checkout-actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "src/app/r/[slug]/checkout-actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "src/app/r/[slug]/checkout-actions.ts"
+        ],
+        "invariant": "Payment settlement must validate positive amounts, verify active orders exist, and check Razorpay HMAC signatures.",
+        "method": "source",
+        "result": "Verified: recordTablePayment validates totalAmount > 0, checks non-cancelled active orders sum, and verifies HMAC-SHA256 signature when live credentials are set.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23operational_mutations::src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23requireStaffAuth::src%2Fapp%2Fstaff::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/app/staff/[slug]/actions.ts#operational_mutations",
+      "boundary": "src/app/staff/[slug]/actions.ts#requireStaffAuth",
+      "subsystem": "src/app/staff",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Staff operational mutations (approve, reject, kds, serve, reset)",
+    "boundary": "Staff cookie session verification and tenant isolation",
+    "subsystem": "Staff Operations",
+    "attack_class": "Access control",
+    "starting_paths": [
+      "src/app/staff/[slug]/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "src/app/staff/[slug]/actions.ts",
+      "src/components/staff/FloorDashboard.tsx",
+      "src/components/staff/KdsBoard.tsx"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "src/app/staff/[slug]/actions.ts",
+          "src/components/staff/FloorDashboard.tsx",
+          "src/components/staff/KdsBoard.tsx"
+        ],
+        "invariant": "Staff operational mutations must verify HTTP-only staff session matching restaurantId.",
+        "method": "source",
+        "result": "Verified: all operational actions invoke requireStaffAuth to ensure session validity, tenant match, and role authorization.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23verifyStaffPin::src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23rate_limiter::src%2Fapp%2Fauth::ATTACK-CLASSES.md%23Authentication%20and%20credential%20handling",
+    "canonical_refs": {
+      "surface": "src/app/staff/[slug]/actions.ts#verifyStaffPin",
+      "boundary": "src/app/staff/[slug]/actions.ts#rate_limiter",
+      "subsystem": "src/app/auth",
+      "attack_class": "ATTACK-CLASSES.md#Authentication and credential handling"
+    },
+    "surface": "Staff PIN and Super Admin authentication endpoints",
+    "boundary": "PIN brute-force lockout and timing-safe comparison",
+    "subsystem": "Authentication & Gatekeeping",
+    "attack_class": "Authentication and credential handling",
+    "starting_paths": [
+      "src/app/staff/[slug]/actions.ts",
+      "src/app/super-admin/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Authentication and credential handling",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "src/app/staff/[slug]/actions.ts",
+      "src/app/super-admin/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "src/app/staff/[slug]/actions.ts",
+          "src/app/super-admin/actions.ts"
+        ],
+        "invariant": "PIN attempts must be bounded by rate-limiting lockout; passkey checks must be constant-time with HMAC signed cookies.",
+        "method": "source",
+        "result": "Verified: verifyStaffPin enforces 5 attempts max with 15-min lockout; super-admin enforces >= 16 chars, timingSafeEqual, and HMAC-signed session cookies.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fcomponents%2Fguest%2FPostPaymentReviewModal.tsx%23handleGoogleRedirect::src%2Fcomponents%2Fguest%2FPostPaymentReviewModal.tsx%23url_sanitization::src%2Fcomponents%2Fguest::ATTACK-CLASSES.md%23Server-side%20request%20forgery%20%28SSRF%29%20and%20URL%20fetching",
+    "canonical_refs": {
+      "surface": "src/components/guest/PostPaymentReviewModal.tsx#handleGoogleRedirect",
+      "boundary": "src/components/guest/PostPaymentReviewModal.tsx#url_sanitization",
+      "subsystem": "src/components/guest",
+      "attack_class": "ATTACK-CLASSES.md#Server-side request forgery (SSRF) and URL fetching"
+    },
+    "surface": "Google review external redirection",
+    "boundary": "HTTPS protocol validation",
+    "subsystem": "Guest Web App",
+    "attack_class": "Server-side request forgery (SSRF) and URL fetching",
+    "starting_paths": [
+      "src/components/guest/PostPaymentReviewModal.tsx",
+      "src/app/admin/[slug]/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Server-side request forgery (SSRF) and URL fetching",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "src/components/guest/PostPaymentReviewModal.tsx",
+      "src/app/admin/[slug]/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "src/components/guest/PostPaymentReviewModal.tsx",
+          "src/app/admin/[slug]/actions.ts"
+        ],
+        "invariant": "External navigation URLs must strictly require https:// protocol.",
+        "method": "source",
+        "result": "Verified: PostPaymentReviewModal and updateRestaurantSettings enforce https:// prefix check before navigation or persistence.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "supabase%2Frls_policies.sql%23direct_client_access::supabase%2Frls_policies.sql%23rls_policies::supabase::ATTACK-CLASSES.md%23Data%20isolation%2C%20tenancy%2C%20and%20storage%20boundaries",
+    "canonical_refs": {
+      "surface": "supabase/rls_policies.sql#direct_client_access",
+      "boundary": "supabase/rls_policies.sql#rls_policies",
+      "subsystem": "supabase",
+      "attack_class": "ATTACK-CLASSES.md#Data isolation, tenancy, and storage boundaries"
+    },
+    "surface": "Supabase Postgres Client Connection (anon / authenticated roles)",
+    "boundary": "Row-Level Security policy definitions",
+    "subsystem": "Database & Tenancy",
+    "attack_class": "Data isolation, tenancy, and storage boundaries",
+    "starting_paths": [
+      "supabase/rls_policies.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Data isolation, tenancy, and storage boundaries",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "prior_confirmed_changed_source",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-post-remediation",
+    "reviewed_paths": [
+      "supabase/rls_policies.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-post-remediation",
+        "reviewed_paths": [
+          "supabase/rls_policies.sql"
+        ],
+        "invariant": "Direct public client writes and sensitive financial reads must be denied under RLS.",
+        "method": "source",
+        "result": "Verified: direct client INSERT, UPDATE, DELETE on operational tables are set to WITH CHECK (false) / USING (false), and payments/reviews reads are denied with USING (false).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  }
+]
