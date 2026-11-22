@@ -220,6 +220,13 @@ export async function updateRestaurantSettings(
         return { success: false, error: 'Tax percentage must be between 0% and 100%.' };
     }
 
+    if (input.googleReviewUrl && input.googleReviewUrl.trim()) {
+        const trimmedReviewUrl = input.googleReviewUrl.trim();
+        if (!trimmedReviewUrl.startsWith('https://')) {
+            return { success: false, error: 'Google Review URL must begin with https://' };
+        }
+    }
+
     const { error } = await supabaseAdmin
         .from('restaurants')
         .update({

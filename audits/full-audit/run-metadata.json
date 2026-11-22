@@ -1,0 +1,51 @@
+{
+  "run_id": "run-dineos-full-audit-001",
+  "repo": "Restaurant-SaaS-Work",
+  "target": "c:/Antigravity Work/Restaurant SaaS Work",
+  "source_ref": "main",
+  "profile": "standard",
+  "scope_paths": [
+    "src/app/super-admin/actions.ts",
+    "src/app/super-admin/page.tsx",
+    "src/app/r/[slug]/actions.ts",
+    "src/app/r/[slug]/checkout-actions.ts",
+    "src/app/r/[slug]/layout.tsx",
+    "src/app/r/[slug]/t/[tableCode]/page.tsx",
+    "src/app/staff/[slug]/actions.ts",
+    "src/app/staff/[slug]/floor/page.tsx",
+    "src/app/staff/[slug]/kds/page.tsx",
+    "src/app/admin/[slug]/actions.ts",
+    "src/app/admin/[slug]/page.tsx",
+    "src/app/api/payments/razorpay/route.ts",
+    "src/components/guest/PostPaymentReviewModal.tsx",
+    "src/components/guest/BillCheckoutDrawer.tsx",
+    "src/components/staff/FloorDashboard.tsx",
+    "src/components/staff/KdsBoard.tsx",
+    "src/components/staff/StaffPinGate.tsx",
+    "src/components/admin/OwnerAdminDashboard.tsx",
+    "supabase/rls_policies.sql",
+    "next.config.ts"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companion_files": [
+    "DATA-ISOLATION-AND-LIFECYCLE.md",
+    "WEB-PROTOCOL-AND-AUTH.md",
+    "CLIENT-SIDE.md",
+    "CLOUD-AND-DEPLOYMENT.md",
+    "ATTACK-CLASSES.md"
+  ],
+  "prior_run_paths": [
+    "audits/dineos-security-audit"
+  ],
+  "shared_file_owners": {
+    "run-metadata.json": "coordinator",
+    "architecture.md": "coordinator",
+    "coverage-ledger.json": "coordinator",
+    "findings.json": "coordinator",
+    "REPORT.md": "coordinator",
+    "FINDINGS-DETAIL.md": "coordinator",
+    "NEEDS-VALIDATION.md": "coordinator"
+  },
+  "run_status": "completed"
+}

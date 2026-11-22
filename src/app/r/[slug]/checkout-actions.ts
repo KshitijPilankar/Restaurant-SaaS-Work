@@ -21,6 +21,7 @@ export interface RecordPaymentInput {
     method: PaymentMethod;
     razorpayOrderId?: string | null;
     razorpayPaymentId?: string | null;
+    razorpaySignature?: string | null;
 }
 
 export interface SubmitReviewInput {
@@ -34,13 +35,57 @@ export interface SubmitReviewInput {
 
 /**
  * 1. Record Table Payment:
- * Inserts a payment record, updates table status to 'BILL',
+ * Validates active order total, verifies Razorpay HMAC signature if configured,
+ * inserts a payment record, updates table status to 'BILL',
  * and records a service request so floor staff sees the table has paid / requested settlement.
  */
 export async function recordTablePayment(
     input: RecordPaymentInput
 ): Promise<ActionResult<{ paymentId: string }>> {
-    // 1. Insert into payments
+    // 1. Validate numerical amounts
+    if (isNaN(input.totalAmount) || input.totalAmount <= 0) {
+        return { success: false, error: 'Payment total must be greater than zero.' };
+    }
+    if (input.subtotal < 0 || input.taxAmount < 0 || (input.tipAmount || 0) < 0) {
+        return { success: false, error: 'Invalid payment amount breakdown.' };
+    }
+
+    // 2. Validate session has active orders (prevent fake settlement of unplaced/cancelled orders)
+    const { data: activeOrders, error: orderErr } = await supabaseAdmin
+        .from('orders')
+        .select('id, total_amount, status')
+        .eq('session_id', input.sessionId)
+        .eq('restaurant_id', input.restaurantId)
+        .neq('status', 'CANCELLED');
+
+    if (orderErr || !activeOrders || activeOrders.length === 0) {
+        return { success: false, error: 'No active orders found for this table session.' };
+    }
+
+    const orderSum = activeOrders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
+    // Tolerance for tip and float rounding (+1 INR)
+    const maxAllowed = orderSum + (input.tipAmount || 0) + 1.0;
+    if (input.totalAmount > maxAllowed) {
+        return { success: false, error: 'Payment amount exceeds total active order amount.' };
+    }
+
+    // 3. Verify Razorpay HMAC-SHA256 signature when live production credentials are present
+    if (input.method !== 'CASH' && input.razorpayOrderId && input.razorpayPaymentId) {
+        const keySecret = process.env.RAZORPAY_KEY_SECRET;
+        const isLive = keySecret && !keySecret.includes('your_razorpay');
+        if (isLive && input.razorpaySignature) {
+            const crypto = await import('crypto');
+            const expectedSig = crypto
+                .createHmac('sha256', keySecret)
+                .update(`${input.razorpayOrderId}|${input.razorpayPaymentId}`)
+                .digest('hex');
+            if (expectedSig !== input.razorpaySignature) {
+                return { success: false, error: 'Payment signature verification failed.' };
+            }
+        }
+    }
+
+    // 4. Insert into payments
     const { data: payment, error: payErr } = await supabaseAdmin
         .from('payments')
         .insert({

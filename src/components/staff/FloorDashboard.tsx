@@ -209,33 +209,33 @@ export function FloorDashboard({
     // Actions
     const handleApprove = (orderId: string) => {
         startActionTransition(async () => {
-            await approveOrder(restaurant.id, orderId);
+            await approveOrder(restaurant.id, orderId, restaurant.slug);
         });
     };
 
     const handleReject = (orderId: string) => {
         if (!confirm('Reject this guest order?')) return;
         startActionTransition(async () => {
-            await rejectOrder(restaurant.id, orderId);
+            await rejectOrder(restaurant.id, orderId, restaurant.slug);
         });
     };
 
     const handleServeOrder = (orderId: string) => {
         startActionTransition(async () => {
-            await markOrderServed(restaurant.id, orderId);
+            await markOrderServed(restaurant.id, orderId, restaurant.slug);
         });
     };
 
     const handleResolveRequest = (requestId: string) => {
         startActionTransition(async () => {
-            await resolveServiceRequest(restaurant.id, requestId);
+            await resolveServiceRequest(restaurant.id, requestId, restaurant.slug);
         });
     };
 
     const handleResetTable = (tableId: string, sessionId?: string | null) => {
         if (!confirm('Reset this table? Current diners and active orders will be archived.')) return;
         startActionTransition(async () => {
-            await resetTableSession(restaurant.id, tableId, sessionId);
+            await resetTableSession(restaurant.id, tableId, sessionId, restaurant.slug);
             setSelectedTable(null);
         });
     };

@@ -1,12 +1,11 @@
-import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { isSuperAdminAuthenticated } from '@/app/super-admin/actions';
 import { SuperAdminLogin } from '@/components/super-admin/SuperAdminLogin';
 import { SuperAdminDashboard } from '@/components/super-admin/SuperAdminDashboard';
 import { Restaurant } from '@/types/database';
 
 export default async function SuperAdminPage() {
-    const cookieStore = await cookies();
-    const isAuthed = cookieStore.get('dineos_super_admin')?.value === 'authenticated';
+    const isAuthed = await isSuperAdminAuthenticated();
 
     if (!isAuthed) {
         return <SuperAdminLogin />;

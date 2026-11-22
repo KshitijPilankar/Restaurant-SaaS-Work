@@ -53,6 +53,17 @@
     - **Restaurant Settings**: Live configuration form for name, primary brand color (hex + picker), tax percentage, Wi-Fi SSID & password, UPI ID, and Google Review URL.
   - `src/app/page.tsx`: Sleek, modern DineOS showcase landing page highlighting the 4 core pillars, live interactive demo switcher for tenant `garnish-annex`, architecture breakdown, and zero-DNS multi-tenancy highlights.
   - `supabase/rls_policies.sql`: Production PostgreSQL script enabling Row-Level Security across all 13 tables (`restaurants`, `staff_users`, `kitchen_stations`, `tables`, `menu_categories`, `menu_items`, `table_sessions`, `cart_items`, `orders`, `order_items`, `service_requests`, `payments`, `reviews`) with scoped policies for public anonymous guests and service role bypass.
+- [x] **Full Security Audit & Comprehensive Remediation Completed** (`./audits/full-audit/`):
+  - Completed autonomous end-to-end security review using `@cloudflare/security-audit-skill`.
+  - Fully remediated all 7 findings (`DINEOS-VULN-001` through `DINEOS-VULN-007`):
+    - `DINEOS-VULN-001`: Implemented `requireStaffAuth` guard on all operational mutations in `src/app/staff/[slug]/actions.ts`.
+    - `DINEOS-VULN-002`: Hardened `supabase/rls_policies.sql`, revoking direct anon/authenticated client writes and sensitive reads.
+    - `DINEOS-VULN-003`: Server-side authoritative price resolution in `src/app/r/[slug]/actions.ts` (`addToSharedCart`).
+    - `DINEOS-VULN-004`: Server-side order total validation and live Razorpay HMAC signature check in `src/app/r/[slug]/checkout-actions.ts`.
+    - `DINEOS-VULN-005`: Staff PIN brute-force rate-limiting lockout map + Super Admin passkey length, constant-time compare (`crypto.timingSafeEqual`), and HMAC-signed cookies.
+    - `DINEOS-VULN-006`: Sanitized external Google review redirect URLs in `PostPaymentReviewModal.tsx` and `updateRestaurantSettings`.
+    - `DINEOS-VULN-007`: Replaced wildcard remote patterns in `next.config.ts` with explicit domain allowlist.
+  - Formally validated with zero-dependency audit scripts (`validate-coverage-ledger.cjs`, `validate-findings.cjs`), zero TypeScript errors (`npx tsc --noEmit`), and successful Next.js 16 build (`npm run build`).
 
 ## Known Issues / Pending Setup
 - Supabase project SQL execution pending (run SQL blocks from `database.md` in Supabase SQL Editor).

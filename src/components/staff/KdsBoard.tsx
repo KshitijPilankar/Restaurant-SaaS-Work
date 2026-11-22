@@ -161,13 +161,13 @@ export function KdsBoard({
         else if (currentStatus === 'READY') nextStatus = 'READY';
 
         startActionTransition(async () => {
-            await updateOrderItemPrepStatus(restaurant.id, itemId, nextStatus);
+            await updateOrderItemPrepStatus(restaurant.id, itemId, nextStatus, restaurant.slug);
         });
     };
 
     const handleBumpReady = (orderId: string) => {
         startActionTransition(async () => {
-            await bumpOrderReady(restaurant.id, orderId);
+            await bumpOrderReady(restaurant.id, orderId, restaurant.slug);
         });
     };
 

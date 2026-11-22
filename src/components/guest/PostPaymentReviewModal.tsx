@@ -29,9 +29,11 @@ export function PostPaymentReviewModal({
 
     const isHighRating = rating >= 4;
 
-    const googleUrl =
-        restaurant.google_review_url ||
-        `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' restaurant reviews')}`;
+    const rawGoogleUrl = restaurant.google_review_url?.trim();
+    const safeGoogleUrl =
+        rawGoogleUrl && rawGoogleUrl.startsWith('https://')
+            ? rawGoogleUrl
+            : `https://www.google.com/search?q=${encodeURIComponent(restaurant.name + ' restaurant reviews')}`;
 
     const handleGoogleRedirect = () => {
         startTransition(async () => {
@@ -43,7 +45,7 @@ export function PostPaymentReviewModal({
                 comment: null,
                 redirectedToGoogle: true,
             });
-            window.open(googleUrl, '_blank', 'noopener,noreferrer');
+            window.open(safeGoogleUrl, '_blank', 'noopener,noreferrer');
             setIsSubmitted(true);
             setTimeout(() => {
                 onClose();

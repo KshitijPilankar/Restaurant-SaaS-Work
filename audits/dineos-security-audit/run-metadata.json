@@ -1,0 +1,34 @@
+{
+  "run_id": "run-dineos-audit-001",
+  "repo": "Restaurant-SaaS-Work",
+  "target": "c:/Antigravity Work/Restaurant SaaS Work",
+  "source_ref": "main",
+  "profile": "standard",
+  "scope_paths": [
+    "src/app/super-admin/actions.ts",
+    "src/app/r/[slug]/actions.ts",
+    "src/app/r/[slug]/checkout-actions.ts",
+    "src/app/staff/[slug]/actions.ts",
+    "src/app/admin/[slug]/actions.ts",
+    "src/app/api/payments/razorpay/route.ts",
+    "supabase/rls_policies.sql"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companion_files": [
+    "DATA-ISOLATION-AND-LIFECYCLE.md",
+    "WEB-PROTOCOL-AND-AUTH.md",
+    "ATTACK-CLASSES.md"
+  ],
+  "prior_run_paths": [],
+  "shared_file_owners": {
+    "run-metadata.json": "coordinator",
+    "architecture.md": "coordinator",
+    "coverage-ledger.json": "coordinator",
+    "findings.json": "coordinator",
+    "REPORT.md": "coordinator",
+    "FINDINGS-DETAIL.md": "coordinator",
+    "NEEDS-VALIDATION.md": "coordinator"
+  },
+  "run_status": "completed"
+}

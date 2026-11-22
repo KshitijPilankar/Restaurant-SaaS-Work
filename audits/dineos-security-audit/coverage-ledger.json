@@ -1,0 +1,217 @@
+[
+  {
+    "coverage_id": "src%2Fapp%2Fr%2F%5Bslug%5D%2Factions.ts%23addToSharedCart::src%2Fapp%2Fr%2F%5Bslug%5D%2Factions.ts%23price_validation::src%2Fapp%2Fguest::ATTACK-CLASSES.md%23Input%20validation",
+    "canonical_refs": {
+      "surface": "src/app/r/[slug]/actions.ts#addToSharedCart",
+      "boundary": "src/app/r/[slug]/actions.ts#price_validation",
+      "subsystem": "src/app/guest",
+      "attack_class": "ATTACK-CLASSES.md#Input validation"
+    },
+    "surface": "Guest shared cart insertion",
+    "boundary": "Price integrity verification",
+    "subsystem": "Guest Web App",
+    "attack_class": "Input validation",
+    "starting_paths": [
+      "src/app/r/[slug]/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Input validation",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-1",
+    "reviewed_paths": [
+      "src/app/r/[slug]/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-1",
+        "reviewed_paths": [
+          "src/app/r/[slug]/actions.ts"
+        ],
+        "invariant": "Item prices must be derived server-side from menu_items.base_price.",
+        "method": "source",
+        "result": "addToSharedCart accepts unitPrice from client and stores it directly into cart_items.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "dineos:cart:price-tampering"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fr%2F%5Bslug%5D%2Fcheckout-actions.ts%23recordTablePayment::src%2Fapp%2Fr%2F%5Bslug%5D%2Fcheckout-actions.ts%23payment_verification::src%2Fapp%2Fcheckout::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "src/app/r/[slug]/checkout-actions.ts#recordTablePayment",
+      "boundary": "src/app/r/[slug]/checkout-actions.ts#payment_verification",
+      "subsystem": "src/app/checkout",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "Guest checkout settlement",
+    "boundary": "Payment gateway cryptographic verification",
+    "subsystem": "Billing & Payments",
+    "attack_class": "Business logic",
+    "starting_paths": [
+      "src/app/r/[slug]/checkout-actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-1",
+    "reviewed_paths": [
+      "src/app/r/[slug]/checkout-actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-1",
+        "reviewed_paths": [
+          "src/app/r/[slug]/checkout-actions.ts"
+        ],
+        "invariant": "Payments must be verified via gateway signatures and matched against active order totals.",
+        "method": "source",
+        "result": "recordTablePayment marks status PAID for arbitrary client amounts without signature check.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "dineos:payment:unverified-settlement"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23approveOrder::src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23verifyStaffPin::src%2Fapp%2Fstaff::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/app/staff/[slug]/actions.ts#approveOrder",
+      "boundary": "src/app/staff/[slug]/actions.ts#verifyStaffPin",
+      "subsystem": "src/app/staff",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Staff floor operational actions",
+    "boundary": "Staff PIN session verification",
+    "subsystem": "Staff Operations",
+    "attack_class": "Access control",
+    "starting_paths": [
+      "src/app/staff/[slug]/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-1",
+    "reviewed_paths": [
+      "src/app/staff/[slug]/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-1",
+        "reviewed_paths": [
+          "src/app/staff/[slug]/actions.ts"
+        ],
+        "invariant": "Staff operational mutations require an authenticated staff session cookie.",
+        "method": "source",
+        "result": "approveOrder, rejectOrder, and resetTableSession do not call getStaffSession or verify authorization.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "dineos:idor:staff-actions"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23verifyStaffPin::src%2Fapp%2Fstaff%2F%5Bslug%5D%2Factions.ts%23rate_limiting::src%2Fapp%2Fauth::ATTACK-CLASSES.md%23Authentication",
+    "canonical_refs": {
+      "surface": "src/app/staff/[slug]/actions.ts#verifyStaffPin",
+      "boundary": "src/app/staff/[slug]/actions.ts#rate_limiting",
+      "subsystem": "src/app/auth",
+      "attack_class": "ATTACK-CLASSES.md#Authentication"
+    },
+    "surface": "Staff PIN & Super Admin verification",
+    "boundary": "Credential rate limiting and secret storage",
+    "subsystem": "Authentication",
+    "attack_class": "Authentication",
+    "starting_paths": [
+      "src/app/staff/[slug]/actions.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Authentication",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-1",
+    "reviewed_paths": [
+      "src/app/staff/[slug]/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-1",
+        "reviewed_paths": [
+          "src/app/staff/[slug]/actions.ts"
+        ],
+        "invariant": "PIN and passkey verifications must enforce rate limits and require secure secret configuration.",
+        "method": "source",
+        "result": "PIN verification has no rate limits; Super Admin passkey has fallback to default secret.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "dineos:auth:pin-bruteforce"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "supabase%2Frls_policies.sql%23payments_public_read::supabase%2Frls_policies.sql%23multi_tenant_isolation::supabase::ATTACK-CLASSES.md%23Data%20isolation",
+    "canonical_refs": {
+      "surface": "supabase/rls_policies.sql#payments_public_read",
+      "boundary": "supabase/rls_policies.sql#multi_tenant_isolation",
+      "subsystem": "supabase",
+      "attack_class": "ATTACK-CLASSES.md#Data isolation"
+    },
+    "surface": "Supabase RLS policies",
+    "boundary": "Multi-tenant database row-level security",
+    "subsystem": "Database Security",
+    "attack_class": "Data isolation",
+    "starting_paths": [
+      "supabase/rls_policies.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Data isolation",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-1",
+    "reviewed_paths": [
+      "supabase/rls_policies.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-1",
+        "reviewed_paths": [
+          "supabase/rls_policies.sql"
+        ],
+        "invariant": "Anon role must not be able to read payment and order records across tenants.",
+        "method": "source",
+        "result": "payments_public_read and orders_public_read use USING (true), permitting cross-tenant scraping.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "dineos:rls:public-bypass"
+    ],
+    "unresolved": []
+  }
+]

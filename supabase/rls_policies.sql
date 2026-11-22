@@ -81,14 +81,15 @@ CREATE POLICY menu_categories_public_read ON menu_categories
     TO anon, authenticated
     USING (is_active = true);
 
--- 3.5 menu_items: Public can read all menu items
+-- 3.5 menu_items: Public can read active menu items
 DROP POLICY IF EXISTS menu_items_public_read ON menu_items;
 CREATE POLICY menu_items_public_read ON menu_items
     FOR SELECT
     TO anon, authenticated
-    USING (true);
+    USING (is_available = true);
 
--- 3.6 table_sessions: Guests can read, create, and update table sessions
+-- 3.6 table_sessions: Guests can read table sessions for realtime sync.
+-- Direct client writes are blocked; all session mutations go via Server Actions (service_role).
 DROP POLICY IF EXISTS table_sessions_public_read ON table_sessions;
 CREATE POLICY table_sessions_public_read ON table_sessions
     FOR SELECT
@@ -99,16 +100,17 @@ DROP POLICY IF EXISTS table_sessions_public_insert ON table_sessions;
 CREATE POLICY table_sessions_public_insert ON table_sessions
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
 DROP POLICY IF EXISTS table_sessions_public_update ON table_sessions;
 CREATE POLICY table_sessions_public_update ON table_sessions
     FOR UPDATE
     TO anon, authenticated
-    USING (true)
-    WITH CHECK (true);
+    USING (false)
+    WITH CHECK (false);
 
--- 3.7 cart_items: Guests can manage shared cart items
+-- 3.7 cart_items: Guests can read shared cart items for realtime sync.
+-- Direct client writes are blocked; all cart mutations go via Server Actions (service_role).
 DROP POLICY IF EXISTS cart_items_public_read ON cart_items;
 CREATE POLICY cart_items_public_read ON cart_items
     FOR SELECT
@@ -119,22 +121,23 @@ DROP POLICY IF EXISTS cart_items_public_insert ON cart_items;
 CREATE POLICY cart_items_public_insert ON cart_items
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
 DROP POLICY IF EXISTS cart_items_public_update ON cart_items;
 CREATE POLICY cart_items_public_update ON cart_items
     FOR UPDATE
     TO anon, authenticated
-    USING (true)
-    WITH CHECK (true);
+    USING (false)
+    WITH CHECK (false);
 
 DROP POLICY IF EXISTS cart_items_public_delete ON cart_items;
 CREATE POLICY cart_items_public_delete ON cart_items
     FOR DELETE
     TO anon, authenticated
-    USING (true);
+    USING (false);
 
--- 3.8 orders & order_items: Guests & staff can read and place orders
+-- 3.8 orders & order_items: Guests & staff can read orders for realtime sync.
+-- Direct client inserts are blocked; all orders are placed via Server Actions (service_role).
 DROP POLICY IF EXISTS orders_public_read ON orders;
 CREATE POLICY orders_public_read ON orders
     FOR SELECT
@@ -145,7 +148,7 @@ DROP POLICY IF EXISTS orders_public_insert ON orders;
 CREATE POLICY orders_public_insert ON orders
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
 DROP POLICY IF EXISTS order_items_public_read ON order_items;
 CREATE POLICY order_items_public_read ON order_items
@@ -157,9 +160,10 @@ DROP POLICY IF EXISTS order_items_public_insert ON order_items;
 CREATE POLICY order_items_public_insert ON order_items
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
--- 3.9 service_requests: Guests can call waiter and read status
+-- 3.9 service_requests: Guests & staff can read service requests for realtime sync.
+-- Direct client inserts are blocked; all requests are made via Server Actions (service_role).
 DROP POLICY IF EXISTS service_requests_public_read ON service_requests;
 CREATE POLICY service_requests_public_read ON service_requests
     FOR SELECT
@@ -170,33 +174,35 @@ DROP POLICY IF EXISTS service_requests_public_insert ON service_requests;
 CREATE POLICY service_requests_public_insert ON service_requests
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
--- 3.10 payments: Guests can read table payments and record transactions
+-- 3.10 payments: Direct public read and insert are blocked to protect guest financial data.
+-- All payments are recorded server-side via Server Actions (service_role).
 DROP POLICY IF EXISTS payments_public_read ON payments;
 CREATE POLICY payments_public_read ON payments
     FOR SELECT
     TO anon, authenticated
-    USING (true);
+    USING (false);
 
 DROP POLICY IF EXISTS payments_public_insert ON payments;
 CREATE POLICY payments_public_insert ON payments
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
--- 3.11 reviews: Guests can submit ratings & feedback
+-- 3.11 reviews: Direct public read and insert are blocked.
+-- Reviews are recorded and queried server-side via Server Actions (service_role).
 DROP POLICY IF EXISTS reviews_public_read ON reviews;
 CREATE POLICY reviews_public_read ON reviews
     FOR SELECT
     TO anon, authenticated
-    USING (true);
+    USING (false);
 
 DROP POLICY IF EXISTS reviews_public_insert ON reviews;
 CREATE POLICY reviews_public_insert ON reviews
     FOR INSERT
     TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (false);
 
 -- 3.12 staff_users: Restrict direct public read of staff PINs
 DROP POLICY IF EXISTS staff_users_public_read ON staff_users;

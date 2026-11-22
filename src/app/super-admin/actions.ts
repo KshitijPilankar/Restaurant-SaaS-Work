@@ -1,5 +1,6 @@
 'use server';
 
+import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -29,27 +30,95 @@ export interface ActionResult<T = unknown> {
 }
 
 /**
- * Checks if the request has an active super admin session cookie.
+ * Returns the configured master secret. Fails closed if missing or < 16 chars.
  */
-async function isSuperAdminAuthenticated(): Promise<boolean> {
-    const cookieStore = await cookies();
-    const cookie = cookieStore.get(SUPER_ADMIN_COOKIE);
-    return cookie?.value === 'authenticated';
+function getSuperAdminSecret(): string {
+    const secret = process.env.SUPER_ADMIN_PASSKEY?.trim();
+    if (!secret || secret.length < 16) {
+        throw new Error(
+            'Security Error: SUPER_ADMIN_PASSKEY must be defined in environment variables with at least 16 characters.'
+        );
+    }
+    return secret;
 }
 
 /**
- * Verifies the master passkey against process.env.SUPER_ADMIN_PASSKEY.
- * Sets an HTTP-only 7-day session cookie on success.
+ * Generates an HMAC-signed session token for the Super Admin.
+ */
+function computeSuperAdminToken(secret: string): string {
+    const timestamp = Date.now().toString();
+    const payload = `super-admin-session:${timestamp}`;
+    const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    return `auth:${timestamp}:${signature}`;
+}
+
+/**
+ * Verifies the HMAC-signed Super Admin session token.
+ */
+function verifySuperAdminToken(token: string, secret: string): boolean {
+    if (!token || !token.startsWith('auth:')) return false;
+    const parts = token.split(':');
+    if (parts.length !== 3) return false;
+
+    const [, timestamp, signature] = parts;
+    const time = parseInt(timestamp, 10);
+    if (isNaN(time) || Date.now() - time > COOKIE_MAX_AGE * 1000 || time > Date.now() + 60000) {
+        return false;
+    }
+
+    const payload = `super-admin-session:${timestamp}`;
+    const expectedSig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+    const sigBuf = Buffer.from(signature, 'hex');
+    const expBuf = Buffer.from(expectedSig, 'hex');
+    if (sigBuf.length !== expBuf.length) return false;
+
+    return crypto.timingSafeEqual(sigBuf, expBuf);
+}
+
+/**
+ * Checks if the request has a valid HMAC-signed super admin session cookie.
+ */
+export async function isSuperAdminAuthenticated(): Promise<boolean> {
+    try {
+        const secret = getSuperAdminSecret();
+        const cookieStore = await cookies();
+        const cookie = cookieStore.get(SUPER_ADMIN_COOKIE);
+        if (!cookie?.value) return false;
+        return verifySuperAdminToken(cookie.value, secret);
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Verifies the master passkey against process.env.SUPER_ADMIN_PASSKEY using constant-time comparison.
+ * Sets an HTTP-only 7-day HMAC-signed session cookie on success.
  */
 export async function verifySuperAdminPasskey(passkey: string): Promise<ActionResult> {
-    const masterPasskey = process.env.SUPER_ADMIN_PASSKEY || 'change_this_master_password';
+    let secret: string;
+    try {
+        secret = getSuperAdminSecret();
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Server authentication misconfiguration';
+        return { success: false, error: msg };
+    }
 
-    if (!passkey || passkey.trim() !== masterPasskey.trim()) {
+    if (!passkey || typeof passkey !== 'string') {
+        return { success: false, error: 'Master passkey is required.' };
+    }
+
+    const passBuf = Buffer.from(passkey.trim());
+    const secBuf = Buffer.from(secret);
+
+    // Constant-time check to prevent timing analysis attacks
+    if (passBuf.length !== secBuf.length || !crypto.timingSafeEqual(passBuf, secBuf)) {
         return { success: false, error: 'Invalid master passkey. Access denied.' };
     }
 
+    const token = computeSuperAdminToken(secret);
     const cookieStore = await cookies();
-    cookieStore.set(SUPER_ADMIN_COOKIE, 'authenticated', {
+    cookieStore.set(SUPER_ADMIN_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

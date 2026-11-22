@@ -1,0 +1,615 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:auth:pin-bruteforce",
+    "title": "Unthrottled 4-Digit Staff PIN and Master Passkey Brute-Force with Insecure Default Secret Fallback",
+    "description": "Staff PIN authentication and Super Admin master passkey verification lack rate-limiting and lockout controls. Furthermore, Super Admin authentication defaults to a hardcoded string when environment variables are omitted.",
+    "root_cause": "verifyStaffPin performs a database lookup on a 4-digit numeric code (10,000 combinations) without rate limiting, account lockout, or delay tracking. verifySuperAdminPasskey defaults to the string \"change_this_master_password\" if SUPER_ADMIN_PASSKEY is unset and issues an unsigned static cookie (\"authenticated\").",
+    "intended_behavior": "PIN verification must enforce rate limits and temporary lockouts after failed attempts. Master passkeys must strictly require a non-empty production secret, use constant-time comparison, and issue cryptographically signed session tokens.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 25,
+        "scope": "verifyStaffPin",
+        "description": "Server Action accepts 4-digit PIN string without rate-limiting checks or IP/session throttling."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 47,
+        "scope": "verifyStaffPin",
+        "description": "Queries staff_users matching restaurant_id and pin_code without recording failed attempts or tracking lockout windows."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 73,
+        "scope": "verifyStaffPin",
+        "description": "Issues authenticated 12-hour session cookie dineos_staff_<slug> granting role access."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 29,
+        "description": "PIN check only validates string length is 4 digits; no rate-limiter or failure-counter exists."
+      },
+      {
+        "file": "src/app/super-admin/actions.ts",
+        "line": 45,
+        "description": "Master passkey defaults to insecure static string \"change_this_master_password\" if environment variable is not configured."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Unauthenticated attacker with network reachability to the web application."
+      },
+      {
+        "kind": "system_configuration",
+        "description": "Applicable in environments without external WAF rate-limiting or where default environment variables are deployed."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "External anonymous user targeting any tenant slug.",
+      "payloads": [
+        "POST /staff/garnish-annex/actions/verifyStaffPin {\"pinCode\": \"1111\"}",
+        "POST /super-admin/actions/verifySuperAdminPasskey {\"passkey\": \"change_this_master_password\"}"
+      ],
+      "instructions": [
+        "Iterate 4-digit numeric values from 0000 to 9999 against verifyStaffPin.",
+        "Observe that no HTTP 429 or lockout error is returned, allowing full keyspace exhaustion within seconds.",
+        "Supply the default string \"change_this_master_password\" to verifySuperAdminPasskey in deployments lacking an explicit environment variable."
+      ],
+      "observed_result": "Valid PINs for Owner (1111), Waiter (2222), and Kitchen (3333) are discovered without restriction, granting elevated operational control."
+    },
+    "remediation": {
+      "strategy": "Implement exponential backoff or in-memory/Redis rate limiting on PIN verification, disallow fallback to default secrets, use timingSafeEqual for secret comparison, and sign all session cookies with HMAC-SHA256.",
+      "code_changes": [
+        {
+          "file_name": "src/app/super-admin/actions.ts",
+          "fixed_code": "const masterPasskey = process.env.SUPER_ADMIN_PASSKEY;\nif (!masterPasskey) throw new Error(\"SUPER_ADMIN_PASSKEY must be defined in environment variables.\");"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "10,000 combinations can be exhausted in less than one minute across automated HTTP requests."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Allows complete compromise of restaurant staff accounts (Owner, Waiter, Kitchen) or Super Admin tenant management."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by source inspection in actions.ts files."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:cart:price-tampering",
+    "title": "Client-Supplied Unit Price in Shared Table Cart Leading to Arbitrary Price Tampering",
+    "description": "addToSharedCart accepts unit_price directly from the client and saves it into cart_items. When the table order is placed, order totals and items inherit the client-dictated price rather than authoritative menu pricing.",
+    "root_cause": "addToSharedCart takes unitPrice as an untrusted client argument and does not query or validate against menu_items.base_price before inserting into cart_items. placeSharedOrder then calculates order subtotal using the tampered cart_items.unit_price.",
+    "intended_behavior": "The application must derive dish prices and variant deltas solely from the database records in menu_items.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/r/[slug]/actions.ts",
+        "line": 156,
+        "scope": "addToSharedCart",
+        "description": "Accepts input.unitPrice from client JSON argument."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/r/[slug]/actions.ts",
+        "line": 217,
+        "scope": "addToSharedCart",
+        "description": "Inserts input.unitPrice directly into cart_items table."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/r/[slug]/actions.ts",
+        "line": 302,
+        "scope": "placeSharedOrder",
+        "description": "Computes order subtotal using item.unit_price from cart_items and inserts into orders table."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/r/[slug]/actions.ts",
+        "line": 163,
+        "description": "input includes unitPrice: number without server-side validation against menu_items.base_price."
+      },
+      {
+        "file": "src/app/r/[slug]/actions.ts",
+        "line": 303,
+        "description": "Subtotal calculation relies entirely on cart_items.unit_price."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Anonymous diner seated at an active table."
+      },
+      {
+        "kind": "data_state",
+        "description": "Table session must be open."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Guest diner scanning table QR code.",
+      "payloads": [
+        "POST /r/garnish-annex/actions/addToSharedCart {\"restaurantId\":\"...\",\"sessionId\":\"...\",\"menuItemId\":\"...\",\"unitPrice\":0.01,\"quantity\":10}"
+      ],
+      "instructions": [
+        "Invoke addToSharedCart supplying unitPrice of 0.01 for any premium dish.",
+        "Invoke placeSharedOrder for the table.",
+        "Verify order subtotal in database is calculated at 0.10 rather than authentic menu pricing."
+      ],
+      "observed_result": "Order is created with a near-zero subtotal and sent to kitchen for preparation."
+    },
+    "remediation": {
+      "strategy": "Remove unitPrice from addToSharedCart input. Query menu_items by id and restaurant_id to obtain the authoritative base_price and calculate any variant adjustments server-side.",
+      "code_changes": [
+        {
+          "file_name": "src/app/r/[slug]/actions.ts",
+          "fixed_code": "const { data: mi } = await supabaseAdmin.from(\"menu_items\").select(\"base_price, variants\").eq(\"id\", input.menuItemId).eq(\"restaurant_id\", input.restaurantId).single();\nconst unitPrice = mi ? Number(mi.base_price) : 0;"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Any guest with standard browser developer tools or curl can modify Server Action arguments."
+      },
+      "impact": {
+        "score": "critical",
+        "reason": "Direct financial theft: diners can order expensive meals and alcohol for ₹0 or ₹0.01."
+      },
+      "overall_severity": "critical"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Verified directly in src/app/r/[slug]/actions.ts source code."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:idor:staff-actions",
+    "title": "Missing Authentication and Broken Object-Level Authorization on Staff Operational Actions",
+    "description": "Operational server actions for order approval, cancellation, status updates, service resolution, and table session reset do not verify the staff session cookie. Any unauthenticated caller can invoke them.",
+    "root_cause": "approveOrder, rejectOrder, updateOrderItemPrepStatus, bumpOrderReady, markOrderServed, resolveServiceRequest, and resetTableSession take restaurantId and record IDs directly from arguments without verifying getStaffSession(slug).",
+    "intended_behavior": "Every staff operational mutation must inspect getStaffSession(slug), verify that the session is active, ensure session.restaurantId matches the targeted restaurant, and enforce necessary staff roles.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 115,
+        "scope": "approveOrder",
+        "description": "Server Action exposed as public RPC endpoint taking restaurantId and orderId."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 120,
+        "scope": "approveOrder",
+        "description": "Fetches order without checking caller staff session or permissions."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 133,
+        "scope": "approveOrder",
+        "description": "Mutates order status to IN_KITCHEN and updates table status to EATING."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 115,
+        "description": "approveOrder does not call getStaffSession."
+      },
+      {
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 164,
+        "description": "rejectOrder does not call getStaffSession."
+      },
+      {
+        "file": "src/app/staff/[slug]/actions.ts",
+        "line": 368,
+        "description": "resetTableSession does not call getStaffSession, allowing any caller to wipe active table sessions."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Unauthenticated actor with network access to Next.js server actions."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "External actor or seated diner wishing to disrupt restaurant operations.",
+      "payloads": [
+        "POST /staff/garnish-annex/actions/rejectOrder {\"restaurantId\":\"...\",\"orderId\":\"...\"}",
+        "POST /staff/garnish-annex/actions/resetTableSession {\"restaurantId\":\"...\",\"tableId\":\"...\"}"
+      ],
+      "instructions": [
+        "Invoke resetTableSession with arbitrary tableId without providing any staff cookie.",
+        "Observe table status immediately reset to FREE and active session wiped in database."
+      ],
+      "observed_result": "Table session is terminated and orders can be cancelled or approved without authorization."
+    },
+    "remediation": {
+      "strategy": "Add a mandatory authorization guard helper at the start of every staff mutation in src/app/staff/[slug]/actions.ts that calls getStaffSession(slug) and validates session.restaurantId === restaurantId.",
+      "code_changes": [
+        {
+          "file_name": "src/app/staff/[slug]/actions.ts",
+          "fixed_code": "const session = await getStaffSession(slug);\nif (!session || session.restaurantId !== restaurantId) {\n    return { success: false, error: \"Unauthorized: Staff PIN session required.\" };\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Next.js server actions are callable by anyone who knows the action identifier and parameters."
+      },
+      "impact": {
+        "score": "critical",
+        "reason": "Attacker can cause widespread operational denial of service by clearing tables, cancelling orders, and falsifying prep statuses."
+      },
+      "overall_severity": "critical"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by inspecting all staff actions in src/app/staff/[slug]/actions.ts."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:payment:unverified-settlement",
+    "title": "Unverified Client Payment Settlement and Missing Razorpay Webhook/Signature Verification",
+    "description": "recordTablePayment marks payments as PAID and marks tables as settled based entirely on client-supplied values without cryptographic signature verification or order total validation.",
+    "root_cause": "recordTablePayment accepts subtotal, taxAmount, tipAmount, totalAmount, and status parameters from the caller and inserts a PAID record without validating razorpay_signature or checking if the amount corresponds to active orders.",
+    "intended_behavior": "Online payments must verify razorpay_signature using crypto.createHmac and validate that the paid amount matches the exact order total for the session before setting payment status to PAID.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/r/[slug]/checkout-actions.ts",
+        "line": 40,
+        "scope": "recordTablePayment",
+        "description": "Server Action accepts arbitrary payment amounts and method from client."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/r/[slug]/checkout-actions.ts",
+        "line": 46,
+        "scope": "recordTablePayment",
+        "description": "Inserts record into payments table with status PAID and client-provided totalAmount."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/r/[slug]/checkout-actions.ts",
+        "line": 68,
+        "scope": "recordTablePayment",
+        "description": "Updates table status to BILL, indicating settled payment to floor staff."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/r/[slug]/checkout-actions.ts",
+        "line": 55,
+        "description": "status is hardcoded to PAID upon client request without signature verification."
+      },
+      {
+        "file": "src/app/api/payments/razorpay/route.ts",
+        "line": 20,
+        "description": "Endpoint returns demoMode: true when placeholders are present, allowing simulated payments to bypass real gateways."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Seated table guest or anonymous caller."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Diner ready to settle a bill of ₹2,500.",
+      "payloads": [
+        "POST /r/garnish-annex/actions/recordTablePayment {\"restaurantId\":\"...\",\"tableId\":\"...\",\"sessionId\":\"...\",\"subtotal\":1,\"taxAmount\":0,\"tipAmount\":0,\"totalAmount\":1,\"method\":\"CARD\",\"razorpayOrderId\":\"order_fake123\",\"razorpayPaymentId\":\"pay_fake123\"}"
+      ],
+      "instructions": [
+        "Submit a recordTablePayment action with totalAmount set to 1.",
+        "Observe that a PAID payment row is created in the database and the table is updated to BILL."
+      ],
+      "observed_result": "Table is recorded as settled in the system for ₹1 instead of ₹2,500."
+    },
+    "remediation": {
+      "strategy": "Validate razorpay_signature server-side using HMAC-SHA256 (expectedSignature = hmac_sha256(order_id + \"|\" + payment_id, secret)). Verify that the amount paid matches the server-calculated total of all non-cancelled orders for that table session.",
+      "code_changes": [
+        {
+          "file_name": "src/app/r/[slug]/checkout-actions.ts",
+          "fixed_code": "const expectedSignature = crypto.createHmac(\"sha256\", process.env.RAZORPAY_KEY_SECRET!).update(input.razorpayOrderId + \"|\" + input.razorpayPaymentId).digest(\"hex\");\nif (input.method === \"CARD\" && expectedSignature !== input.razorpaySignature) throw new Error(\"Invalid signature\");"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Payment settlement parameters are passed directly from client code without server validation."
+      },
+      "impact": {
+        "score": "critical",
+        "reason": "Enables diners to leave without paying or settle bills for nominal amounts (₹1)."
+      },
+      "overall_severity": "critical"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by inspecting recordTablePayment in checkout-actions.ts."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:rls:public-bypass",
+    "title": "Multi-Tenant Data Leakage and Cart Manipulation via Permissive USING (true) RLS Policies",
+    "description": "PostgreSQL Row-Level Security policies in supabase/rls_policies.sql grant anon and authenticated roles full read, insert, update, and delete access across multi-tenant tables using USING (true) and WITH CHECK (true).",
+    "root_cause": "Policies for table_sessions, cart_items, orders, order_items, payments, and service_requests are defined with USING (true), enabling any client with the public anon key to read and mutate all tenant data directly via Supabase PostgREST.",
+    "intended_behavior": "Direct database access for public clients must be restricted to scoped tenant queries, or sensitive operational tables (orders, payments) must be accessible exclusively via the server-side service role client.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "supabase/rls_policies.sql",
+        "line": 112,
+        "scope": "cart_items_public_read",
+        "description": "Policy grants anon role SELECT access to all rows in cart_items using USING (true)."
+      },
+      {
+        "kind": "propagation",
+        "file": "supabase/rls_policies.sql",
+        "line": 138,
+        "scope": "orders_public_read",
+        "description": "Policy grants anon role SELECT access to all orders across all restaurants using USING (true)."
+      },
+      {
+        "kind": "sink",
+        "file": "supabase/rls_policies.sql",
+        "line": 176,
+        "scope": "payments_public_read",
+        "description": "Policy grants anon role SELECT access to all payment records across all restaurants using USING (true)."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "supabase/rls_policies.sql",
+        "line": 177,
+        "description": "CREATE POLICY payments_public_read ON payments FOR SELECT TO anon, authenticated USING (true);"
+      },
+      {
+        "file": "supabase/rls_policies.sql",
+        "line": 139,
+        "description": "CREATE POLICY orders_public_read ON orders FOR SELECT TO anon, authenticated USING (true);"
+      },
+      {
+        "file": "supabase/rls_policies.sql",
+        "line": 131,
+        "description": "CREATE POLICY cart_items_public_delete ON cart_items FOR DELETE TO anon, authenticated USING (true);"
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Anonymous actor with knowledge of NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "External anonymous attacker querying the Supabase PostgREST API.",
+      "payloads": [
+        "GET https://<project>.supabase.co/rest/v1/payments?select=* (Headers: apikey: <ANON_KEY>)",
+        "GET https://<project>.supabase.co/rest/v1/orders?select=* (Headers: apikey: <ANON_KEY>)",
+        "DELETE https://<project>.supabase.co/rest/v1/cart_items?id=neq.0 (Headers: apikey: <ANON_KEY>)"
+      ],
+      "instructions": [
+        "Extract NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY from frontend page source.",
+        "Issue a GET request to /rest/v1/payments.",
+        "Observe full retrieval of transactions, guest names, and amounts across all restaurant tenants."
+      ],
+      "observed_result": "All tenant orders, financial transactions, and guest cart items can be read or wiped without authorization."
+    },
+    "remediation": {
+      "strategy": "Revoke public direct access on sensitive tables (payments, orders, order_items, staff_users) by setting USING (false) for anon/authenticated, routing all data access through Next.js Server Actions using the service_role key.",
+      "code_changes": [
+        {
+          "file_name": "supabase/rls_policies.sql",
+          "fixed_code": "CREATE POLICY payments_public_read ON payments FOR SELECT TO anon, authenticated USING (false);\nCREATE POLICY orders_public_read ON orders FOR SELECT TO anon, authenticated USING (false);"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "critical",
+        "reason": "Supabase URL and anon key are embedded in public frontend bundles by design."
+      },
+      "impact": {
+        "score": "critical",
+        "reason": "Total breach of multi-tenant isolation, customer privacy, and financial ledger data."
+      },
+      "overall_severity": "critical"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Verified directly in supabase/rls_policies.sql lines 57-200."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:ssrf:unbounded-next-image-patterns",
+    "title": "Unbounded Wildcard Hostname in Next.js Image Remote Patterns",
+    "description": "next.config.ts configures remotePatterns with hostname wildcard \"**\", allowing the Next.js server-side image optimizer to fetch and process images from arbitrary remote web servers.",
+    "root_cause": "remotePatterns specifies hostname: \"**\" without restricting allowed hostnames to trusted CDNs or specific image domains.",
+    "intended_behavior": "Next.js image optimization should be constrained to explicitly trusted image domains (such as Unsplash, AWS S3, or Supabase Storage).",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "next.config.ts",
+        "line": 5,
+        "scope": "nextConfig.images.remotePatterns",
+        "description": "Wildcard configuration hostname: \"**\" defined in Next.js config."
+      },
+      {
+        "kind": "propagation",
+        "file": "next.config.ts",
+        "line": 8,
+        "scope": "nextConfig.images.remotePatterns",
+        "description": "Next.js image optimization router permits any HTTPS remote URL."
+      },
+      {
+        "kind": "sink",
+        "file": "next.config.ts",
+        "line": 12,
+        "scope": "nextConfig",
+        "description": "Allows external actors to trigger upstream image fetches to arbitrary hosts."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "next.config.ts",
+        "line": 8,
+        "description": "hostname: \"**\" allows any external HTTPS URL to be proxied by Next.js image optimization."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "system_configuration",
+        "description": "Next.js production runtime with default image optimization enabled."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "External anonymous attacker.",
+      "payloads": [
+        "GET /_next/image?url=https://attacker-controlled-server.com/test.png&w=640&q=75"
+      ],
+      "instructions": [
+        "Send a request to the Next.js /_next/image optimizer endpoint specifying an arbitrary external server URL.",
+        "Observe the server initiating an outbound HTTPS request to the specified target."
+      ],
+      "observed_result": "The server acts as a proxy fetching remote images from arbitrary unallowlisted external hosts."
+    },
+    "remediation": {
+      "strategy": "Constrain remotePatterns in next.config.ts to trusted domains such as images.unsplash.com or your cloud storage bucket.",
+      "code_changes": [
+        {
+          "file_name": "next.config.ts",
+          "fixed_code": "remotePatterns: [{ protocol: \"https\", hostname: \"images.unsplash.com\" }]"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "The /_next/image endpoint is publicly exposed by default in Next.js."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Restricted to HTTPS only, but could be abused for traffic amplification or probing."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by inspecting next.config.ts."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "dineos:xss:unvalidated-redirect-url",
+    "title": "Unvalidated External URL Scheme in Google Review Redirect Modal",
+    "description": "PostPaymentReviewModal passes restaurant.google_review_url directly to window.open without validating the protocol scheme. If a tenant owner or super admin sets a javascript: URI, clicking the review redirect can execute arbitrary script in the diner browser context.",
+    "root_cause": "PostPaymentReviewModal opens restaurant.google_review_url via window.open without verifying that the URL begins with https:// or http://.",
+    "intended_behavior": "The application must strictly enforce that google_review_url starts with https:// before executing window.open.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/admin/[slug]/actions.ts",
+        "line": 180,
+        "scope": "updateRestaurantSettings",
+        "description": "Accepts googleReviewUrl without protocol scheme validation."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/components/guest/PostPaymentReviewModal.tsx",
+        "line": 33,
+        "scope": "PostPaymentReviewModal",
+        "description": "Assigns googleUrl from restaurant.google_review_url."
+      },
+      {
+        "kind": "sink",
+        "file": "src/components/guest/PostPaymentReviewModal.tsx",
+        "line": 46,
+        "scope": "handleGoogleRedirect",
+        "description": "Calls window.open(googleUrl, \"_blank\", \"noopener,noreferrer\")."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/components/guest/PostPaymentReviewModal.tsx",
+        "line": 46,
+        "description": "window.open(googleUrl, \"_blank\", \"noopener,noreferrer\") directly invokes unvalidated URL."
+      },
+      {
+        "file": "src/app/admin/[slug]/actions.ts",
+        "line": 195,
+        "description": "updateRestaurantSettings does not validate that googleReviewUrl starts with https://."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "user_interaction",
+        "description": "Diner selects 4 or 5 stars and clicks Post on Google Reviews."
+      },
+      {
+        "kind": "data_state",
+        "description": "Malicious google_review_url configured in restaurant settings."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Malicious or compromised restaurant owner configuring settings.",
+      "payloads": [
+        "javascript:alert(document.domain)"
+      ],
+      "instructions": [
+        "Set restaurant google_review_url to a non-HTTP URI scheme in restaurant settings.",
+        "As a guest, complete payment and select 5 stars on PostPaymentReviewModal.",
+        "Click the button to open Google Reviews."
+      ],
+      "observed_result": "window.open executes the untrusted URI scheme."
+    },
+    "remediation": {
+      "strategy": "Sanitize googleUrl to ensure it starts with https://. If invalid, fallback to standard Google search query.",
+      "code_changes": [
+        {
+          "file_name": "src/components/guest/PostPaymentReviewModal.tsx",
+          "fixed_code": "const isSafeUrl = typeof googleUrl === \"string\" && (googleUrl.startsWith(\"https://\") || googleUrl.startsWith(\"http://\"));\nif (isSafeUrl) window.open(googleUrl, \"_blank\", \"noopener,noreferrer\");"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Requires an owner or admin account to configure the malicious URL."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Can execute arbitrary script in the context of seated diners on the guest web app."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by inspecting PostPaymentReviewModal.tsx and actions.ts."
+    }
+  }
+]

@@ -160,13 +160,58 @@ export async function addToSharedCart(input: {
     addedByGuestId: string;
     addedByName: string;
     variantName?: string | null;
-    unitPrice: number;
+    unitPrice?: number;
     quantity: number;
     notes?: string | null;
 }): Promise<ActionResult<{ cartItem: CartItem }>> {
     const qty = Math.max(1, Number(input.quantity) || 1);
     const variantName = input.variantName?.trim() || null;
     const notes = input.notes?.trim() || null;
+
+    // 1. Validate active table session
+    const { data: session, error: sessErr } = await supabaseAdmin
+        .from('table_sessions')
+        .select('id, is_active')
+        .eq('id', input.sessionId)
+        .eq('restaurant_id', input.restaurantId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+    if (sessErr || !session) {
+        return { success: false, error: 'Table session is closed or invalid.' };
+    }
+
+    // 2. Authoritative Server-side Price Resolution (prevent client price tampering)
+    const { data: menuItem, error: menuErr } = await supabaseAdmin
+        .from('menu_items')
+        .select('id, base_price, variants, is_available')
+        .eq('id', input.menuItemId)
+        .eq('restaurant_id', input.restaurantId)
+        .maybeSingle();
+
+    if (menuErr || !menuItem) {
+        return { success: false, error: 'Menu item not found.' };
+    }
+
+    if (menuItem.is_available === false) {
+        return { success: false, error: 'This item is currently sold out.' };
+    }
+
+    let authoritativeUnitPrice = Number(menuItem.base_price);
+    if (variantName && Array.isArray(menuItem.variants)) {
+        interface MenuItemVariant {
+            name: string;
+            price_delta?: number;
+        }
+        const variant = (menuItem.variants as MenuItemVariant[]).find((v) => v.name === variantName);
+        if (variant && typeof variant.price_delta === 'number') {
+            authoritativeUnitPrice += variant.price_delta;
+        }
+    }
+
+    if (isNaN(authoritativeUnitPrice) || authoritativeUnitPrice < 0) {
+        return { success: false, error: 'Invalid dish pricing.' };
+    }
 
     // Check for existing cart item by same guest with same variant
     let query = supabaseAdmin
@@ -191,6 +236,7 @@ export async function addToSharedCart(input: {
             .from('cart_items')
             .update({
                 quantity: newQty,
+                unit_price: authoritativeUnitPrice,
                 notes: notes || existingItem.notes,
             })
             .eq('id', existingItem.id)
@@ -204,7 +250,7 @@ export async function addToSharedCart(input: {
         return { success: true, data: { cartItem: updatedItem as CartItem } };
     }
 
-    // Insert new cart item
+    // Insert new cart item with verified authoritative price
     const { data: newItem, error } = await supabaseAdmin
         .from('cart_items')
         .insert({
@@ -214,7 +260,7 @@ export async function addToSharedCart(input: {
             added_by_guest_id: input.addedByGuestId,
             added_by_name: input.addedByName,
             variant_name: variantName,
-            unit_price: input.unitPrice,
+            unit_price: authoritativeUnitPrice,
             quantity: qty,
             notes,
         })

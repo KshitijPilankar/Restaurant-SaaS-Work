@@ -19,8 +19,14 @@ export interface StaffSessionData {
     restaurantSlug: string;
 }
 
+// In-memory PIN rate limiting tracking map (per restaurant slug)
+const PIN_MAX_ATTEMPTS = 5;
+const PIN_LOCKOUT_MS = 15 * 60 * 1000; // 15-minute lockout
+const pinRateLimitMap = new Map<string, { attempts: number; lockedUntil: number }>();
+
 /**
  * 1. Verify 4-digit Staff PIN & establish HTTP-only session cookie (12-hour expiry)
+ * Includes brute-force protection with 5 attempts max per 15 minutes.
  */
 export async function verifyStaffPin(
     slug: string,
@@ -30,6 +36,19 @@ export async function verifyStaffPin(
     const trimmedPin = pinCode.trim();
     if (trimmedPin.length !== 4) {
         return { success: false, error: 'Please enter a 4-digit PIN.' };
+    }
+
+    // Check rate limit lockout
+    const rateLimitKey = slug.toLowerCase();
+    const currentRate = pinRateLimitMap.get(rateLimitKey);
+    const now = Date.now();
+
+    if (currentRate && currentRate.lockedUntil > now) {
+        const remainingMins = Math.ceil((currentRate.lockedUntil - now) / 60000);
+        return {
+            success: false,
+            error: `Too many failed attempts. PIN entry is locked for ${remainingMins} more minute(s).`,
+        };
     }
 
     // 1. Fetch restaurant by slug
@@ -53,13 +72,34 @@ export async function verifyStaffPin(
         .maybeSingle();
 
     if (staffErr || !staff) {
-        return { success: false, error: 'Invalid PIN. Check your 4-digit staff passcode.' };
+        const record = currentRate && currentRate.lockedUntil <= now
+            ? { attempts: 1, lockedUntil: 0 }
+            : { attempts: (currentRate?.attempts || 0) + 1, lockedUntil: 0 };
+
+        if (record.attempts >= PIN_MAX_ATTEMPTS) {
+            record.lockedUntil = now + PIN_LOCKOUT_MS;
+            pinRateLimitMap.set(rateLimitKey, record);
+            return {
+                success: false,
+                error: 'Too many failed PIN attempts. PIN entry is locked for 15 minutes.',
+            };
+        }
+
+        pinRateLimitMap.set(rateLimitKey, record);
+        const remaining = PIN_MAX_ATTEMPTS - record.attempts;
+        return {
+            success: false,
+            error: `Invalid PIN. ${remaining} attempt(s) remaining before 15-minute lockout.`,
+        };
     }
 
     // If a specific role is required (e.g. OWNER), enforce it
     if (requiredRole && staff.role !== requiredRole && staff.role !== 'OWNER') {
         return { success: false, error: `Access denied. ${requiredRole} PIN required for this portal.` };
     }
+
+    // Clear rate limit on successful PIN
+    pinRateLimitMap.delete(rateLimitKey);
 
     const sessionPayload: StaffSessionData = {
         staffId: staff.id,
@@ -116,12 +156,73 @@ export async function getStaffSession(slug: string): Promise<StaffSessionData | 
 }
 
 /**
+ * Strict Server Action Authorization Guard:
+ * Checks for a verified staff session matching restaurantId and optional role requirements.
+ */
+export async function requireStaffAuth(
+    restaurantId: string,
+    slug?: string,
+    allowedRoles?: StaffRole[]
+): Promise<ActionResult<StaffSessionData>> {
+    const cookieStore = await cookies();
+    let session: StaffSessionData | null = null;
+
+    if (slug) {
+        const raw = cookieStore.get(`dineos_staff_${slug}`)?.value;
+        if (raw) {
+            try {
+                session = JSON.parse(raw) as StaffSessionData;
+            } catch {
+                session = null;
+            }
+        }
+    } else {
+        // Fallback: search cookies for matching tenant restaurantId
+        const allCookies = cookieStore.getAll();
+        for (const c of allCookies) {
+            if (c.name.startsWith('dineos_staff_')) {
+                try {
+                    const parsed = JSON.parse(c.value) as StaffSessionData;
+                    if (parsed && parsed.restaurantId === restaurantId) {
+                        session = parsed;
+                        break;
+                    }
+                } catch {
+                    // ignore invalid JSON
+                }
+            }
+        }
+    }
+
+    if (!session) {
+        return { success: false, error: 'Unauthorized: Staff session expired or not authenticated.' };
+    }
+
+    if (session.restaurantId !== restaurantId) {
+        return { success: false, error: 'Unauthorized: Cross-tenant session mismatch.' };
+    }
+
+    if (allowedRoles && allowedRoles.length > 0) {
+        // OWNER role can perform any staff action
+        if (session.role !== 'OWNER' && !allowedRoles.includes(session.role)) {
+            return { success: false, error: 'Access denied: Insufficient role permissions.' };
+        }
+    }
+
+    return { success: true, data: session };
+}
+
+/**
  * 3. Approve Incoming Guest Order -> Move to IN_KITCHEN & update Table to EATING
  */
 export async function approveOrder(
     restaurantId: string,
-    orderId: string
+    orderId: string,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER', 'KITCHEN']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     // 1. Fetch order to get table_id
     const { data: order, error: orderFetchErr } = await supabaseAdmin
         .from('orders')
@@ -163,8 +264,12 @@ export async function approveOrder(
  */
 export async function rejectOrder(
     restaurantId: string,
-    orderId: string
+    orderId: string,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER', 'KITCHEN']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     const { data: order } = await supabaseAdmin
         .from('orders')
         .select('id, table_id')
@@ -212,8 +317,12 @@ export async function rejectOrder(
 export async function updateOrderItemPrepStatus(
     restaurantId: string,
     itemId: string,
-    prepStatus: ItemPrepStatus
+    prepStatus: ItemPrepStatus,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER', 'KITCHEN']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     const { data: updatedItem, error: itemErr } = await supabaseAdmin
         .from('order_items')
         .update({ prep_status: prepStatus })
@@ -258,8 +367,12 @@ export async function updateOrderItemPrepStatus(
  */
 export async function bumpOrderReady(
     restaurantId: string,
-    orderId: string
+    orderId: string,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER', 'KITCHEN']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     // 1. Mark all items as READY
     await supabaseAdmin
         .from('order_items')
@@ -289,8 +402,12 @@ export async function bumpOrderReady(
  */
 export async function markOrderServed(
     restaurantId: string,
-    orderId: string
+    orderId: string,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     await supabaseAdmin
         .from('order_items')
         .update({ prep_status: 'SERVED' })
@@ -315,8 +432,12 @@ export async function markOrderServed(
  */
 export async function resolveServiceRequest(
     restaurantId: string,
-    requestId: string
+    requestId: string,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     const { data: req, error } = await supabaseAdmin
         .from('service_requests')
         .update({
@@ -368,8 +489,12 @@ export async function resolveServiceRequest(
 export async function resetTableSession(
     restaurantId: string,
     tableId: string,
-    sessionId?: string | null
+    sessionId?: string | null,
+    slug?: string
 ): Promise<ActionResult> {
+    const auth = await requireStaffAuth(restaurantId, slug, ['WAITER']);
+    if (!auth.success) return { success: false, error: auth.error };
+
     if (sessionId) {
         await supabaseAdmin
             .from('table_sessions')
