@@ -34,11 +34,11 @@ export function GuestHeader({
 
     return (
         <>
-            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-zinc-200/80 px-4 py-2.5 flex items-center justify-between shadow-2xs">
+            <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
                 {/* Left: Brand & Table */}
                 <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 text-sm overflow-hidden"
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 text-sm overflow-hidden ring-1 ring-black/5"
                         style={{ backgroundColor: 'var(--brand-primary)' }}
                     >
                         {restaurant.logo_url ? (
@@ -53,13 +53,13 @@ export function GuestHeader({
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                            <h1 className="text-sm font-bold text-zinc-900 truncate tracking-tight">
+                            <h1 className="text-sm font-bold text-foreground truncate tracking-tight">
                                 {restaurant.name}
                             </h1>
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 ring-2 ring-emerald-500/20" />
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium">
-                            <span className="bg-zinc-100 text-zinc-700 font-semibold px-1.5 py-0.2 rounded font-mono">
+                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium mt-0.5">
+                            <span className="bg-muted text-foreground font-semibold px-1.5 py-0.5 rounded-md font-mono border border-border/60">
                                 {table.table_code}
                             </span>
                             {currentGuestName && (
@@ -76,8 +76,9 @@ export function GuestHeader({
                         <button
                             type="button"
                             onClick={() => setShowWifi(true)}
-                            className="p-2 rounded-xl text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200/80 transition cursor-pointer"
+                            className="p-2 rounded-xl text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition cursor-pointer active:scale-95"
                             title="Restaurant Wi-Fi"
+                            aria-label="View restaurant Wi-Fi password"
                         >
                             <Wifi className="w-4 h-4" />
                         </button>
@@ -87,9 +88,11 @@ export function GuestHeader({
                     <button
                         type="button"
                         onClick={() => setShowGuests(true)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 transition cursor-pointer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground transition cursor-pointer active:scale-95"
+                        title="Table Guests"
+                        aria-label="View seated table guests"
                     >
-                        <Users className="w-3.5 h-3.5 text-zinc-500" />
+                        <Users className="w-3.5 h-3.5 text-muted-foreground" />
                         <span>{guests.length || 1}</span>
                     </button>
 
@@ -97,8 +100,9 @@ export function GuestHeader({
                     <button
                         type="button"
                         onClick={() => setShowService(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition shadow-sm cursor-pointer active:scale-95"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition shadow-xs cursor-pointer active:scale-95"
                         style={{ backgroundColor: 'var(--brand-primary)' }}
+                        aria-label="Call waiter or request service"
                     >
                         <Bell className="w-3.5 h-3.5" />
                         <span>Service</span>
@@ -117,29 +121,31 @@ export function GuestHeader({
 
             {/* Wi-Fi Popover Modal */}
             {showWifi && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-                    <div className="bg-white rounded-3xl p-5 max-w-xs w-full shadow-2xl space-y-4 animate-slideUp relative text-center">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
+                    <div className="bg-card rounded-t-[28px] sm:rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-slideUp relative text-center border-t sm:border border-border">
+                        <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
                         <button
                             onClick={() => setShowWifi(false)}
-                            className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-600"
+                            className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
+                            aria-label="Close Wi-Fi modal"
                         >
                             <X className="w-4 h-4" />
                         </button>
 
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto text-zinc-800">
-                            <Wifi className="w-6 h-6" />
+                        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto text-foreground shadow-xs">
+                            <Wifi className="w-6 h-6 text-foreground" />
                         </div>
 
                         <div>
-                            <h3 className="font-bold text-zinc-900 text-base">Guest Wi-Fi</h3>
-                            <p className="text-xs text-zinc-500 mt-0.5">Complimentary high-speed internet</p>
+                            <h3 className="font-bold text-foreground text-base tracking-tight">Guest Wi-Fi</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">Complimentary high-speed internet</p>
                         </div>
 
-                        <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl text-left space-y-1 text-xs">
-                            <div className="text-zinc-500">Network: <strong className="text-zinc-900">{restaurant.wifi_ssid}</strong></div>
+                        <div className="p-3.5 bg-muted/50 border border-border rounded-2xl text-left space-y-1.5 text-xs">
+                            <div className="text-muted-foreground">Network: <strong className="text-foreground">{restaurant.wifi_ssid}</strong></div>
                             {restaurant.wifi_password && (
-                                <div className="text-zinc-500">
-                                    Password: <strong className="text-zinc-900 font-mono">{restaurant.wifi_password}</strong>
+                                <div className="text-muted-foreground">
+                                    Password: <strong className="text-foreground font-mono">{restaurant.wifi_password}</strong>
                                 </div>
                             )}
                         </div>
@@ -148,17 +154,17 @@ export function GuestHeader({
                             <button
                                 type="button"
                                 onClick={handleCopyWifi}
-                                className="w-full py-2.5 px-3 rounded-xl font-semibold text-xs text-white transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-3 px-4 rounded-xl font-bold text-xs text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-98"
                                 style={{ backgroundColor: 'var(--brand-primary)' }}
                             >
                                 {copiedPass ? (
                                     <>
-                                        <Check className="w-3.5 h-3.5" />
+                                        <Check className="w-4 h-4" />
                                         <span>Copied Password!</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Copy className="w-3.5 h-3.5" />
+                                        <Copy className="w-4 h-4" />
                                         <span>Copy Wi-Fi Password</span>
                                     </>
                                 )}
@@ -171,20 +177,22 @@ export function GuestHeader({
             {/* Table Diners Modal */}
             {showGuests && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-                    <div className="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl space-y-4 animate-slideUp relative">
+                    <div className="w-full max-w-sm bg-card rounded-t-[28px] sm:rounded-3xl p-6 shadow-2xl space-y-4 animate-slideUp relative border-t sm:border border-border">
+                        <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
                         <button
                             onClick={() => setShowGuests(false)}
-                            className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-600"
+                            className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
+                            aria-label="Close table guests modal"
                         >
                             <X className="w-4 h-4" />
                         </button>
 
                         <div>
-                            <span className="text-[11px] font-semibold uppercase text-zinc-400 tracking-wider">
+                            <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
                                 Table Live Session
                             </span>
-                            <h3 className="font-bold text-zinc-900 text-base">Seated at {table.display_name}</h3>
-                            <p className="text-xs text-zinc-500">
+                            <h3 className="font-bold text-foreground text-base tracking-tight">Seated at {table.display_name}</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">
                                 All diners can add dishes to the shared table cart in real-time.
                             </p>
                         </div>
@@ -195,19 +203,19 @@ export function GuestHeader({
                                 return (
                                     <div
                                         key={g.guest_id}
-                                        className="flex items-center justify-between p-2.5 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs"
+                                        className="flex items-center justify-between p-3 bg-muted/60 border border-border rounded-xl text-xs"
                                     >
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2.5">
                                             <div
-                                                className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[11px]"
+                                                className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-2xs"
                                                 style={{ backgroundColor: 'var(--brand-primary)' }}
                                             >
                                                 {g.name.charAt(0).toUpperCase()}
                                             </div>
-                                            <span className="font-semibold text-zinc-800">{g.name}</span>
+                                            <span className="font-semibold text-foreground text-sm">{g.name}</span>
                                         </div>
                                         {isMe && (
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-200 text-zinc-700">
+                                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200">
                                                 You
                                             </span>
                                         )}

@@ -86,7 +86,7 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
 
     return (
         <div
-            className="min-h-screen bg-[#FAFAFA] text-zinc-900 font-sans"
+            className="min-h-screen bg-background text-foreground font-sans selection:bg-orange-500 selection:text-white"
             style={{ '--brand-primary': brandPrimary } as React.CSSProperties}
         >
             {children}

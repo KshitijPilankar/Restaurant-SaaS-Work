@@ -209,26 +209,30 @@ export function BillCheckoutDrawer({
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm p-0 animate-fadeIn">
-                <div className="w-full max-w-md bg-white rounded-t-3xl max-h-[94vh] flex flex-col shadow-2xl animate-slideUp relative overflow-hidden">
+                <div className="w-full max-w-md bg-card rounded-t-[28px] max-h-[94vh] flex flex-col shadow-2xl animate-slideUp relative overflow-hidden border-t border-border">
+                    {/* Tactile Grab Handle */}
+                    <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 mb-1 shrink-0" />
+
                     {/* Header */}
-                    <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
-                        <div className="flex items-center gap-2">
+                    <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-2.5">
                             <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-xs"
+                                className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-xs ring-1 ring-black/5"
                                 style={{ backgroundColor: 'var(--brand-primary)' }}
                             >
                                 <Receipt className="w-4 h-4" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-zinc-900 text-base">Checkout & Bill</h3>
-                                <p className="text-[11px] text-zinc-400">
+                                <h3 className="font-bold text-foreground text-base tracking-tight">Checkout & Bill</h3>
+                                <p className="text-[11px] text-muted-foreground font-mono">
                                     {table.display_name} • Total Bill ₹{fullBillWithoutTip}
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-1 rounded-full text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition"
+                            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer"
+                            aria-label="Close bill drawer"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -239,13 +243,13 @@ export function BillCheckoutDrawer({
                         {paymentSuccess ? (
                             <div className="py-12 text-center space-y-3 animate-fadeIn">
                                 <div
-                                    className="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-white shadow-xl"
+                                    className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xl"
                                     style={{ backgroundColor: 'var(--brand-primary)' }}
                                 >
                                     <Check className="w-8 h-8 stroke-[3]" />
                                 </div>
-                                <h3 className="text-xl font-bold text-zinc-900">Payment Successful!</h3>
-                                <p className="text-xs text-zinc-500 max-w-xs mx-auto">
+                                <h3 className="text-xl font-bold text-foreground tracking-tight">Payment Successful!</h3>
+                                <p className="text-xs text-muted-foreground max-w-xs mx-auto">
                                     Paid ₹{payableDetails.total} via {selectedMethod}. Table status updated.
                                 </p>
                             </div>
@@ -253,17 +257,17 @@ export function BillCheckoutDrawer({
                             <>
                                 {/* Split Bill Tabs */}
                                 <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
                                         Choose How to Pay
                                     </span>
-                                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-zinc-100 rounded-2xl">
+                                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-muted rounded-2xl border border-border/60">
                                         <button
                                             type="button"
                                             onClick={() => setSplitTab('FULL')}
-                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition ${
+                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
                                                 splitTab === 'FULL'
-                                                    ? 'bg-white text-zinc-900 shadow-sm'
-                                                    : 'text-zinc-500 hover:text-zinc-900'
+                                                    ? 'bg-card text-foreground shadow-xs'
+                                                    : 'text-muted-foreground hover:text-foreground'
                                             }`}
                                         >
                                             Full Bill
@@ -271,10 +275,10 @@ export function BillCheckoutDrawer({
                                         <button
                                             type="button"
                                             onClick={() => setSplitTab('EQUAL')}
-                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition ${
+                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
                                                 splitTab === 'EQUAL'
-                                                    ? 'bg-white text-zinc-900 shadow-sm'
-                                                    : 'text-zinc-500 hover:text-zinc-900'
+                                                    ? 'bg-card text-foreground shadow-xs'
+                                                    : 'text-muted-foreground hover:text-foreground'
                                             }`}
                                         >
                                             Split Equally
@@ -282,10 +286,10 @@ export function BillCheckoutDrawer({
                                         <button
                                             type="button"
                                             onClick={() => setSplitTab('ITEMIZED')}
-                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition ${
+                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
                                                 splitTab === 'ITEMIZED'
-                                                    ? 'bg-white text-zinc-900 shadow-sm'
-                                                    : 'text-zinc-500 hover:text-zinc-900'
+                                                    ? 'bg-card text-foreground shadow-xs'
+                                                    : 'text-muted-foreground hover:text-foreground'
                                             }`}
                                         >
                                             By Person
@@ -295,29 +299,31 @@ export function BillCheckoutDrawer({
 
                                 {/* Tab-Specific Controls */}
                                 {splitTab === 'EQUAL' && (
-                                    <div className="p-3.5 bg-zinc-50 rounded-2xl border border-zinc-200/80 flex items-center justify-between">
+                                    <div className="p-3.5 bg-muted/40 rounded-2xl border border-border flex items-center justify-between">
                                         <div>
-                                            <div className="text-xs font-bold text-zinc-900">Split by Diners</div>
-                                            <div className="text-[11px] text-zinc-500">
+                                            <div className="text-xs font-bold text-foreground">Split by Diners</div>
+                                            <div className="text-[11px] text-muted-foreground font-mono">
                                                 ₹{fullBillWithoutTip} ÷ {equalSplitCount} people
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 bg-white border border-zinc-200 rounded-xl p-1 shadow-2xs">
+                                        <div className="flex items-center gap-2 bg-card border border-border rounded-xl p-1 shadow-2xs">
                                             <button
                                                 type="button"
                                                 onClick={() => setEqualSplitCount(Math.max(2, equalSplitCount - 1))}
                                                 disabled={equalSplitCount <= 2}
-                                                className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100 disabled:opacity-30"
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted disabled:opacity-30 cursor-pointer active:scale-90"
+                                                aria-label="Decrease split diners"
                                             >
                                                 <Minus className="w-3.5 h-3.5" />
                                             </button>
-                                            <span className="w-6 text-center text-xs font-bold font-mono text-zinc-900">
+                                            <span className="w-6 text-center text-xs font-extrabold font-mono text-foreground">
                                                 {equalSplitCount}
                                             </span>
                                             <button
                                                 type="button"
                                                 onClick={() => setEqualSplitCount(Math.min(10, equalSplitCount + 1))}
-                                                className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100"
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted cursor-pointer active:scale-90"
+                                                aria-label="Increase split diners"
                                             >
                                                 <Plus className="w-3.5 h-3.5" />
                                             </button>
@@ -327,7 +333,7 @@ export function BillCheckoutDrawer({
 
                                 {splitTab === 'ITEMIZED' && (
                                     <div className="space-y-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                                             Select Diner to Settle:
                                         </span>
                                         <div className="grid grid-cols-2 gap-2">
@@ -337,30 +343,30 @@ export function BillCheckoutDrawer({
                                                     <div
                                                         key={diner.name}
                                                         onClick={() => setSelectedDinerName(diner.name)}
-                                                        className={`p-3 rounded-2xl border text-left cursor-pointer transition ${
+                                                        className={`p-3 rounded-2xl border text-left cursor-pointer transition active:scale-[0.98] ${
                                                             isSelected
-                                                                ? 'border-2 ring-1 ring-black/5 bg-zinc-50'
-                                                                : 'border-zinc-200 hover:border-zinc-300'
+                                                                ? 'border-2 ring-2 ring-orange-500/10 bg-muted/60'
+                                                                : 'border-border hover:border-foreground/20 bg-card'
                                                         }`}
                                                         style={{
                                                             borderColor: isSelected ? 'var(--brand-primary)' : undefined,
                                                         }}
                                                     >
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-xs font-bold text-zinc-900 truncate">
+                                                            <span className="text-xs font-bold text-foreground truncate">
                                                                 {diner.name}
                                                             </span>
                                                             {diner.name === currentGuestName && (
-                                                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-700">
+                                                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-muted text-foreground border border-border">
                                                                     You
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <div className="text-xs font-extrabold text-zinc-900 mt-1 font-mono">
+                                                        <div className="text-xs font-extrabold text-foreground mt-1 font-mono">
                                                             ₹{diner.total}
                                                         </div>
-                                                        <div className="text-[10px] text-zinc-400 mt-0.5">
-                                                            {diner.items.length} dishes
+                                                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                                                            {diner.items.length} {diner.items.length === 1 ? 'dish' : 'dishes'}
                                                         </div>
                                                     </div>
                                                 );
@@ -371,7 +377,7 @@ export function BillCheckoutDrawer({
 
                                 {/* Tip Selection */}
                                 <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
                                         Add Tip for Staff (Optional)
                                     </span>
                                     <div className="grid grid-cols-4 gap-2">
@@ -387,10 +393,10 @@ export function BillCheckoutDrawer({
                                                     key={t.label}
                                                     type="button"
                                                     onClick={() => setSelectedTip(t.val)}
-                                                    className={`py-2 px-1 rounded-xl text-xs font-bold border transition cursor-pointer text-center ${
+                                                    className={`py-2 px-1 rounded-xl text-xs font-bold border transition cursor-pointer text-center active:scale-95 font-mono ${
                                                         isSelected
                                                             ? 'border-2 text-white shadow-xs'
-                                                            : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                                                            : 'bg-muted/40 border-border text-foreground hover:bg-muted'
                                                     }`}
                                                     style={{
                                                         backgroundColor: isSelected ? 'var(--brand-primary)' : undefined,
@@ -406,89 +412,89 @@ export function BillCheckoutDrawer({
 
                                 {/* Payment Method Selector */}
                                 <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
                                         Payment Method
                                     </span>
                                     <div className="grid grid-cols-3 gap-2">
                                         <button
                                             type="button"
                                             onClick={() => setSelectedMethod('UPI')}
-                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer ${
+                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer active:scale-95 ${
                                                 selectedMethod === 'UPI'
-                                                    ? 'border-2 bg-zinc-50 shadow-2xs'
-                                                    : 'border-zinc-200 hover:border-zinc-300'
+                                                    ? 'border-2 bg-muted/60 shadow-xs'
+                                                    : 'border-border hover:border-foreground/20 bg-card'
                                             }`}
                                             style={{
                                                 borderColor: selectedMethod === 'UPI' ? 'var(--brand-primary)' : undefined,
                                             }}
                                         >
-                                            <Smartphone className="w-5 h-5 mb-1 text-zinc-800" />
-                                            <span className="text-xs font-bold text-zinc-900">UPI</span>
-                                            <span className="text-[9px] text-emerald-600 font-semibold">Instant App</span>
+                                            <Smartphone className="w-5 h-5 mb-1 text-foreground" />
+                                            <span className="text-xs font-bold text-foreground">UPI</span>
+                                            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">Instant App</span>
                                         </button>
 
                                         <button
                                             type="button"
                                             onClick={() => setSelectedMethod('CARD')}
-                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer ${
+                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer active:scale-95 ${
                                                 selectedMethod === 'CARD'
-                                                    ? 'border-2 bg-zinc-50 shadow-2xs'
-                                                    : 'border-zinc-200 hover:border-zinc-300'
+                                                    ? 'border-2 bg-muted/60 shadow-xs'
+                                                    : 'border-border hover:border-foreground/20 bg-card'
                                             }`}
                                             style={{
                                                 borderColor: selectedMethod === 'CARD' ? 'var(--brand-primary)' : undefined,
                                             }}
                                         >
-                                            <CreditCard className="w-5 h-5 mb-1 text-zinc-800" />
-                                            <span className="text-xs font-bold text-zinc-900">Cards</span>
-                                            <span className="text-[9px] text-zinc-500 font-semibold">Razorpay</span>
+                                            <CreditCard className="w-5 h-5 mb-1 text-foreground" />
+                                            <span className="text-xs font-bold text-foreground">Cards</span>
+                                            <span className="text-[9px] text-muted-foreground font-semibold">Razorpay</span>
                                         </button>
 
                                         <button
                                             type="button"
                                             onClick={() => setSelectedMethod('CASH')}
-                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer ${
+                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer active:scale-95 ${
                                                 selectedMethod === 'CASH'
-                                                    ? 'border-2 bg-zinc-50 shadow-2xs'
-                                                    : 'border-zinc-200 hover:border-zinc-300'
+                                                    ? 'border-2 bg-muted/60 shadow-xs'
+                                                    : 'border-border hover:border-foreground/20 bg-card'
                                             }`}
                                             style={{
                                                 borderColor: selectedMethod === 'CASH' ? 'var(--brand-primary)' : undefined,
                                             }}
                                         >
-                                            <Banknote className="w-5 h-5 mb-1 text-zinc-800" />
-                                            <span className="text-xs font-bold text-zinc-900">Cash</span>
-                                            <span className="text-[9px] text-zinc-500 font-semibold">Pay Waiter</span>
+                                            <Banknote className="w-5 h-5 mb-1 text-foreground" />
+                                            <span className="text-xs font-bold text-foreground">Cash</span>
+                                            <span className="text-[9px] text-muted-foreground font-semibold">Pay Server</span>
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Bill Breakdown Summary */}
-                                <div className="p-3.5 bg-zinc-50 rounded-2xl border border-zinc-200/80 space-y-1.5 text-xs">
-                                    <div className="flex justify-between text-zinc-500">
+                                <div className="p-4 bg-muted/40 rounded-2xl border border-border space-y-2 text-xs">
+                                    <div className="flex justify-between text-muted-foreground">
                                         <span>{payableDetails.label}</span>
-                                        <span className="font-mono">₹{payableDetails.subtotal}</span>
+                                        <span className="font-mono font-medium text-foreground">₹{payableDetails.subtotal}</span>
                                     </div>
-                                    <div className="flex justify-between text-zinc-500">
+                                    <div className="flex justify-between text-muted-foreground">
                                         <span>GST ({taxRate}%)</span>
-                                        <span className="font-mono">₹{payableDetails.tax}</span>
+                                        <span className="font-mono font-medium text-foreground">₹{payableDetails.tax}</span>
                                     </div>
                                     {selectedTip > 0 && (
-                                        <div className="flex justify-between text-zinc-500">
+                                        <div className="flex justify-between text-muted-foreground">
                                             <span>Staff Tip</span>
-                                            <span className="font-mono">₹{selectedTip}</span>
+                                            <span className="font-mono font-medium text-foreground">₹{selectedTip}</span>
                                         </div>
                                     )}
-                                    <div className="pt-2 border-t border-zinc-200 flex justify-between font-extrabold text-sm text-zinc-900">
+                                    <div className="pt-2.5 border-t border-border flex justify-between font-extrabold text-sm text-foreground">
                                         <span>Amount to Pay</span>
-                                        <span className="font-mono font-extrabold">
+                                        <span className="font-mono font-extrabold text-base">
                                             ₹{payableDetails.total}
                                         </span>
                                     </div>
                                 </div>
 
                                 {errorMessage && (
-                                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs flex items-center gap-2">
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
                                         <AlertCircle className="w-4 h-4 shrink-0" />
                                         <span>{errorMessage}</span>
                                     </div>
@@ -499,19 +505,19 @@ export function BillCheckoutDrawer({
 
                     {/* Bottom Pay Button */}
                     {!paymentSuccess && (
-                        <div className="p-4 bg-white border-t border-zinc-100 shrink-0">
+                        <div className="p-4 pb-safe bg-card border-t border-border shrink-0 shadow-lg">
                             <button
                                 type="button"
                                 onClick={handleExecutePayment}
                                 disabled={isProcessing || payableDetails.total <= 0}
-                                className="w-full py-4 px-4 rounded-2xl font-bold text-sm text-white shadow-lg active:scale-[0.99] transition flex items-center justify-between cursor-pointer disabled:opacity-50"
+                                className="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white shadow-lg active:scale-[0.98] transition flex items-center justify-between cursor-pointer disabled:opacity-50"
                                 style={{ backgroundColor: 'var(--brand-primary)' }}
                             >
                                 <div className="text-left">
-                                    <div className="text-[10px] uppercase font-semibold text-white/80">
+                                    <div className="text-[10px] uppercase font-bold text-white/80 tracking-wider">
                                         {selectedMethod === 'CASH' ? 'Confirm Cash Settlement' : `Pay via ${selectedMethod}`}
                                     </div>
-                                    <div className="text-sm font-bold">
+                                    <div className="text-sm font-extrabold">
                                         {selectedMethod === 'CASH' ? 'Ask Server for Bill' : 'Pay Now'}
                                     </div>
                                 </div>

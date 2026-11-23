@@ -48,11 +48,14 @@ export function TableJoinModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-            <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 animate-slideUp">
+            <div className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 animate-slideUp border-t sm:border border-border">
+                {/* Tactile Grab Handle */}
+                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
+
                 {/* Brand / Table Header */}
                 <div className="text-center space-y-2">
                     <div
-                        className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-white shadow-lg font-bold text-xl"
+                        className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-white shadow-md font-bold text-xl overflow-hidden ring-1 ring-black/5"
                         style={{ backgroundColor: 'var(--brand-primary)' }}
                     >
                         {restaurant.logo_url ? (
@@ -67,32 +70,32 @@ export function TableJoinModal({
                     </div>
 
                     <div>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-800 border border-zinc-200 mb-1">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-foreground border border-border mb-1.5">
                             <span>{table.display_name}</span>
                             <span>•</span>
                             <span className="font-mono">{table.table_code}</span>
                         </div>
-                        <h2 className="text-xl font-bold text-zinc-900 tracking-tight">
+                        <h2 className="text-xl font-extrabold text-foreground tracking-tight">
                             Welcome to {restaurant.name}
                         </h2>
-                        <p className="text-xs text-zinc-500 max-w-xs mx-auto mt-0.5">
-                            Browse the digital menu, add items to the live shared table cart, and order together.
+                        <p className="text-xs text-muted-foreground max-w-xs mx-auto mt-1 leading-relaxed">
+                            Browse the digital menu, add dishes to the live shared table cart, and order together.
                         </p>
                     </div>
                 </div>
 
                 {/* Existing Tablemates info */}
                 {existingGuests.length > 0 && (
-                    <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
-                            <Users className="w-3.5 h-3.5 text-zinc-500" />
+                    <div className="p-3.5 bg-muted/50 border border-border rounded-2xl space-y-2">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                            <Users className="w-3.5 h-3.5 text-muted-foreground" />
                             <span>Already seated at this table:</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             {existingGuests.map((g) => (
                                 <span
                                     key={g.guest_id}
-                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white border border-zinc-200 text-zinc-800 shadow-2xs"
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-card border border-border text-foreground shadow-2xs"
                                 >
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                     {g.name}
@@ -107,7 +110,7 @@ export function TableJoinModal({
                     <div>
                         <label
                             htmlFor="guestName"
-                            className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5"
+                            className="block text-xs font-bold text-foreground uppercase tracking-wider mb-1.5"
                         >
                             What should we call you? *
                         </label>
@@ -120,7 +123,7 @@ export function TableJoinModal({
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g. Kshitij, Priya, Alex"
                             maxLength={30}
-                            className="w-full px-4 py-3 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:bg-white text-base font-medium transition"
+                            className="w-full px-4 py-3 bg-muted/40 border border-border focus:border-foreground/40 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-base font-medium transition"
                             style={{
                                 outlineColor: 'var(--brand-primary)',
                             }}
@@ -128,7 +131,7 @@ export function TableJoinModal({
                     </div>
 
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-medium">
+                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-xs font-medium">
                             {error}
                         </div>
                     )}
@@ -136,7 +139,7 @@ export function TableJoinModal({
                     <button
                         type="submit"
                         disabled={isPending}
-                        className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white shadow-lg active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         style={{ backgroundColor: 'var(--brand-primary)' }}
                     >
                         {isPending ? (

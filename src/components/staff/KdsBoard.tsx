@@ -452,7 +452,7 @@ export function KdsBoard({
                                             type="button"
                                             onClick={() => handleBumpReady(order.id)}
                                             disabled={isActionPending || isAllReady}
-                                            className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${
+                                            className={`w-full py-3 px-3 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.98] ${
                                                 isAllReady
                                                     ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-400 cursor-default'
                                                     : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white'

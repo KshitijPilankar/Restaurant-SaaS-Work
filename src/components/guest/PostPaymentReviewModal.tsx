@@ -73,10 +73,14 @@ export function PostPaymentReviewModal({
 
     return (
         <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-            <div className="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 animate-slideUp relative text-center">
+            <div className="w-full max-w-sm bg-card rounded-t-[28px] sm:rounded-3xl p-6 shadow-2xl space-y-5 animate-slideUp relative text-center border-t sm:border border-border">
+                {/* Tactile Grab Handle */}
+                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
+
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-600 rounded-full"
+                    className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
+                    aria-label="Close review modal"
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -84,13 +88,13 @@ export function PostPaymentReviewModal({
                 {isSubmitted ? (
                     <div className="py-6 space-y-3 animate-fadeIn">
                         <div
-                            className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white shadow-lg"
+                            className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white shadow-lg ring-1 ring-black/5"
                             style={{ backgroundColor: 'var(--brand-primary)' }}
                         >
                             <Check className="w-7 h-7 stroke-[3]" />
                         </div>
-                        <h3 className="text-lg font-bold text-zinc-900">Thank You!</h3>
-                        <p className="text-xs text-zinc-500">
+                        <h3 className="text-lg font-bold text-foreground">Thank You!</h3>
+                        <p className="text-xs text-muted-foreground">
                             Your feedback helps us continuously elevate our food & hospitality.
                         </p>
                     </div>
@@ -99,15 +103,15 @@ export function PostPaymentReviewModal({
                         {/* Header */}
                         <div className="space-y-1.5">
                             <div
-                                className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-white shadow-md mb-2"
+                                className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-white shadow-md mb-2 ring-1 ring-black/5"
                                 style={{ backgroundColor: 'var(--brand-primary)' }}
                             >
                                 <Heart className="w-6 h-6 fill-white" />
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                                 How was your dining experience?
                             </span>
-                            <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                            <h3 className="text-xl font-extrabold text-foreground tracking-tight">
                                 Rate {restaurant.name}
                             </h3>
                         </div>
@@ -121,13 +125,14 @@ export function PostPaymentReviewModal({
                                         key={star}
                                         type="button"
                                         onClick={() => setRating(star)}
-                                        className="p-1 hover:scale-125 transition cursor-pointer"
+                                        className="p-1 hover:scale-125 transition cursor-pointer active:scale-95"
+                                        aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
                                     >
                                         <Star
                                             className={`w-8 h-8 transition ${
                                                 isFilled
                                                     ? 'fill-amber-400 text-amber-400 drop-shadow-sm'
-                                                    : 'text-zinc-300 hover:text-amber-200'
+                                                    : 'text-zinc-300 dark:text-zinc-600 hover:text-amber-200'
                                             }`}
                                         />
                                     </button>
@@ -138,14 +143,14 @@ export function PostPaymentReviewModal({
                         {/* Smart Review Branch */}
                         {isHighRating ? (
                             /* 4 or 5 Stars: Celebratory Google Review Funnel */
-                            <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-3 animate-fadeIn text-left">
-                                <div className="flex items-start gap-2">
-                                    <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-3 animate-fadeIn text-left">
+                                <div className="flex items-start gap-2.5">
+                                    <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <h4 className="text-xs font-bold text-amber-950">
+                                        <h4 className="text-xs font-bold text-foreground">
                                             We&apos;re thrilled you enjoyed it!
                                         </h4>
-                                        <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
                                             Would you mind taking 10 seconds to share your positive experience on Google? It means the world to our team.
                                         </p>
                                     </div>
@@ -155,7 +160,7 @@ export function PostPaymentReviewModal({
                                     type="button"
                                     onClick={handleGoogleRedirect}
                                     disabled={isPending}
-                                    className="w-full py-3 px-4 rounded-xl font-bold text-xs text-white shadow-md active:scale-[0.99] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                    className="w-full py-3 px-4 rounded-xl font-bold text-xs text-white shadow-md active:scale-[0.98] transition flex items-center justify-center gap-1.5 cursor-pointer"
                                     style={{ backgroundColor: 'var(--brand-primary)' }}
                                 >
                                     <ExternalLink className="w-3.5 h-3.5" />
@@ -165,11 +170,11 @@ export function PostPaymentReviewModal({
                         ) : (
                             /* 1, 2 or 3 Stars: Private Constructive Feedback Form */
                             <form onSubmit={handlePrivateFeedbackSubmit} className="space-y-3 animate-fadeIn text-left">
-                                <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl space-y-1">
-                                    <h4 className="text-xs font-bold text-zinc-900">
+                                <div className="p-3 bg-muted/50 border border-border rounded-xl space-y-1">
+                                    <h4 className="text-xs font-bold text-foreground">
                                         We strive for perfection.
                                     </h4>
-                                    <p className="text-[11px] text-zinc-500 leading-relaxed">
+                                    <p className="text-[11px] text-muted-foreground leading-relaxed">
                                         Please tell us what went wrong so the restaurant owner can address it immediately.
                                     </p>
                                 </div>
@@ -180,13 +185,13 @@ export function PostPaymentReviewModal({
                                     placeholder="Tell the management what we can improve..."
                                     rows={3}
                                     required
-                                    className="w-full p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:bg-white resize-none"
+                                    className="w-full p-3 bg-muted/40 border border-border rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/20 resize-none transition"
                                 />
 
                                 <button
                                     type="submit"
                                     disabled={isPending}
-                                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-zinc-900 text-white hover:bg-zinc-800 transition shadow cursor-pointer disabled:opacity-50"
+                                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-foreground text-background hover:opacity-90 transition shadow-xs cursor-pointer disabled:opacity-50 active:scale-[0.98]"
                                 >
                                     {isPending ? 'Sending...' : 'Send Private Feedback to Owner'}
                                 </button>
