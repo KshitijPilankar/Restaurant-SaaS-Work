@@ -24,6 +24,15 @@ DineOS is a dual-paradigm hospitality operating system engineered for two comple
    - **Vibe:** Glare-resistant obsidian surfaces, crisp typography, unmistakable color status signaling, and zero-distraction layout.
    - **Key Interactions:** Glancable table states, audio-synced visual alerts, tactile large button bumping for cooks wearing kitchen gloves, and high-velocity order lifecycle management.
 
+3. **Owner Admin (Light Mode / Ledger):** Owners manage menus and print QR codes in the daytime, so `/admin/*` uses the light theme. Staff Floor, KDS and Super Admin stay dark.
+
+### Confirmed decisions (redesign kickoff)
+- **Theme by surface:** Guest = light, Staff Floor + KDS = dark, Super Admin = dark, Owner Admin = light.
+- **Demo PINs stay public** (Owner `1111`, Waiter `2222`, Kitchen `3333`) because the live URL is the sales-pitch demo. Present them in a subtle "Interactive Demo Credentials" card on the landing page and the staff PIN gate, never as loose inline text.
+- **Brand tokens on guest routes:** use `--brand-primary`, `--brand-primary-foreground` (readable text on the brand color) and `--brand-primary-subtle` (selected tint). All three are injected by `src/lib/brand.ts` in the tenant layout.
+- **Text on the default saffron (`#EA580C`) is dark `#1C1917`** (about 5:1, passes AA; white is 3.6:1 and fails). Tenant colors use the auto-computed foreground from `src/lib/brand.ts`. Never hard-code `text-white` on a brand-colored surface.
+- **Design authority:** `PRODUCT.md` holds product truth; this file holds the visual spec.
+
 ---
 
 ## 2. Semantic Color Palette & Contrast Hierarchy

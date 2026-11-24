@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { AlertCircle, Clock, UtensilsCrossed } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { Restaurant } from '@/types/database';
+import { getBrandCssVars } from '@/lib/brand';
 
 interface TenantLayoutProps {
     children: React.ReactNode;
@@ -82,12 +83,13 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
     }
 
     // Dynamic White-Label Token Injection
-    const brandPrimary = rest.primary_color || '#EA580C';
+    // --brand-primary plus derived companions (readable foreground, subtle tint)
+    const brandVars = getBrandCssVars(rest.primary_color);
 
     return (
         <div
             className="min-h-screen bg-background text-foreground font-sans selection:bg-orange-500 selection:text-white"
-            style={{ '--brand-primary': brandPrimary } as React.CSSProperties}
+            style={brandVars as React.CSSProperties}
         >
             {children}
         </div>
