@@ -122,6 +122,43 @@ export function GuestAppShell({
         const supabase = createClient();
         const activeSessionId = session?.id || table.active_session_id;
 
+        // A Realtime order INSERT carries only the order row; its items are written a moment later.
+        // Merge items into the matching order (no duplicates) so the tracker and the bill's
+        // "By Person" split show them right away.
+        let disposed = false;
+        const retryTimers: number[] = [];
+
+        const mergeOrderItems = (orderId: string, items: OrderItem[]) => {
+            if (items.length === 0) return;
+            setOrders((prev) =>
+                prev.map((ord) => {
+                    if (ord.id !== orderId) return ord;
+                    const known = new Set((ord.order_items || []).map((oi) => oi.id));
+                    const fresh = items.filter((oi) => !known.has(oi.id));
+                    return fresh.length > 0
+                        ? { ...ord, order_items: [...(ord.order_items || []), ...fresh] }
+                        : ord;
+                })
+            );
+        };
+
+        // Fetch the order's items; if they are not written yet, retry a few times.
+        const hydrateOrderItems = async (orderId: string, attempt = 0) => {
+            const { data } = await supabase
+                .from('order_items')
+                .select('*')
+                .eq('restaurant_id', restaurant.id)
+                .eq('order_id', orderId);
+            if (disposed) return;
+            if (data && data.length > 0) {
+                mergeOrderItems(orderId, data as OrderItem[]);
+            } else if (attempt < 3) {
+                retryTimers.push(
+                    window.setTimeout(() => void hydrateOrderItems(orderId, attempt + 1), 500 * (attempt + 1))
+                );
+            }
+        };
+
         const channel = supabase
             .channel(`room:session:${activeSessionId || table.id}`)
             .on(
@@ -165,6 +202,7 @@ export function GuestAppShell({
                         const newOrder = payload.new as Order;
                         if (!activeSessionId || newOrder.session_id === activeSessionId) {
                             setOrders((prev) => [newOrder as OrderWithItems, ...prev]);
+                            void hydrateOrderItems(newOrder.id);
                         }
                     } else if (payload.eventType === 'UPDATE') {
                         const updated = payload.new as Order;
@@ -172,6 +210,19 @@ export function GuestAppShell({
                             prev.map((ord) => (ord.id === updated.id ? { ...ord, ...updated } : ord))
                         );
                     }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'order_items',
+                    filter: `restaurant_id=eq.${restaurant.id}`,
+                },
+                (payload) => {
+                    const newItem = payload.new as OrderItem;
+                    mergeOrderItems(newItem.order_id, [newItem]);
                 }
             )
             .on(
@@ -194,6 +245,8 @@ export function GuestAppShell({
             .subscribe();
 
         return () => {
+            disposed = true;
+            retryTimers.forEach((t) => window.clearTimeout(t));
             supabase.removeChannel(channel);
         };
     }, [restaurant.id, session?.id, table.active_session_id, table.id]);

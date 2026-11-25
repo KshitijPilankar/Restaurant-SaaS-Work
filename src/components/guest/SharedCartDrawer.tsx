@@ -3,7 +3,7 @@
 import React, { useTransition } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, AlertCircle, Utensils } from 'lucide-react';
 import { CartItem, Restaurant, RestaurantTable, MenuItem } from '@/types/database';
-import { updateCartItemQuantity, placeSharedOrder } from '@/app/r/[slug]/actions';
+import { addToSharedCart, updateCartItemQuantity, placeSharedOrder } from '@/app/r/[slug]/actions';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface SharedCartDrawerProps {
@@ -65,6 +65,26 @@ export function SharedCartDrawer({
                 onClose();
             } else {
                 setError(res.error || 'Failed to place order. Please try again.');
+            }
+        });
+    };
+
+    // Quick Add puts one of a suggested dish into the shared cart. It uses the same add action as
+    // the dish drawer (a menu item id is not a cart row id), with the dish's default portion.
+    const handleQuickAdd = (dish: MenuItem) => {
+        setError(null);
+        startUpdateTransition(async () => {
+            const res = await addToSharedCart({
+                restaurantId: restaurant.id,
+                sessionId,
+                menuItemId: dish.id,
+                addedByGuestId: currentGuestId,
+                addedByName: currentGuestName,
+                variantName: dish.variants && dish.variants.length > 0 ? dish.variants[0].name : null,
+                quantity: 1,
+            });
+            if (!res.success) {
+                setError(res.error || 'Could not add that dish. Please try again.');
             }
         });
     };
@@ -205,12 +225,10 @@ export function SharedCartDrawer({
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            startUpdateTransition(async () => {
-                                                await updateCartItemQuantity(restaurant.id, sessionId, up.id, 1);
-                                            });
-                                        }}
-                                        className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-border bg-card px-2.5 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-muted active:scale-95"
+                                        onClick={() => handleQuickAdd(up)}
+                                        disabled={isUpdating}
+                                        aria-label={`Quick add ${up.name}`}
+                                        className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-border bg-card px-2.5 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-muted active:scale-95 disabled:opacity-50"
                                     >
                                         <Plus aria-hidden="true" className="size-3.5" />
                                         <span>Quick Add</span>
