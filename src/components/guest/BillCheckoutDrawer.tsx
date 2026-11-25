@@ -3,17 +3,13 @@
 import React, { useState, useMemo, useTransition } from 'react';
 import {
     Receipt,
-    Users,
-    UserCheck,
     CreditCard,
-    QrCode,
     Banknote,
     Plus,
     Minus,
     ArrowRight,
     Check,
     X,
-    Sparkles,
     AlertCircle,
     Smartphone,
 } from 'lucide-react';
@@ -213,328 +209,286 @@ export function BillCheckoutDrawer({
             className="max-w-md max-h-[94vh]"
             backdropClassName="bg-black/70 backdrop-blur-sm"
         >
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border py-2 pr-3 pl-5">
+                <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground ring-1 ring-black/5">
+                        <Receipt aria-hidden="true" className="size-[18px]" />
+                    </div>
+                    <div className="min-w-0">
+                        <h2 className="font-display text-lg leading-tight font-semibold tracking-tight text-foreground">Checkout & Bill</h2>
+                        <p className="truncate text-xs text-muted-foreground">
+                            {table.display_name} · Total bill{' '}
+                            <span className="font-mono font-semibold text-foreground tabular-nums">₹{fullBillWithoutTip}</span>
+                        </p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label="Close bill drawer"
+                >
+                    <X aria-hidden="true" className="size-5" />
+                </button>
+            </div>
 
-                    {/* Header */}
-                    <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
-                        <div className="flex items-center gap-2.5">
-                            <div
-                                className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-xs ring-1 ring-black/5"
-                                style={{ backgroundColor: 'var(--brand-primary)' }}
-                            >
-                                <Receipt className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-foreground text-base tracking-tight">Checkout & Bill</h3>
-                                <p className="text-[11px] text-muted-foreground font-mono">
-                                    {table.display_name} • Total Bill ₹{fullBillWithoutTip}
-                                </p>
+            {/* Content */}
+            <div className="flex-1 space-y-5 overflow-y-auto p-5">
+                {paymentSuccess ? (
+                    <div role="status" className="animate-fadeIn space-y-3 py-12 text-center">
+                        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-xl">
+                            <Check aria-hidden="true" className="size-8 stroke-[3]" />
+                        </div>
+                        <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground">Payment Successful!</h2>
+                        <p className="mx-auto max-w-xs text-sm text-muted-foreground">
+                            Paid <span className="font-mono font-semibold text-foreground tabular-nums">₹{payableDetails.total}</span> via{' '}
+                            {selectedMethod}. Table status updated.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        {/* How to pay: full bill, equal split, or by person */}
+                        <div role="group" aria-labelledby="split-label" className="space-y-2">
+                            <p id="split-label" className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                                Choose How to Pay
+                            </p>
+                            <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-border/60 bg-muted p-1">
+                                {(
+                                    [
+                                        { tab: 'FULL', label: 'Full Bill' },
+                                        { tab: 'EQUAL', label: 'Split Equally' },
+                                        { tab: 'ITEMIZED', label: 'By Person' },
+                                    ] as { tab: SplitTab; label: string }[]
+                                ).map(({ tab, label }) => (
+                                    <button
+                                        key={tab}
+                                        type="button"
+                                        onClick={() => setSplitTab(tab)}
+                                        aria-pressed={splitTab === tab}
+                                        className={`min-h-11 rounded-xl px-2 text-sm font-semibold transition-colors active:scale-95 ${
+                                            splitTab === tab
+                                                ? 'bg-card text-foreground shadow-xs'
+                                                : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer"
-                            aria-label="Close bill drawer"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
 
-                    {/* Content Scroll */}
-                    <div className="flex-1 overflow-y-auto p-5 space-y-5">
-                        {paymentSuccess ? (
-                            <div className="py-12 text-center space-y-3 animate-fadeIn">
-                                <div
-                                    className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xl"
-                                    style={{ backgroundColor: 'var(--brand-primary)' }}
-                                >
-                                    <Check className="w-8 h-8 stroke-[3]" />
+                        {/* Equal split: number of diners */}
+                        {splitTab === 'EQUAL' && (
+                            <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-3.5">
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">Split by Diners</p>
+                                    <p className="font-mono text-xs text-muted-foreground tabular-nums">
+                                        ₹{fullBillWithoutTip} ÷ {equalSplitCount} people
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground tracking-tight">Payment Successful!</h3>
-                                <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                                    Paid ₹{payableDetails.total} via {selectedMethod}. Table status updated.
-                                </p>
+                                <div className="flex items-center rounded-xl border border-border bg-card p-0.5 shadow-2xs">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEqualSplitCount(Math.max(2, equalSplitCount - 1))}
+                                        disabled={equalSplitCount <= 2}
+                                        className="flex size-11 items-center justify-center rounded-lg text-foreground transition hover:bg-muted active:scale-90 disabled:opacity-30"
+                                        aria-label="Decrease split diners"
+                                    >
+                                        <Minus aria-hidden="true" className="size-4" />
+                                    </button>
+                                    <span aria-live="polite" className="w-8 text-center font-mono text-base font-extrabold text-foreground tabular-nums">
+                                        {equalSplitCount}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setEqualSplitCount(Math.min(10, equalSplitCount + 1))}
+                                        className="flex size-11 items-center justify-center rounded-lg text-foreground transition hover:bg-muted active:scale-90"
+                                        aria-label="Increase split diners"
+                                    >
+                                        <Plus aria-hidden="true" className="size-4" />
+                                    </button>
+                                </div>
                             </div>
-                        ) : (
-                            <>
-                                {/* Split Bill Tabs */}
-                                <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
-                                        Choose How to Pay
-                                    </span>
-                                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-muted rounded-2xl border border-border/60">
-                                        <button
-                                            type="button"
-                                            onClick={() => setSplitTab('FULL')}
-                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
-                                                splitTab === 'FULL'
-                                                    ? 'bg-card text-foreground shadow-xs'
-                                                    : 'text-muted-foreground hover:text-foreground'
-                                            }`}
-                                        >
-                                            Full Bill
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setSplitTab('EQUAL')}
-                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
-                                                splitTab === 'EQUAL'
-                                                    ? 'bg-card text-foreground shadow-xs'
-                                                    : 'text-muted-foreground hover:text-foreground'
-                                            }`}
-                                        >
-                                            Split Equally
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setSplitTab('ITEMIZED')}
-                                            className={`py-2 px-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
-                                                splitTab === 'ITEMIZED'
-                                                    ? 'bg-card text-foreground shadow-xs'
-                                                    : 'text-muted-foreground hover:text-foreground'
-                                            }`}
-                                        >
-                                            By Person
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Tab-Specific Controls */}
-                                {splitTab === 'EQUAL' && (
-                                    <div className="p-3.5 bg-muted/40 rounded-2xl border border-border flex items-center justify-between">
-                                        <div>
-                                            <div className="text-xs font-bold text-foreground">Split by Diners</div>
-                                            <div className="text-[11px] text-muted-foreground font-mono">
-                                                ₹{fullBillWithoutTip} ÷ {equalSplitCount} people
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-2 bg-card border border-border rounded-xl p-1 shadow-2xs">
-                                            <button
-                                                type="button"
-                                                onClick={() => setEqualSplitCount(Math.max(2, equalSplitCount - 1))}
-                                                disabled={equalSplitCount <= 2}
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted disabled:opacity-30 cursor-pointer active:scale-90"
-                                                aria-label="Decrease split diners"
-                                            >
-                                                <Minus className="w-3.5 h-3.5" />
-                                            </button>
-                                            <span className="w-6 text-center text-xs font-extrabold font-mono text-foreground">
-                                                {equalSplitCount}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setEqualSplitCount(Math.min(10, equalSplitCount + 1))}
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted cursor-pointer active:scale-90"
-                                                aria-label="Increase split diners"
-                                            >
-                                                <Plus className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {splitTab === 'ITEMIZED' && (
-                                    <div className="space-y-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-                                            Select Diner to Settle:
-                                        </span>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {dinerBreakdown.map((diner) => {
-                                                const isSelected = selectedDinerName === diner.name;
-                                                return (
-                                                    <div
-                                                        key={diner.name}
-                                                        onClick={() => setSelectedDinerName(diner.name)}
-                                                        className={`p-3 rounded-2xl border text-left cursor-pointer transition active:scale-[0.98] ${
-                                                            isSelected
-                                                                ? 'border-2 ring-2 ring-orange-500/10 bg-muted/60'
-                                                                : 'border-border hover:border-foreground/20 bg-card'
-                                                        }`}
-                                                        style={{
-                                                            borderColor: isSelected ? 'var(--brand-primary)' : undefined,
-                                                        }}
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="text-xs font-bold text-foreground truncate">
-                                                                {diner.name}
-                                                            </span>
-                                                            {diner.name === currentGuestName && (
-                                                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-muted text-foreground border border-border">
-                                                                    You
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="text-xs font-extrabold text-foreground mt-1 font-mono">
-                                                            ₹{diner.total}
-                                                        </div>
-                                                        <div className="text-[10px] text-muted-foreground mt-0.5">
-                                                            {diner.items.length} {diner.items.length === 1 ? 'dish' : 'dishes'}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Tip Selection */}
-                                <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
-                                        Add Tip for Staff (Optional)
-                                    </span>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {[
-                                            { label: '₹0', val: 0 },
-                                            { label: '₹20', val: 20 },
-                                            { label: '₹50', val: 50 },
-                                            { label: '10%', val: Math.round(payableDetails.subtotal * 0.1) },
-                                        ].map((t) => {
-                                            const isSelected = selectedTip === t.val;
-                                            return (
-                                                <button
-                                                    key={t.label}
-                                                    type="button"
-                                                    onClick={() => setSelectedTip(t.val)}
-                                                    className={`py-2 px-1 rounded-xl text-xs font-bold border transition cursor-pointer text-center active:scale-95 font-mono ${
-                                                        isSelected
-                                                            ? 'border-2 text-white shadow-xs'
-                                                            : 'bg-muted/40 border-border text-foreground hover:bg-muted'
-                                                    }`}
-                                                    style={{
-                                                        backgroundColor: isSelected ? 'var(--brand-primary)' : undefined,
-                                                        borderColor: isSelected ? 'var(--brand-primary)' : undefined,
-                                                    }}
-                                                >
-                                                    {t.label}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Payment Method Selector */}
-                                <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
-                                        Payment Method
-                                    </span>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedMethod('UPI')}
-                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer active:scale-95 ${
-                                                selectedMethod === 'UPI'
-                                                    ? 'border-2 bg-muted/60 shadow-xs'
-                                                    : 'border-border hover:border-foreground/20 bg-card'
-                                            }`}
-                                            style={{
-                                                borderColor: selectedMethod === 'UPI' ? 'var(--brand-primary)' : undefined,
-                                            }}
-                                        >
-                                            <Smartphone className="w-5 h-5 mb-1 text-foreground" />
-                                            <span className="text-xs font-bold text-foreground">UPI</span>
-                                            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">Instant App</span>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedMethod('CARD')}
-                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer active:scale-95 ${
-                                                selectedMethod === 'CARD'
-                                                    ? 'border-2 bg-muted/60 shadow-xs'
-                                                    : 'border-border hover:border-foreground/20 bg-card'
-                                            }`}
-                                            style={{
-                                                borderColor: selectedMethod === 'CARD' ? 'var(--brand-primary)' : undefined,
-                                            }}
-                                        >
-                                            <CreditCard className="w-5 h-5 mb-1 text-foreground" />
-                                            <span className="text-xs font-bold text-foreground">Cards</span>
-                                            <span className="text-[9px] text-muted-foreground font-semibold">Razorpay</span>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedMethod('CASH')}
-                                            className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer active:scale-95 ${
-                                                selectedMethod === 'CASH'
-                                                    ? 'border-2 bg-muted/60 shadow-xs'
-                                                    : 'border-border hover:border-foreground/20 bg-card'
-                                            }`}
-                                            style={{
-                                                borderColor: selectedMethod === 'CASH' ? 'var(--brand-primary)' : undefined,
-                                            }}
-                                        >
-                                            <Banknote className="w-5 h-5 mb-1 text-foreground" />
-                                            <span className="text-xs font-bold text-foreground">Cash</span>
-                                            <span className="text-[9px] text-muted-foreground font-semibold">Pay Server</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Bill Breakdown Summary */}
-                                <div className="p-4 bg-muted/40 rounded-2xl border border-border space-y-2 text-xs">
-                                    <div className="flex justify-between text-muted-foreground">
-                                        <span>{payableDetails.label}</span>
-                                        <span className="font-mono font-medium text-foreground">₹{payableDetails.subtotal}</span>
-                                    </div>
-                                    <div className="flex justify-between text-muted-foreground">
-                                        <span>GST ({taxRate}%)</span>
-                                        <span className="font-mono font-medium text-foreground">₹{payableDetails.tax}</span>
-                                    </div>
-                                    {selectedTip > 0 && (
-                                        <div className="flex justify-between text-muted-foreground">
-                                            <span>Staff Tip</span>
-                                            <span className="font-mono font-medium text-foreground">₹{selectedTip}</span>
-                                        </div>
-                                    )}
-                                    <div className="pt-2.5 border-t border-border flex justify-between font-extrabold text-sm text-foreground">
-                                        <span>Amount to Pay</span>
-                                        <span className="font-mono font-extrabold text-base">
-                                            ₹{payableDetails.total}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {errorMessage && (
-                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
-                                        <AlertCircle className="w-4 h-4 shrink-0" />
-                                        <span>{errorMessage}</span>
-                                    </div>
-                                )}
-                            </>
                         )}
-                    </div>
 
-                    {/* Bottom Pay Button */}
-                    {!paymentSuccess && (
-                        <div className="p-4 pb-safe bg-card border-t border-border shrink-0 shadow-lg">
-                            <button
-                                type="button"
-                                onClick={handleExecutePayment}
-                                disabled={isProcessing || payableDetails.total <= 0}
-                                className="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white shadow-lg active:scale-[0.98] transition flex items-center justify-between cursor-pointer disabled:opacity-50"
-                                style={{ backgroundColor: 'var(--brand-primary)' }}
-                            >
-                                <div className="text-left">
-                                    <div className="text-[10px] uppercase font-bold text-white/80 tracking-wider">
-                                        {selectedMethod === 'CASH' ? 'Confirm Cash Settlement' : `Pay via ${selectedMethod}`}
-                                    </div>
-                                    <div className="text-sm font-extrabold">
-                                        {selectedMethod === 'CASH' ? 'Ask Server for Bill' : 'Pay Now'}
-                                    </div>
+                        {/* By person: pick the diner to settle */}
+                        {splitTab === 'ITEMIZED' && (
+                            <div role="group" aria-labelledby="diner-label" className="space-y-2">
+                                <p id="diner-label" className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                                    Select Diner to Settle:
+                                </p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {dinerBreakdown.map((diner) => {
+                                        const isSelected = selectedDinerName === diner.name;
+                                        return (
+                                            <button
+                                                key={diner.name}
+                                                type="button"
+                                                onClick={() => setSelectedDinerName(diner.name)}
+                                                aria-pressed={isSelected}
+                                                className={`min-h-16 rounded-2xl border-2 p-3 text-left transition-colors active:scale-[0.98] ${
+                                                    isSelected
+                                                        ? 'border-brand bg-brand-subtle'
+                                                        : 'border-border bg-card hover:border-foreground/25'
+                                                }`}
+                                            >
+                                                <span className="flex items-center justify-between gap-2">
+                                                    <span className="truncate text-sm font-semibold text-foreground">{diner.name}</span>
+                                                    {diner.name === currentGuestName && (
+                                                        <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs font-semibold text-foreground">
+                                                            You
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                <span className="mt-1 block font-mono text-sm font-extrabold text-foreground tabular-nums">
+                                                    ₹{diner.total}
+                                                </span>
+                                                <span className="block text-xs text-muted-foreground">
+                                                    {diner.items.length} {diner.items.length === 1 ? 'dish' : 'dishes'}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                                <div className="flex items-center gap-1.5 text-base font-extrabold font-mono">
-                                    {isProcessing ? (
-                                        <span>Processing...</span>
-                                    ) : (
-                                        <>
-                                            <span>₹{payableDetails.total}</span>
-                                            <ArrowRight className="w-4 h-4" />
-                                        </>
-                                    )}
-                                </div>
-                            </button>
+                            </div>
+                        )}
+
+                        {/* Tip */}
+                        <div role="group" aria-labelledby="tip-label" className="space-y-2">
+                            <p id="tip-label" className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                                Add Tip for Staff (Optional)
+                            </p>
+                            <div className="grid grid-cols-4 gap-2">
+                                {[
+                                    { label: '₹0', val: 0 },
+                                    { label: '₹20', val: 20 },
+                                    { label: '₹50', val: 50 },
+                                    { label: '10%', val: Math.round(payableDetails.subtotal * 0.1) },
+                                ].map((t) => {
+                                    const isSelected = selectedTip === t.val;
+                                    return (
+                                        <button
+                                            key={t.label}
+                                            type="button"
+                                            onClick={() => setSelectedTip(t.val)}
+                                            aria-pressed={isSelected}
+                                            className={`min-h-11 rounded-xl border px-1 text-center font-mono text-sm font-bold tabular-nums transition-colors active:scale-95 ${
+                                                isSelected
+                                                    ? 'border-brand bg-brand text-brand-foreground shadow-xs'
+                                                    : 'border-border bg-muted/40 text-foreground hover:bg-muted'
+                                            }`}
+                                        >
+                                            {t.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    )}
+
+                        {/* Payment method */}
+                        <div role="group" aria-labelledby="method-label" className="space-y-2">
+                            <p id="method-label" className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                                Payment Method
+                            </p>
+                            <div className="grid grid-cols-3 gap-2">
+                                {(
+                                    [
+                                        { method: 'UPI', label: 'UPI', note: 'Instant app', Icon: Smartphone, noteClass: 'text-emerald-700' },
+                                        { method: 'CARD', label: 'Cards', note: 'Razorpay', Icon: CreditCard, noteClass: 'text-muted-foreground' },
+                                        { method: 'CASH', label: 'Cash', note: 'Pay server', Icon: Banknote, noteClass: 'text-muted-foreground' },
+                                    ] as { method: PaymentMethod; label: string; note: string; Icon: React.ElementType; noteClass: string }[]
+                                ).map(({ method, label, note, Icon, noteClass }) => {
+                                    const isSelected = selectedMethod === method;
+                                    return (
+                                        <button
+                                            key={method}
+                                            type="button"
+                                            onClick={() => setSelectedMethod(method)}
+                                            aria-pressed={isSelected}
+                                            className={`relative flex min-h-20 flex-col items-center justify-center rounded-2xl border-2 p-3 text-center transition-colors active:scale-95 ${
+                                                isSelected
+                                                    ? 'border-brand bg-brand-subtle shadow-xs'
+                                                    : 'border-border bg-card hover:border-foreground/25'
+                                            }`}
+                                        >
+                                            {isSelected && (
+                                                <Check aria-hidden="true" className="absolute top-1.5 right-1.5 size-3.5 text-foreground" />
+                                            )}
+                                            <Icon aria-hidden="true" className="mb-1 size-5 text-foreground" />
+                                            <span className="text-sm font-semibold text-foreground">{label}</span>
+                                            <span className={`text-xs font-medium ${noteClass}`}>{note}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Amount summary */}
+                        <dl className="space-y-2 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+                            <div className="flex justify-between text-muted-foreground">
+                                <dt>{payableDetails.label}</dt>
+                                <dd className="font-mono font-medium text-foreground tabular-nums">₹{payableDetails.subtotal}</dd>
+                            </div>
+                            <div className="flex justify-between text-muted-foreground">
+                                <dt>GST ({taxRate}%)</dt>
+                                <dd className="font-mono font-medium text-foreground tabular-nums">₹{payableDetails.tax}</dd>
+                            </div>
+                            {selectedTip > 0 && (
+                                <div className="flex justify-between text-muted-foreground">
+                                    <dt>Staff Tip</dt>
+                                    <dd className="font-mono font-medium text-foreground tabular-nums">₹{selectedTip}</dd>
+                                </div>
+                            )}
+                            <div className="flex justify-between border-t border-border pt-2.5 font-extrabold text-foreground">
+                                <dt>Amount to Pay</dt>
+                                <dd className="font-mono text-base font-extrabold tabular-nums">₹{payableDetails.total}</dd>
+                            </div>
+                        </dl>
+
+                        {errorMessage && (
+                            <div
+                                role="alert"
+                                className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-700"
+                            >
+                                <AlertCircle aria-hidden="true" className="size-4 shrink-0" />
+                                <span>{errorMessage}</span>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {/* Pay button */}
+            {!paymentSuccess && (
+                <div className="shrink-0 border-t border-border bg-card p-4 pb-safe shadow-lg">
+                    <button
+                        type="button"
+                        onClick={handleExecutePayment}
+                        disabled={isProcessing || payableDetails.total <= 0}
+                        className="flex min-h-14 w-full items-center justify-between gap-3 rounded-2xl bg-brand px-5 py-2.5 text-left text-brand-foreground shadow-lg transition-transform active:scale-[0.98] disabled:opacity-60"
+                    >
+                        <span>
+                            <span className="block text-xs font-semibold tracking-wide uppercase opacity-80">
+                                {selectedMethod === 'CASH' ? 'Confirm Cash Settlement' : `Pay via ${selectedMethod}`}
+                            </span>
+                            <span className="block text-base font-extrabold">
+                                {selectedMethod === 'CASH' ? 'Ask Server for Bill' : 'Pay Now'}
+                            </span>
+                        </span>
+                        <span className="flex items-center gap-1.5 font-mono text-base font-extrabold tabular-nums">
+                            {isProcessing ? (
+                                <span>Processing…</span>
+                            ) : (
+                                <>
+                                    <span>₹{payableDetails.total}</span>
+                                    <ArrowRight aria-hidden="true" className="size-4" />
+                                </>
+                            )}
+                        </span>
+                    </button>
+                </div>
+            )}
 
             {/* Post-Payment Review Modal (nested inside the bill sheet so focus and dismissal stay scoped) */}
             <PostPaymentReviewModal

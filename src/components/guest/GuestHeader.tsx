@@ -112,7 +112,7 @@ export function GuestHeader({
                 onClose={() => setShowService(false)}
             />
 
-            {/* Wi-Fi Popover Modal */}
+            {/* Wi-Fi sheet */}
             <BottomSheet
                 open={showWifi}
                 onClose={() => setShowWifi(false)}
@@ -121,55 +121,63 @@ export function GuestHeader({
                 className="max-w-sm"
                 contentClassName="px-6 pb-6 pt-1 sm:pt-6 space-y-4 text-center"
             >
-                        <button
-                            onClick={() => setShowWifi(false)}
-                            className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
-                            aria-label="Close Wi-Fi modal"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
+                <button
+                    type="button"
+                    onClick={() => setShowWifi(false)}
+                    className="absolute top-2 right-2 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label="Close Wi-Fi modal"
+                >
+                    <X aria-hidden="true" className="size-5" />
+                </button>
 
-                        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto text-foreground shadow-xs">
-                            <Wifi className="w-6 h-6 text-foreground" />
+                <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground ring-1 ring-black/5">
+                    <Wifi aria-hidden="true" className="size-6" />
+                </div>
+
+                <div>
+                    <h2 className="font-display text-xl leading-tight font-semibold tracking-tight text-foreground">Guest Wi-Fi</h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Complimentary high-speed internet</p>
+                </div>
+
+                <dl className="space-y-1.5 rounded-2xl border border-border bg-muted/50 p-4 text-left text-sm">
+                    <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Network</dt>
+                        <dd translate="no" className="truncate font-semibold text-foreground">
+                            {restaurant.wifi_ssid}
+                        </dd>
+                    </div>
+                    {restaurant.wifi_password && (
+                        <div className="flex justify-between gap-3">
+                            <dt className="text-muted-foreground">Password</dt>
+                            <dd translate="no" className="font-mono font-semibold break-all text-foreground">
+                                {restaurant.wifi_password}
+                            </dd>
                         </div>
+                    )}
+                </dl>
 
-                        <div>
-                            <h3 className="font-bold text-foreground text-base tracking-tight">Guest Wi-Fi</h3>
-                            <p className="text-xs text-muted-foreground mt-0.5">Complimentary high-speed internet</p>
-                        </div>
-
-                        <div className="p-3.5 bg-muted/50 border border-border rounded-2xl text-left space-y-1.5 text-xs">
-                            <div className="text-muted-foreground">Network: <strong className="text-foreground">{restaurant.wifi_ssid}</strong></div>
-                            {restaurant.wifi_password && (
-                                <div className="text-muted-foreground">
-                                    Password: <strong className="text-foreground font-mono">{restaurant.wifi_password}</strong>
-                                </div>
-                            )}
-                        </div>
-
-                        {restaurant.wifi_password && (
-                            <button
-                                type="button"
-                                onClick={handleCopyWifi}
-                                className="w-full py-3 px-4 rounded-xl font-bold text-xs text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-98"
-                                style={{ backgroundColor: 'var(--brand-primary)' }}
-                            >
-                                {copiedPass ? (
-                                    <>
-                                        <Check className="w-4 h-4" />
-                                        <span>Copied Password!</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Copy className="w-4 h-4" />
-                                        <span>Copy Wi-Fi Password</span>
-                                    </>
-                                )}
-                            </button>
+                {restaurant.wifi_password && (
+                    <button
+                        type="button"
+                        onClick={handleCopyWifi}
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground shadow-sm transition-transform active:scale-[0.98]"
+                    >
+                        {copiedPass ? (
+                            <>
+                                <Check aria-hidden="true" className="size-4" />
+                                <span aria-live="polite">Copied Password!</span>
+                            </>
+                        ) : (
+                            <>
+                                <Copy aria-hidden="true" className="size-4" />
+                                <span>Copy Wi-Fi Password</span>
+                            </>
                         )}
+                    </button>
+                )}
             </BottomSheet>
 
-            {/* Table Diners Modal */}
+            {/* Table guests sheet */}
             <BottomSheet
                 open={showGuests}
                 onClose={() => setShowGuests(false)}
@@ -178,50 +186,51 @@ export function GuestHeader({
                 className="max-w-sm"
                 contentClassName="px-6 pb-6 pt-1 sm:pt-6 space-y-4"
             >
-                        <button
-                            onClick={() => setShowGuests(false)}
-                            className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
-                            aria-label="Close table guests modal"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
+                <button
+                    type="button"
+                    onClick={() => setShowGuests(false)}
+                    className="absolute top-2 right-2 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label="Close table guests modal"
+                >
+                    <X aria-hidden="true" className="size-5" />
+                </button>
 
-                        <div>
-                            <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
-                                Table Live Session
-                            </span>
-                            <h3 className="font-bold text-foreground text-base tracking-tight">Seated at {table.display_name}</h3>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                                All diners can add dishes to the shared table cart in real-time.
-                            </p>
-                        </div>
+                <div className="pr-10">
+                    <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Table Live Session</p>
+                    <h2 className="font-display text-xl leading-tight font-semibold tracking-tight text-foreground">
+                        Seated at {table.display_name}
+                    </h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                        All diners can add dishes to the shared table cart in real-time.
+                    </p>
+                </div>
 
-                        <div className="space-y-2">
-                            {guests.map((g) => {
-                                const isMe = g.name.toLowerCase() === currentGuestName?.toLowerCase();
-                                return (
+                <ul className="space-y-2">
+                    {guests.map((g) => {
+                        const isMe = g.name.toLowerCase() === currentGuestName?.toLowerCase();
+                        return (
+                            <li
+                                key={g.guest_id}
+                                className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border bg-muted/60 px-3 py-2"
+                            >
+                                <div className="flex min-w-0 items-center gap-2.5">
                                     <div
-                                        key={g.guest_id}
-                                        className="flex items-center justify-between p-3 bg-muted/60 border border-border rounded-xl text-xs"
+                                        aria-hidden="true"
+                                        className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand text-sm font-bold text-brand-foreground"
                                     >
-                                        <div className="flex items-center gap-2.5">
-                                            <div
-                                                className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-2xs"
-                                                style={{ backgroundColor: 'var(--brand-primary)' }}
-                                            >
-                                                {g.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <span className="font-semibold text-foreground text-sm">{g.name}</span>
-                                        </div>
-                                        {isMe && (
-                                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200">
-                                                You
-                                            </span>
-                                        )}
+                                        {g.name.charAt(0).toUpperCase()}
                                     </div>
-                                );
-                            })}
-                        </div>
+                                    <span className="truncate text-sm font-semibold text-foreground">{g.name}</span>
+                                </div>
+                                {isMe && (
+                                    <span className="shrink-0 rounded-full bg-zinc-200 px-2.5 py-0.5 text-xs font-semibold text-zinc-800">
+                                        You
+                                    </span>
+                                )}
+                            </li>
+                        );
+                    })}
+                </ul>
             </BottomSheet>
         </>
     );

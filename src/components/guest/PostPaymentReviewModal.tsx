@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
-import { Star, Sparkles, ExternalLink, MessageSquare, Check, X, Heart } from 'lucide-react';
+import { Star, Sparkles, ExternalLink, Check, X, Heart } from 'lucide-react';
 import { Restaurant } from '@/types/database';
 import { submitGuestReview } from '@/app/r/[slug]/checkout-actions';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
@@ -81,128 +81,125 @@ export function PostPaymentReviewModal({
             zIndexClassName="z-60"
             backdropClassName="bg-black/70 backdrop-blur-sm"
         >
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
-                    aria-label="Close review modal"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+            <button
+                type="button"
+                onClick={onClose}
+                className="absolute top-2 right-2 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                aria-label="Close review modal"
+            >
+                <X aria-hidden="true" className="size-5" />
+            </button>
 
-                {isSubmitted ? (
-                    <div className="py-6 space-y-3 animate-fadeIn">
-                        <div
-                            className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white shadow-lg ring-1 ring-black/5"
-                            style={{ backgroundColor: 'var(--brand-primary)' }}
-                        >
-                            <Check className="w-7 h-7 stroke-[3]" />
-                        </div>
-                        <h3 className="text-lg font-bold text-foreground">Thank You!</h3>
-                        <p className="text-xs text-muted-foreground">
-                            Your feedback helps us continuously elevate our food & hospitality.
-                        </p>
+            {isSubmitted ? (
+                <div role="status" className="animate-fadeIn space-y-3 py-6">
+                    <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-lg ring-1 ring-black/5">
+                        <Check aria-hidden="true" className="size-7 stroke-[3]" />
                     </div>
-                ) : (
-                    <>
-                        {/* Header */}
-                        <div className="space-y-1.5">
-                            <div
-                                className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-white shadow-md mb-2 ring-1 ring-black/5"
-                                style={{ backgroundColor: 'var(--brand-primary)' }}
-                            >
-                                <Heart className="w-6 h-6 fill-white" />
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                How was your dining experience?
-                            </span>
-                            <h3 className="text-xl font-extrabold text-foreground tracking-tight">
-                                Rate {restaurant.name}
-                            </h3>
+                    <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground">Thank You!</h2>
+                    <p className="text-sm text-muted-foreground">
+                        Your feedback helps us keep improving our food &amp; hospitality.
+                    </p>
+                </div>
+            ) : (
+                <>
+                    {/* Header */}
+                    <div className="space-y-1.5">
+                        <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-md ring-1 ring-black/5">
+                            <Heart aria-hidden="true" className="size-6 fill-current" />
                         </div>
+                        <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                            How was your dining experience?
+                        </p>
+                        <h2 className="font-display text-2xl leading-tight font-semibold tracking-tight text-balance text-foreground">
+                            Rate {restaurant.name}
+                        </h2>
+                    </div>
 
-                        {/* Interactive 5-Star Row */}
-                        <div className="flex items-center justify-center gap-2 py-1">
-                            {[1, 2, 3, 4, 5].map((star) => {
-                                const isFilled = star <= rating;
-                                return (
-                                    <button
-                                        key={star}
-                                        type="button"
-                                        onClick={() => setRating(star)}
-                                        className="p-1 hover:scale-125 transition cursor-pointer active:scale-95"
-                                        aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                                    >
-                                        <Star
-                                            className={`w-8 h-8 transition ${
-                                                isFilled
-                                                    ? 'fill-amber-400 text-amber-400 drop-shadow-sm'
-                                                    : 'text-zinc-300 dark:text-zinc-600 hover:text-amber-200'
-                                            }`}
-                                        />
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        {/* Smart Review Branch */}
-                        {isHighRating ? (
-                            /* 4 or 5 Stars: Celebratory Google Review Funnel */
-                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-3 animate-fadeIn text-left">
-                                <div className="flex items-start gap-2.5">
-                                    <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                                    <div>
-                                        <h4 className="text-xs font-bold text-foreground">
-                                            We&apos;re thrilled you enjoyed it!
-                                        </h4>
-                                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                                            Would you mind taking 10 seconds to share your positive experience on Google? It means the world to our team.
-                                        </p>
-                                    </div>
-                                </div>
-
+                    {/* 5-star rating */}
+                    <div role="group" aria-label="Your rating" className="flex items-center justify-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                            const isFilled = star <= rating;
+                            return (
                                 <button
+                                    key={star}
                                     type="button"
-                                    onClick={handleGoogleRedirect}
-                                    disabled={isPending}
-                                    className="w-full py-3 px-4 rounded-xl font-bold text-xs text-white shadow-md active:scale-[0.98] transition flex items-center justify-center gap-1.5 cursor-pointer"
-                                    style={{ backgroundColor: 'var(--brand-primary)' }}
+                                    onClick={() => setRating(star)}
+                                    aria-pressed={star === rating}
+                                    aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                                    className="flex size-11 items-center justify-center rounded-full transition-transform active:scale-90"
                                 >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                    <span>Share on Google Reviews</span>
+                                    <Star
+                                        aria-hidden="true"
+                                        className={`size-8 transition-colors ${
+                                            isFilled ? 'fill-amber-400 text-amber-500' : 'text-zinc-300 hover:text-amber-300'
+                                        }`}
+                                    />
                                 </button>
-                            </div>
-                        ) : (
-                            /* 1, 2 or 3 Stars: Private Constructive Feedback Form */
-                            <form onSubmit={handlePrivateFeedbackSubmit} className="space-y-3 animate-fadeIn text-left">
-                                <div className="p-3 bg-muted/50 border border-border rounded-xl space-y-1">
-                                    <h4 className="text-xs font-bold text-foreground">
-                                        We strive for perfection.
-                                    </h4>
-                                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                        Please tell us what went wrong so the restaurant owner can address it immediately.
+                            );
+                        })}
+                    </div>
+
+                    {/* Smart review branch */}
+                    {isHighRating ? (
+                        /* 4 or 5 stars: Google review funnel */
+                        <div className="animate-fadeIn space-y-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-left">
+                            <div className="flex items-start gap-2.5">
+                                <Sparkles aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-amber-700" />
+                                <div>
+                                    <h3 className="text-sm font-semibold text-foreground">We&apos;re thrilled you enjoyed it!</h3>
+                                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                                        Would you mind taking 10 seconds to share your positive experience on Google? It means the
+                                        world to our team.
                                     </p>
                                 </div>
+                            </div>
 
-                                <textarea
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    placeholder="Tell the management what we can improve..."
-                                    rows={3}
-                                    required
-                                    className="w-full p-3 bg-muted/40 border border-border rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/20 resize-none transition"
-                                />
+                            <button
+                                type="button"
+                                onClick={handleGoogleRedirect}
+                                disabled={isPending}
+                                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-60"
+                            >
+                                <ExternalLink aria-hidden="true" className="size-4" />
+                                <span>Share on Google Reviews</span>
+                            </button>
+                        </div>
+                    ) : (
+                        /* 1 to 3 stars: private feedback form */
+                        <form onSubmit={handlePrivateFeedbackSubmit} className="animate-fadeIn space-y-3 text-left">
+                            <div className="space-y-1 rounded-xl border border-border bg-muted/50 p-3">
+                                <h3 className="text-sm font-semibold text-foreground">We strive for perfection.</h3>
+                                <p className="text-xs leading-relaxed text-muted-foreground">
+                                    Tell us what went wrong so the restaurant owner can address it right away.
+                                </p>
+                            </div>
 
-                                <button
-                                    type="submit"
-                                    disabled={isPending}
-                                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-foreground text-background hover:opacity-90 transition shadow-xs cursor-pointer disabled:opacity-50 active:scale-[0.98]"
-                                >
-                                    {isPending ? 'Sending...' : 'Send Private Feedback to Owner'}
-                                </button>
-                            </form>
-                        )}
-                    </>
-                )}
+                            <label htmlFor="review-comment" className="sr-only">
+                                What can we improve?
+                            </label>
+                            <textarea
+                                id="review-comment"
+                                name="comment"
+                                autoComplete="off"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder="Tell the management what we can improve…"
+                                rows={3}
+                                required
+                                className="w-full resize-none rounded-xl border border-border bg-muted/40 p-3 text-base text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/30"
+                            />
+
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="flex min-h-12 w-full items-center justify-center rounded-xl bg-foreground px-4 text-sm font-bold text-background shadow-xs transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+                            >
+                                {isPending ? 'Sending…' : 'Send Private Feedback to Owner'}
+                            </button>
+                        </form>
+                    )}
+                </>
+            )}
         </BottomSheet>
     );
 }

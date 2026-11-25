@@ -64,188 +64,179 @@ export function LiveOrderTracker({
 
     return (
         <BottomSheet open={isOpen} onClose={onClose} label="Live order status" className="max-w-md max-h-[92vh]">
-                {/* Header */}
-                <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground transition cursor-pointer"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        <span>Back to Menu</span>
-                    </button>
-                    <div className="text-right">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Live Dine-In
-                        </span>
-                        <div className="text-xs font-bold text-foreground">{table.display_name}</div>
-                    </div>
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border py-1 pr-5 pl-2">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                    <ArrowLeft aria-hidden="true" className="size-4" />
+                    <span>Back to Menu</span>
+                </button>
+                <div className="text-right">
+                    <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">Live Dine-In</p>
+                    <p className="text-sm font-semibold text-foreground">{table.display_name}</p>
                 </div>
+            </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-6">
-                    {/* Stepper Card for Latest Order */}
-                    {latestOrder ? (
-                        <div className="p-4 bg-muted/40 border border-border rounded-2xl space-y-4 shadow-2xs">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-card border border-border text-foreground">
-                                        <span>Order #{latestOrder.order_number || 1}</span>
-                                        <span>•</span>
-                                        <span>Placed by {latestOrder.placed_by_name}</span>
-                                    </div>
-                                    <h3 className="text-base font-extrabold text-foreground mt-1">
-                                        Live Status Tracker
-                                    </h3>
-                                </div>
-                                <div
-                                    className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-xs animate-pulse ring-1 ring-black/5"
-                                    style={{ backgroundColor: 'var(--brand-primary)' }}
-                                >
-                                    <Sparkles className="w-4 h-4" />
-                                </div>
+            {/* Content */}
+            <div className="flex-1 space-y-6 overflow-y-auto p-5">
+                {/* Status tracker for the latest order */}
+                {latestOrder ? (
+                    <div className="space-y-4 rounded-2xl border border-border bg-muted/40 p-4 shadow-2xs">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 space-y-1.5">
+                                <p className="inline-flex max-w-full flex-wrap items-center gap-x-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-semibold text-foreground">
+                                    <span className="font-mono tabular-nums">Order #{latestOrder.order_number || 1}</span>
+                                    <span aria-hidden="true">·</span>
+                                    <span className="truncate">Placed by {latestOrder.placed_by_name}</span>
+                                </p>
+                                <h2 className="font-display text-xl leading-tight font-semibold tracking-tight text-foreground">
+                                    Live Status Tracker
+                                </h2>
                             </div>
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground ring-1 ring-black/5">
+                                <Sparkles aria-hidden="true" className="size-4" />
+                            </div>
+                        </div>
 
-                            {/* Stepper Steps */}
-                            <div className="space-y-3 pt-2">
-                                {STATUS_STEPS.map((step, idx) => {
-                                    const currentIdx = getStepIndex(latestOrder.status);
-                                    const isCompleted = idx <= currentIdx;
-                                    const isCurrent = idx === currentIdx;
-                                    const Icon = step.icon;
+                        {/* Steps */}
+                        <ol className="space-y-1 pt-1">
+                            {STATUS_STEPS.map((step, idx) => {
+                                const currentIdx = getStepIndex(latestOrder.status);
+                                const isCompleted = idx <= currentIdx;
+                                const isCurrent = idx === currentIdx;
+                                const Icon = step.icon;
 
-                                    return (
-                                        <div key={step.status} className="flex items-start gap-3">
-                                            <div className="flex flex-col items-center">
+                                return (
+                                    <li
+                                        key={step.status}
+                                        aria-current={isCurrent ? 'step' : undefined}
+                                        className="flex items-start gap-3"
+                                    >
+                                        <div className="flex flex-col items-center">
+                                            <div
+                                                className={`flex size-8 items-center justify-center rounded-full transition-colors ${
+                                                    isCompleted ? 'bg-brand text-brand-foreground' : 'bg-muted text-muted-foreground'
+                                                }`}
+                                            >
+                                                <Icon aria-hidden="true" className="size-4" />
+                                            </div>
+                                            {idx < STATUS_STEPS.length - 1 && (
                                                 <div
-                                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition shadow-xs ${
-                                                        isCompleted
-                                                            ? 'text-white'
-                                                            : 'bg-muted text-muted-foreground'
+                                                    aria-hidden="true"
+                                                    className={`h-6 w-0.5 transition-colors ${
+                                                        idx < currentIdx ? 'bg-brand' : 'bg-border'
                                                     }`}
-                                                    style={{
-                                                        backgroundColor: isCompleted ? 'var(--brand-primary)' : undefined,
-                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1 pt-1">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <h3
+                                                    className={`text-sm font-semibold ${
+                                                        isCompleted ? 'text-foreground' : 'text-muted-foreground'
+                                                    }`}
                                                 >
-                                                    <Icon className="w-3.5 h-3.5" />
-                                                </div>
-                                                {idx < STATUS_STEPS.length - 1 && (
-                                                    <div
-                                                        className={`w-0.5 h-6 transition ${
-                                                            idx < currentIdx ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-muted'
-                                                        }`}
-                                                        style={{
-                                                            backgroundColor: idx < currentIdx ? 'var(--brand-primary)' : undefined,
-                                                        }}
-                                                    />
+                                                    {step.label}
+                                                </h3>
+                                                {isCurrent && (
+                                                    <span className="rounded-full bg-brand px-2.5 py-0.5 text-xs font-bold text-brand-foreground">
+                                                        In Progress
+                                                    </span>
                                                 )}
                                             </div>
-                                            <div className="flex-1 min-w-0 pt-0.5">
-                                                <div className="flex items-center justify-between">
-                                                    <h4
-                                                        className={`text-xs font-bold ${
-                                                            isCompleted ? 'text-foreground' : 'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {step.label}
-                                                    </h4>
-                                                    {isCurrent && (
-                                                        <span
-                                                            className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white animate-pulse"
-                                                            style={{ backgroundColor: 'var(--brand-primary)' }}
-                                                        >
-                                                            In Progress
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="text-[11px] text-muted-foreground">{step.desc}</p>
-                                            </div>
+                                            <p className="text-xs text-muted-foreground">{step.desc}</p>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="p-8 text-center text-muted-foreground space-y-2">
-                            <Utensils className="w-8 h-8 mx-auto text-muted-foreground/50" />
-                            <p className="text-sm font-semibold text-foreground">No active orders</p>
-                            <p className="text-xs text-muted-foreground">Dishes you order will be tracked here in real-time.</p>
-                        </div>
-                    )}
+                                    </li>
+                                );
+                            })}
+                        </ol>
+                    </div>
+                ) : (
+                    <div className="space-y-2 p-8 text-center">
+                        <Utensils aria-hidden="true" className="mx-auto size-8 text-muted-foreground/50" />
+                        <p className="text-sm font-semibold text-foreground">No active orders</p>
+                        <p className="text-xs text-muted-foreground">Dishes you order will be tracked here in real-time.</p>
+                    </div>
+                )}
 
-                    {/* Orders Breakdown */}
-                    {orders.length > 0 && (
-                        <div className="space-y-3">
-                            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                                Order Items History ({orders.length} orders)
-                            </h4>
-                            <div className="space-y-3">
-                                {orders.map((order) => (
-                                    <div
-                                        key={order.id}
-                                        className="p-3.5 bg-muted/40 border border-border rounded-2xl space-y-2 text-xs"
-                                    >
-                                        <div className="flex items-center justify-between font-bold text-foreground">
-                                            <span>Order #{order.order_number || 1}</span>
-                                            <span className="font-mono">₹{order.subtotal}</span>
-                                        </div>
-
-                                        {order.order_items && order.order_items.length > 0 && (
-                                            <div className="divide-y divide-border/60 pt-1">
-                                                {order.order_items.map((oi) => (
-                                                    <div
-                                                        key={oi.id}
-                                                        className="py-1.5 flex items-center justify-between text-muted-foreground"
-                                                    >
-                                                        <div>
-                                                            <span className="font-semibold text-foreground">
-                                                                {oi.quantity}x {oi.item_name}
-                                                            </span>
-                                                            {oi.variant_name && (
-                                                                <span className="text-[10px] text-muted-foreground ml-1">
-                                                                    ({oi.variant_name})
-                                                                </span>
-                                                            )}
-                                                            <div className="text-[10px] text-muted-foreground italic">
-                                                                For {oi.ordered_by_name}
-                                                            </div>
-                                                        </div>
-                                                        <span className="font-mono font-medium text-foreground">
-                                                            ₹{Number(oi.unit_price) * oi.quantity}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                {/* Order history */}
+                {orders.length > 0 && (
+                    <section aria-labelledby="order-history-heading" className="space-y-3">
+                        <div className="flex items-baseline justify-between gap-3">
+                            <h2
+                                id="order-history-heading"
+                                className="text-xs font-bold tracking-wider text-foreground uppercase"
+                            >
+                                Order History
+                            </h2>
+                            <span className="text-xs text-muted-foreground">
+                                {orders.length} {orders.length === 1 ? 'order' : 'orders'}
+                            </span>
+                        </div>
+                        <ul className="space-y-3">
+                            {orders.map((order) => (
+                                <li
+                                    key={order.id}
+                                    className="space-y-2 rounded-2xl border border-border bg-card p-3.5 text-sm"
+                                >
+                                    <div className="flex items-center justify-between font-semibold text-foreground">
+                                        <span className="font-mono tabular-nums">Order #{order.order_number || 1}</span>
+                                        <span className="font-mono tabular-nums">₹{order.subtotal}</span>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
 
-                {/* Bottom Actions */}
-                <div className="p-4 pb-safe bg-card border-t border-border flex items-center gap-3 shrink-0 shadow-lg">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex-1 py-3.5 px-3 rounded-2xl font-bold text-xs bg-muted hover:bg-muted/80 text-foreground transition cursor-pointer text-center active:scale-95 border border-border"
-                    >
-                        Order More Dishes
-                    </button>
+                                    {order.order_items && order.order_items.length > 0 && (
+                                        <ul className="divide-y divide-border/60">
+                                            {order.order_items.map((oi) => (
+                                                <li key={oi.id} className="flex items-center justify-between gap-3 py-2">
+                                                    <div className="min-w-0">
+                                                        <span className="font-semibold text-foreground">
+                                                            <span className="font-mono tabular-nums">{oi.quantity}×</span> {oi.item_name}
+                                                        </span>
+                                                        {oi.variant_name && (
+                                                            <span className="ml-1 text-xs text-muted-foreground">({oi.variant_name})</span>
+                                                        )}
+                                                        <p className="text-xs text-muted-foreground italic">For {oi.ordered_by_name}</p>
+                                                    </div>
+                                                    <span className="shrink-0 font-mono font-medium text-foreground tabular-nums">
+                                                        ₹{Number(oi.unit_price) * oi.quantity}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
+            </div>
 
-                    <button
-                        type="button"
-                        onClick={() => {
-                            onClose();
-                            onOpenCheckout();
-                        }}
-                        className="flex-1 py-3.5 px-3 rounded-2xl font-bold text-xs text-white transition shadow cursor-pointer text-center flex items-center justify-center gap-1.5 active:scale-95"
-                        style={{ backgroundColor: 'var(--brand-primary)' }}
-                    >
-                        <Receipt className="w-3.5 h-3.5" />
-                        <span>Pay Bill (₹{grandTotal})</span>
-                    </button>
-                </div>
+            {/* Bottom actions */}
+            <div className="flex shrink-0 items-center gap-3 border-t border-border bg-card p-4 pb-safe shadow-lg">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-muted px-3 text-sm font-bold text-foreground transition-colors hover:bg-muted/70 active:scale-95"
+                >
+                    Order More Dishes
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => {
+                        onClose();
+                        onOpenCheckout();
+                    }}
+                    className="flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-brand px-3 text-sm font-bold text-brand-foreground shadow transition-transform active:scale-95"
+                >
+                    <Receipt aria-hidden="true" className="size-4" />
+                    <span>Pay Bill</span>
+                    <span className="font-mono tabular-nums">₹{grandTotal}</span>
+                </button>
+            </div>
         </BottomSheet>
     );
 }
