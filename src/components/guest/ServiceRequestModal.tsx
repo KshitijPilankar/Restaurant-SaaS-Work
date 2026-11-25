@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react';
 import { Droplet, Utensils, Bell, Receipt, Check, X, AlertCircle } from 'lucide-react';
 import { RequestType, RestaurantTable } from '@/types/database';
 import { createServiceRequest } from '@/app/r/[slug]/actions';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface ServiceRequestModalProps {
     restaurantId: string;
@@ -32,8 +33,6 @@ export function ServiceRequestModal({
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 
-    if (!isOpen) return null;
-
     const handleSendRequest = (type: RequestType) => {
         setSelectedType(type);
         setError(null);
@@ -54,11 +53,14 @@ export function ServiceRequestModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-            <div className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-3xl p-6 shadow-2xl space-y-4 animate-slideUp relative border-t sm:border border-border">
-                {/* Tactile Grab Handle */}
-                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
-
+        <BottomSheet
+            open={isOpen}
+            onClose={onClose}
+            label="Request service at your table"
+            placement="adaptive"
+            className="max-w-md"
+            contentClassName="px-6 pb-6 pt-1 sm:pt-6 space-y-4"
+        >
                 <button
                     onClick={onClose}
                     className="absolute top-5 right-5 p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer"
@@ -126,7 +128,6 @@ export function ServiceRequestModal({
                         <span>{error}</span>
                     </div>
                 )}
-            </div>
-        </div>
+        </BottomSheet>
     );
 }

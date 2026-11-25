@@ -4,6 +4,7 @@ import React, { useTransition } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, AlertCircle, Utensils } from 'lucide-react';
 import { CartItem, Restaurant, RestaurantTable, MenuItem } from '@/types/database';
 import { updateCartItemQuantity, placeSharedOrder } from '@/app/r/[slug]/actions';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface SharedCartDrawerProps {
     restaurant: Restaurant;
@@ -33,8 +34,6 @@ export function SharedCartDrawer({
     const [isUpdating, startUpdateTransition] = useTransition();
     const [isPlacing, startPlaceTransition] = useTransition();
     const [error, setError] = React.useState<string | null>(null);
-
-    if (!isOpen) return null;
 
     // Subtotal & Tax Calculation
     const subtotal = cartItems.reduce(
@@ -77,11 +76,7 @@ export function SharedCartDrawer({
         .slice(0, 2);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0 animate-fadeIn">
-            <div className="w-full max-w-md bg-card rounded-t-[28px] max-h-[92vh] flex flex-col shadow-2xl animate-slideUp relative overflow-hidden border-t border-border">
-                {/* Tactile Grab Handle */}
-                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 mb-1 shrink-0" />
-
+        <BottomSheet open={isOpen} onClose={onClose} label="Shared table cart" className="max-w-md max-h-[92vh]">
                 {/* Header */}
                 <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2.5">
@@ -280,7 +275,6 @@ export function SharedCartDrawer({
                         </p>
                     </div>
                 )}
-            </div>
-        </div>
+        </BottomSheet>
     );
 }

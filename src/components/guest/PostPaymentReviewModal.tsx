@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react';
 import { Star, Sparkles, ExternalLink, MessageSquare, Check, X, Heart } from 'lucide-react';
 import { Restaurant } from '@/types/database';
 import { submitGuestReview } from '@/app/r/[slug]/checkout-actions';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface PostPaymentReviewModalProps {
     restaurant: Restaurant;
@@ -24,8 +25,6 @@ export function PostPaymentReviewModal({
     const [comment, setComment] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isPending, startTransition] = useTransition();
-
-    if (!isOpen) return null;
 
     const isHighRating = rating >= 4;
 
@@ -72,11 +71,16 @@ export function PostPaymentReviewModal({
     };
 
     return (
-        <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-            <div className="w-full max-w-sm bg-card rounded-t-[28px] sm:rounded-3xl p-6 shadow-2xl space-y-5 animate-slideUp relative text-center border-t sm:border border-border">
-                {/* Tactile Grab Handle */}
-                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
-
+        <BottomSheet
+            open={isOpen}
+            onClose={onClose}
+            label="Rate your visit"
+            placement="adaptive"
+            className="max-w-sm"
+            contentClassName="px-6 pb-6 pt-1 sm:pt-6 space-y-5 text-center"
+            zIndexClassName="z-60"
+            backdropClassName="bg-black/70 backdrop-blur-sm"
+        >
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
@@ -199,7 +203,6 @@ export function PostPaymentReviewModal({
                         )}
                     </>
                 )}
-            </div>
-        </div>
+        </BottomSheet>
     );
 }

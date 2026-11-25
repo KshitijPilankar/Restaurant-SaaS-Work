@@ -20,6 +20,7 @@ import {
 import { Restaurant, RestaurantTable, Order, OrderItem, PaymentMethod } from '@/types/database';
 import { recordTablePayment } from '@/app/r/[slug]/checkout-actions';
 import { PostPaymentReviewModal } from '@/components/guest/PostPaymentReviewModal';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface OrderWithItems extends Order {
     order_items?: OrderItem[];
@@ -204,14 +205,14 @@ export function BillCheckoutDrawer({
         });
     };
 
-    if (!isOpen) return null;
-
     return (
-        <>
-            <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm p-0 animate-fadeIn">
-                <div className="w-full max-w-md bg-card rounded-t-[28px] max-h-[94vh] flex flex-col shadow-2xl animate-slideUp relative overflow-hidden border-t border-border">
-                    {/* Tactile Grab Handle */}
-                    <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 mb-1 shrink-0" />
+        <BottomSheet
+            open={isOpen}
+            onClose={onClose}
+            label="Checkout and bill"
+            className="max-w-md max-h-[94vh]"
+            backdropClassName="bg-black/70 backdrop-blur-sm"
+        >
 
                     {/* Header */}
                     <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
@@ -534,10 +535,8 @@ export function BillCheckoutDrawer({
                             </button>
                         </div>
                     )}
-                </div>
-            </div>
 
-            {/* Post-Payment Review Modal */}
+            {/* Post-Payment Review Modal (nested inside the bill sheet so focus and dismissal stay scoped) */}
             <PostPaymentReviewModal
                 restaurant={restaurant}
                 sessionId={sessionId}
@@ -548,6 +547,6 @@ export function BillCheckoutDrawer({
                     onClose();
                 }}
             />
-        </>
+        </BottomSheet>
     );
 }

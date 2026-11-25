@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Wifi, Bell, Users, Copy, Check, X } from 'lucide-react';
 import { Restaurant, RestaurantTable, TableGuest } from '@/types/database';
 import { ServiceRequestModal } from '@/components/guest/ServiceRequestModal';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface GuestHeaderProps {
     restaurant: Restaurant;
@@ -120,10 +121,14 @@ export function GuestHeader({
             />
 
             {/* Wi-Fi Popover Modal */}
-            {showWifi && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-                    <div className="bg-card rounded-t-[28px] sm:rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-slideUp relative text-center border-t sm:border border-border">
-                        <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
+            <BottomSheet
+                open={showWifi}
+                onClose={() => setShowWifi(false)}
+                label="Guest Wi-Fi"
+                placement="adaptive"
+                className="max-w-sm"
+                contentClassName="px-6 pb-6 pt-1 sm:pt-6 space-y-4 text-center"
+            >
                         <button
                             onClick={() => setShowWifi(false)}
                             className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
@@ -170,15 +175,17 @@ export function GuestHeader({
                                 )}
                             </button>
                         )}
-                    </div>
-                </div>
-            )}
+            </BottomSheet>
 
             {/* Table Diners Modal */}
-            {showGuests && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-                    <div className="w-full max-w-sm bg-card rounded-t-[28px] sm:rounded-3xl p-6 shadow-2xl space-y-4 animate-slideUp relative border-t sm:border border-border">
-                        <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
+            <BottomSheet
+                open={showGuests}
+                onClose={() => setShowGuests(false)}
+                label="Guests seated at your table"
+                placement="adaptive"
+                className="max-w-sm"
+                contentClassName="px-6 pb-6 pt-1 sm:pt-6 space-y-4"
+            >
                         <button
                             onClick={() => setShowGuests(false)}
                             className="absolute top-4 right-4 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition cursor-pointer"
@@ -223,9 +230,7 @@ export function GuestHeader({
                                 );
                             })}
                         </div>
-                    </div>
-                </div>
-            )}
+            </BottomSheet>
         </>
     );
 }

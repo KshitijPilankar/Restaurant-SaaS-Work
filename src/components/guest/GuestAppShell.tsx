@@ -57,6 +57,7 @@ export function GuestAppShell({
 
     // Drawers / Modals
     const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
+    const [isDishOpen, setIsDishOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isTrackerOpen, setIsTrackerOpen] = useState(false);
     const [isBillOpen, setIsBillOpen] = useState(false);
@@ -240,6 +241,7 @@ export function GuestAppShell({
                                 setIsJoinModalOpen(true);
                             } else {
                                 setSelectedDish(dish);
+                                setIsDishOpen(true);
                             }
                         }}
                     />
@@ -317,8 +319,8 @@ export function GuestAppShell({
                     sessionId={session?.id || ''}
                     guestId={currentGuestId || ''}
                     guestName={currentGuestName || ''}
-                    isOpen={!!selectedDish}
-                    onClose={() => setSelectedDish(null)}
+                    isOpen={isDishOpen}
+                    onClose={() => setIsDishOpen(false)}
                 />
 
                 {/* Shared Cart Drawer */}

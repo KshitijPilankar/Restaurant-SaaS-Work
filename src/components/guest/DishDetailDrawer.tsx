@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react';
 import { X, Plus, Minus, Flame, AlertCircle } from 'lucide-react';
 import { MenuItem, DishVariant } from '@/types/database';
 import { addToSharedCart } from '@/app/r/[slug]/actions';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface DishDetailDrawerProps {
     dish: MenuItem | null;
@@ -32,18 +33,19 @@ export function DishDetailDrawer({
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
 
-    // Reset when dish opens
+    // Reset each time the drawer opens. The parent keeps `dish` after closing so the
+    // sheet can finish its exit animation with its content intact.
     React.useEffect(() => {
-        if (dish) {
+        if (dish && isOpen) {
             const defaultVar = (dish.variants && dish.variants.length > 0) ? dish.variants[0] : null;
             setSelectedVariant(defaultVar);
             setQuantity(1);
             setNotes('');
             setError(null);
         }
-    }, [dish]);
+    }, [dish, isOpen]);
 
-    if (!isOpen || !dish) return null;
+    if (!dish) return null;
 
     const basePrice = Number(dish.base_price) || 0;
     const delta = selectedVariant ? Number(selectedVariant.price_delta) || 0 : 0;
@@ -76,11 +78,14 @@ export function DishDetailDrawer({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0 animate-fadeIn">
-            <div className="w-full max-w-md bg-card rounded-t-[28px] max-h-[92vh] flex flex-col shadow-2xl animate-slideUp relative overflow-hidden border-t border-border">
-                {/* Tactile Grab Handle */}
-                <div className="w-12 h-1.5 bg-white/70 rounded-full mx-auto mt-2.5 mb-1 absolute top-0 left-1/2 -translate-x-1/2 z-20 shrink-0 pointer-events-none drop-shadow" />
-
+        <BottomSheet
+            open={isOpen}
+            onClose={onClose}
+            label={`Customize ${dish.name}`}
+            handle="overlay"
+            handleTone="light"
+            className="max-w-md max-h-[92vh]"
+        >
                 {/* Close Button Floating */}
                 <button
                     onClick={onClose}
@@ -257,7 +262,6 @@ export function DishDetailDrawer({
                         <span className="font-mono">₹{totalPrice}</span>
                     </button>
                 </div>
-            </div>
-        </div>
+        </BottomSheet>
     );
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Clock, ChefHat, CheckCircle2, Utensils, ArrowLeft, Receipt, Sparkles } from 'lucide-react';
 import { Order, OrderItem, Restaurant, RestaurantTable, OrderStatus } from '@/types/database';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface OrderWithItems extends Order {
     order_items?: OrderItem[];
@@ -32,8 +33,6 @@ export function LiveOrderTracker({
     onClose,
     onOpenCheckout,
 }: LiveOrderTrackerProps) {
-    if (!isOpen) return null;
-
     // Sort newest first
     const sortedOrders = [...orders].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -64,11 +63,7 @@ export function LiveOrderTracker({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0 animate-fadeIn">
-            <div className="w-full max-w-md bg-card rounded-t-[28px] max-h-[92vh] flex flex-col shadow-2xl animate-slideUp relative overflow-hidden border-t border-border">
-                {/* Tactile Grab Handle */}
-                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 mb-1 shrink-0" />
-
+        <BottomSheet open={isOpen} onClose={onClose} label="Live order status" className="max-w-md max-h-[92vh]">
                 {/* Header */}
                 <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
                     <button
@@ -251,7 +246,6 @@ export function LiveOrderTracker({
                         <span>Pay Bill (₹{grandTotal})</span>
                     </button>
                 </div>
-            </div>
-        </div>
+        </BottomSheet>
     );
 }

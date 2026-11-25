@@ -4,6 +4,10 @@ import React, { useState, useTransition } from 'react';
 import { Utensils, Users, Sparkles, ArrowRight } from 'lucide-react';
 import { Restaurant, RestaurantTable, TableGuest } from '@/types/database';
 import { joinOrCreateTableSession } from '@/app/r/[slug]/actions';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
+
+// Joining is a required step, so the sheet is never dismissed from the outside.
+const noop = () => {};
 
 interface TableJoinModalProps {
     restaurant: Restaurant;
@@ -23,8 +27,6 @@ export function TableJoinModal({
     const [name, setName] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
-
-    if (!isOpen) return null;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,11 +49,15 @@ export function TableJoinModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-            <div className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 animate-slideUp border-t sm:border border-border">
-                {/* Tactile Grab Handle */}
-                <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
-
+        <BottomSheet
+            open={isOpen}
+            onClose={noop}
+            dismissible={false}
+            label="Join this table"
+            placement="adaptive"
+            className="max-w-md"
+            contentClassName="p-6 sm:p-7 space-y-5"
+        >
                 {/* Brand / Table Header */}
                 <div className="text-center space-y-2">
                     <div
@@ -155,7 +161,6 @@ export function TableJoinModal({
                         )}
                     </button>
                 </form>
-            </div>
-        </div>
+        </BottomSheet>
     );
 }
