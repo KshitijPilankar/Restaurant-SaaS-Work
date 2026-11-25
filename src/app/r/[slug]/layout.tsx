@@ -1,9 +1,17 @@
 import React from 'react';
-import { notFound } from 'next/navigation';
+import { Fraunces } from 'next/font/google';
 import { AlertCircle, Clock, UtensilsCrossed } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { Restaurant } from '@/types/database';
 import { getBrandCssVars } from '@/lib/brand';
+
+// Serif display face for guest headings (restaurant name, categories, dish names).
+// Loaded here, not in the root layout, so staff, admin and landing pages never download it.
+const fraunces = Fraunces({
+    subsets: ['latin'],
+    variable: '--font-fraunces',
+    display: 'swap',
+});
 
 interface TenantLayoutProps {
     children: React.ReactNode;
@@ -88,7 +96,7 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
 
     return (
         <div
-            className="min-h-screen bg-background text-foreground font-sans selection:bg-orange-500 selection:text-white"
+            className={`${fraunces.variable} min-h-screen bg-background text-foreground font-sans selection:bg-brand selection:text-brand-foreground`}
             style={brandVars as React.CSSProperties}
         >
             {children}

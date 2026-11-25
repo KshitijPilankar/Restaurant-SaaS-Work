@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, Flame, Plus, Sparkles, Check, Leaf } from 'lucide-react';
-import { MenuCategory, MenuItem, CartItem } from '@/types/database';
+import { Search, Flame, Plus, Sparkles, Check, Leaf, Star, X } from 'lucide-react';
+import { MenuCategory, MenuItem, CartItem, SpiceLevel } from '@/types/database';
 
 interface MenuExplorerProps {
     categories: MenuCategory[];
@@ -13,110 +13,136 @@ interface MenuExplorerProps {
     onSelectDish: (dish: MenuItem) => void;
 }
 
+const SPICE_LABEL: Record<Exclude<SpiceLevel, 'NONE'>, string> = {
+    MILD: 'Mild',
+    MEDIUM: 'Medium',
+    SPICY: 'Spicy',
+};
+
+/** Standard Indian food-labelling mark: square outline with a dot (green = veg, red = non-veg). */
+function DietMark({ isVeg }: { isVeg: boolean }) {
+    return (
+        <span
+            role="img"
+            aria-label={isVeg ? 'Vegetarian' : 'Non-vegetarian'}
+            className={`flex size-4 shrink-0 items-center justify-center rounded-[3px] border-2 bg-card ${
+                isVeg ? 'border-emerald-700' : 'border-red-700'
+            }`}
+        >
+            <span className={`size-2 rounded-full ${isVeg ? 'bg-emerald-700' : 'bg-red-700'}`} />
+        </span>
+    );
+}
+
 export function MenuExplorer({
     categories,
     menuItems,
     cartItems,
-    currentGuestId,
-    currentGuestName,
     onSelectDish,
 }: MenuExplorerProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isVegOnly, setIsVegOnly] = useState(false);
     const [activeCategoryId, setActiveCategoryId] = useState<string>('ALL');
 
-    // Build cart quantity map per menu_item_id
+    // Cart quantity per menu item, to show "2 added" on a dish card
     const cartCountMap = useMemo(() => {
         const map = new Map<string, number>();
         for (const item of cartItems) {
-            const current = map.get(item.menu_item_id) || 0;
-            map.set(item.menu_item_id, current + item.quantity);
+            map.set(item.menu_item_id, (map.get(item.menu_item_id) || 0) + item.quantity);
         }
         return map;
     }, [cartItems]);
 
-    // Filter categories & items
+    // Categories with their items after the search and veg filters
     const filteredCategories = useMemo(() => {
-        return categories.map((cat) => {
-            const items = menuItems.filter((item) => {
-                if (item.category_id !== cat.id) return false;
-                if (isVegOnly && !item.is_veg) return false;
-                if (searchQuery.trim()) {
-                    const q = searchQuery.toLowerCase();
-                    const matchesName = item.name.toLowerCase().includes(q);
-                    const matchesDesc = item.description?.toLowerCase().includes(q);
-                    return matchesName || matchesDesc;
-                }
-                return true;
-            });
-
-            return {
+        const q = searchQuery.trim().toLowerCase();
+        return categories
+            .map((cat) => ({
                 ...cat,
-                items,
-            };
-        }).filter((cat) => cat.items.length > 0);
+                items: menuItems.filter((item) => {
+                    if (item.category_id !== cat.id) return false;
+                    if (isVegOnly && !item.is_veg) return false;
+                    if (q) {
+                        return (
+                            item.name.toLowerCase().includes(q) ||
+                            !!item.description?.toLowerCase().includes(q)
+                        );
+                    }
+                    return true;
+                }),
+            }))
+            .filter((cat) => cat.items.length > 0);
     }, [categories, menuItems, isVegOnly, searchQuery]);
 
-    // Active category items if filtered
     const displayedCategories = useMemo(() => {
         if (activeCategoryId === 'ALL') return filteredCategories;
         return filteredCategories.filter((c) => c.id === activeCategoryId);
     }, [filteredCategories, activeCategoryId]);
 
+    const pillBase =
+        'inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors active:scale-95';
+    const pillOn = 'bg-brand text-brand-foreground shadow-xs';
+    const pillOff = 'border border-border bg-card text-foreground hover:bg-muted';
+
     return (
         <div className="space-y-4">
-            {/* Search & Pure Veg Filter Row */}
-            <div className="px-4 space-y-2.5">
-                <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                        <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search appetizing dishes, drinks..."
-                            className="w-full pl-10 pr-12 py-2.5 bg-card border border-border rounded-2xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/20 shadow-2xs font-medium transition"
-                            style={{ outlineColor: 'var(--brand-primary)' }}
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground hover:text-foreground"
-                            >
-                                Clear
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Veg Only Toggle Button */}
-                    <button
-                        type="button"
-                        onClick={() => setIsVegOnly(!isVegOnly)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs font-bold border transition cursor-pointer shrink-0 shadow-2xs active:scale-95 ${
-                            isVegOnly
-                                ? 'bg-emerald-600 border-emerald-600 text-white shadow-emerald-600/20'
-                                : 'bg-card border-border text-foreground hover:bg-muted'
-                        }`}
-                    >
-                        <Leaf className="w-3.5 h-3.5" />
-                        <span>Pure Veg</span>
-                    </button>
+            {/* Search and Pure Veg filter */}
+            <div className="flex items-center gap-2 px-4">
+                <div className="relative flex-1">
+                    <Search
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+                    />
+                    <input
+                        type="text"
+                        name="menu-search"
+                        inputMode="search"
+                        enterKeyHint="search"
+                        autoComplete="off"
+                        spellCheck={false}
+                        aria-label="Search the menu"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search the menu…"
+                        className="h-11 w-full rounded-2xl border border-border bg-card pr-11 pl-10 text-base text-foreground shadow-2xs outline-none transition placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/30"
+                    />
+                    {searchQuery && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            aria-label="Clear search"
+                            className="absolute top-0 right-0 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                        >
+                            <X aria-hidden="true" className="size-4" />
+                        </button>
+                    )}
                 </div>
+
+                <button
+                    type="button"
+                    onClick={() => setIsVegOnly(!isVegOnly)}
+                    aria-pressed={isVegOnly}
+                    className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-2xl border px-3.5 text-sm font-semibold shadow-2xs transition-colors active:scale-95 ${
+                        isVegOnly
+                            ? 'border-emerald-700 bg-emerald-700 text-white'
+                            : 'border-border bg-card text-foreground hover:bg-muted'
+                    }`}
+                >
+                    <Leaf aria-hidden="true" className="size-4" />
+                    <span>Pure Veg</span>
+                </button>
             </div>
 
-            {/* Sticky Horizontal Category Scroll Bar */}
-            <div className="sticky top-[57px] z-20 bg-background/95 backdrop-blur-md border-y border-border/80 py-2.5 px-4 overflow-x-auto scrollbar-none flex items-center gap-2">
+            {/* Sticky category bar */}
+            <nav
+                aria-label="Menu categories"
+                className="scrollbar-none sticky top-[var(--guest-header-h)] z-20 flex items-center gap-2 overflow-x-auto border-y border-border/80 bg-background/95 px-4 py-1.5 backdrop-blur-md"
+            >
                 <button
                     type="button"
                     onClick={() => setActiveCategoryId('ALL')}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer active:scale-95 ${
-                        activeCategoryId === 'ALL'
-                            ? 'text-white shadow-xs'
-                            : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
-                    style={{
-                        backgroundColor: activeCategoryId === 'ALL' ? 'var(--brand-primary)' : undefined,
-                    }}
+                    aria-pressed={activeCategoryId === 'ALL'}
+                    className={`${pillBase} ${activeCategoryId === 'ALL' ? pillOn : pillOff}`}
                 >
                     All Items
                 </button>
@@ -127,34 +153,33 @@ export function MenuExplorer({
                             key={cat.id}
                             type="button"
                             onClick={() => setActiveCategoryId(cat.id)}
-                            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer active:scale-95 ${
-                                isActive
-                                    ? 'text-white shadow-xs'
-                                    : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted'
-                            }`}
-                            style={{
-                                backgroundColor: isActive ? 'var(--brand-primary)' : undefined,
-                            }}
+                            aria-pressed={isActive}
+                            className={`${pillBase} ${isActive ? pillOn : pillOff}`}
                         >
-                            {cat.name} ({cat.items.length})
+                            {cat.name}
                         </button>
                     );
                 })}
-            </div>
+            </nav>
 
-            {/* Menu Items List Grouped by Category */}
-            <div className="px-4 space-y-6">
+            {/* Dishes grouped by category */}
+            <div className="space-y-8 px-4">
                 {displayedCategories.length === 0 ? (
-                    <div className="py-16 text-center text-muted-foreground space-y-2 bg-card rounded-3xl border border-dashed border-border p-8">
-                        <Sparkles className="w-8 h-8 mx-auto text-muted-foreground/60" />
-                        <p className="text-sm font-semibold text-foreground">No dishes match your filter</p>
-                        <p className="text-xs text-muted-foreground">Try clearing search keywords or the Pure Veg filter.</p>
+                    <div className="space-y-2 rounded-3xl border border-dashed border-border bg-card p-8 py-16 text-center">
+                        <Sparkles aria-hidden="true" className="mx-auto size-8 text-muted-foreground/60" />
+                        <p className="text-sm font-semibold text-foreground">No dishes match your filters</p>
+                        <p className="text-xs text-muted-foreground">
+                            Clear the search or turn off Pure Veg to see the full menu.
+                        </p>
                     </div>
                 ) : (
                     displayedCategories.map((cat) => (
-                        <section key={cat.id} className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-base font-extrabold text-foreground tracking-tight">
+                        <section key={cat.id} aria-labelledby={`cat-${cat.id}`} className="space-y-3">
+                            <div className="flex items-baseline justify-between gap-3">
+                                <h2
+                                    id={`cat-${cat.id}`}
+                                    className="font-display text-xl font-semibold tracking-tight text-balance text-foreground"
+                                >
                                     {cat.name}
                                 </h2>
                                 <span className="text-xs font-medium text-muted-foreground">
@@ -162,114 +187,110 @@ export function MenuExplorer({
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-3">
+                            <ul className="grid grid-cols-1 gap-3">
                                 {cat.items.map((dish) => {
                                     const totalInCart = cartCountMap.get(dish.id) || 0;
-                                    const hasVariants = dish.variants && dish.variants.length > 0;
+                                    const spice = dish.spice && dish.spice !== 'NONE' ? dish.spice : null;
 
                                     return (
-                                        <div
+                                        <li
                                             key={dish.id}
-                                            onClick={() => onSelectDish(dish)}
-                                            className="bg-card rounded-2xl p-3.5 sm:p-4 border border-border/80 hover:border-foreground/20 transition-all shadow-xs flex items-start gap-3.5 cursor-pointer active:scale-[0.99]"
+                                            className="relative flex items-start gap-4 rounded-2xl border border-border/80 bg-card p-4 shadow-xs transition-colors hover:border-foreground/20"
                                         >
-                                            {/* Left Details */}
-                                            <div className="flex-1 min-w-0 flex flex-col justify-between h-full space-y-1.5">
-                                                <div>
-                                                    <div className="flex items-center gap-1.5 mb-1">
-                                                        {/* Veg/Non-Veg Dot */}
-                                                        <span
-                                                            className={`w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center shrink-0 bg-card ${
-                                                                dish.is_veg ? 'border-emerald-600' : 'border-rose-600'
-                                                            }`}
-                                                        >
-                                                            <span
-                                                                className={`w-1.5 h-1.5 rounded-full ${
-                                                                    dish.is_veg ? 'bg-emerald-600' : 'bg-rose-600'
-                                                                }`}
-                                                            />
+                                            {/* Details */}
+                                            <div className="min-w-0 flex-1 space-y-1.5">
+                                                <div className="flex items-center gap-2 text-xs">
+                                                    <DietMark isVeg={dish.is_veg} />
+                                                    {dish.is_bestseller && (
+                                                        <span className="inline-flex items-center gap-1 font-semibold text-amber-800">
+                                                            <Star aria-hidden="true" className="size-3 fill-current" />
+                                                            Bestseller
                                                         </span>
+                                                    )}
+                                                    {spice && (
+                                                        <span className="inline-flex items-center gap-1 font-medium text-red-700">
+                                                            <Flame aria-hidden="true" className="size-3.5" />
+                                                            {SPICE_LABEL[spice]}
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                                        {dish.is_bestseller && (
-                                                            <span className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-700/60 px-1.5 py-0.2 rounded-md uppercase tracking-wider">
-                                                                Bestseller
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    <h3 className="text-sm font-bold text-foreground leading-snug">
+                                                <h3 className="font-display text-[17px] leading-snug font-semibold text-balance text-foreground">
+                                                    {/* The name button stretches over the whole card, so the card is one big tap target */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onSelectDish(dish)}
+                                                        className="text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                                                    >
                                                         {dish.name}
-                                                    </h3>
+                                                    </button>
+                                                </h3>
 
-                                                    <div className="text-sm font-extrabold text-foreground font-mono mt-0.5">
-                                                        ₹{dish.base_price}
-                                                    </div>
+                                                <p className="font-mono text-[15px] font-bold text-foreground tabular-nums">
+                                                    ₹{dish.base_price}
+                                                </p>
 
-                                                    {dish.description && (
-                                                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
-                                                            {dish.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                {/* Badges: Spice & Variants */}
-                                                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                                                    {dish.spice && dish.spice !== 'NONE' && (
-                                                        <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border border-orange-200/60 dark:border-orange-800/60">
-                                                            <Flame className="w-2.5 h-2.5 text-orange-600 dark:text-orange-400" />
-                                                            <span className="capitalize">{dish.spice.toLowerCase()}</span>
-                                                        </span>
-                                                    )}
-                                                    {hasVariants && (
-                                                        <span className="text-[10px] text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded-md border border-border/60">
-                                                            Customisable
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                {dish.description && (
+                                                    <p className="line-clamp-2 text-[13px] leading-snug text-muted-foreground">
+                                                        {dish.description}
+                                                    </p>
+                                                )}
                                             </div>
 
-                                            {/* Right: Dish Photo & Add CTA */}
-                                            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-muted shrink-0 overflow-hidden shadow-2xs border border-border/60">
-                                                {dish.image_url ? (
-                                                    <img
-                                                        src={dish.image_url}
-                                                        alt={dish.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/50 font-bold text-xs">
-                                                        DineOS
-                                                    </div>
-                                                )}
+                                            {/* Photo with the Add control overlapping its lower edge */}
+                                            <div className="flex w-24 shrink-0 flex-col items-center">
+                                                <div className="size-24 overflow-hidden rounded-2xl border border-border/60 bg-muted">
+                                                    {dish.image_url ? (
+                                                        <img
+                                                            src={dish.image_url}
+                                                            alt=""
+                                                            width={96}
+                                                            height={96}
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            className="size-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div
+                                                            aria-hidden="true"
+                                                            className="flex size-full items-center justify-center bg-brand-subtle font-display text-3xl font-semibold text-muted-foreground/70"
+                                                        >
+                                                            {dish.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
 
-                                                {/* Floating ADD Pill */}
                                                 <button
                                                     type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onSelectDish(dish);
-                                                    }}
-                                                    className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-card/95 backdrop-blur-xs shadow-md border border-border hover:border-foreground/30 transition active:scale-90 flex items-center gap-1 cursor-pointer"
-                                                    style={{ color: totalInCart > 0 ? undefined : 'var(--brand-primary)' }}
-                                                    aria-label={`Add ${dish.name} to table cart`}
+                                                    onClick={() => onSelectDish(dish)}
+                                                    aria-label={
+                                                        totalInCart > 0
+                                                            ? `${dish.name}: ${totalInCart} in table cart. Add more`
+                                                            : `Add ${dish.name} to table cart`
+                                                    }
+                                                    className={`relative z-10 -mt-5 inline-flex h-11 min-w-24 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-bold shadow-md ring-4 ring-card transition-transform active:scale-95 ${
+                                                        totalInCart > 0
+                                                            ? 'bg-brand text-brand-foreground'
+                                                            : 'border-2 border-brand bg-card text-foreground'
+                                                    }`}
                                                 >
                                                     {totalInCart > 0 ? (
                                                         <>
-                                                            <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                                                            <span className="text-emerald-600 dark:text-emerald-400 font-mono">{totalInCart} added</span>
+                                                            <Check aria-hidden="true" className="size-4" />
+                                                            <span className="font-mono tabular-nums">{totalInCart}</span>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <span>ADD</span>
-                                                            <Plus className="w-3 h-3" />
+                                                            <span>Add</span>
+                                                            <Plus aria-hidden="true" className="size-4" />
                                                         </>
                                                     )}
                                                 </button>
                                             </div>
-                                        </div>
+                                        </li>
                                     );
                                 })}
-                            </div>
+                            </ul>
                         </section>
                     ))
                 )}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
-import { X, Plus, Minus, Flame, AlertCircle } from 'lucide-react';
+import { X, Plus, Minus, Flame, AlertCircle, Check, Clock, Star } from 'lucide-react';
 import { MenuItem, DishVariant } from '@/types/database';
 import { addToSharedCart } from '@/app/r/[slug]/actions';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
@@ -51,6 +51,8 @@ export function DishDetailDrawer({
     const delta = selectedVariant ? Number(selectedVariant.price_delta) || 0 : 0;
     const unitPrice = basePrice + delta;
     const totalPrice = unitPrice * quantity;
+    const hasSpice = dish.spice && dish.spice !== 'NONE';
+    const hasAllergens = !!dish.allergens && dish.allergens.length > 0;
 
     const handleAddToCart = () => {
         setError(null);
@@ -86,182 +88,197 @@ export function DishDetailDrawer({
             handleTone="light"
             className="max-w-md max-h-[92vh]"
         >
-                {/* Close Button Floating */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-3.5 right-4 z-20 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-md hover:bg-black/70 transition cursor-pointer"
-                    aria-label="Close dish customization"
+            {/* Close (44px target, floats over the photo) */}
+            <button
+                type="button"
+                onClick={onClose}
+                className="absolute top-3 right-3 z-20 flex size-11 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/70 active:scale-95"
+                aria-label="Close dish customization"
+            >
+                <X aria-hidden="true" className="size-5" />
+            </button>
+
+            {/* Hero photo */}
+            <div className="relative h-56 w-full shrink-0 bg-muted">
+                {dish.image_url ? (
+                    <img
+                        src={dish.image_url}
+                        alt=""
+                        width={448}
+                        height={224}
+                        decoding="async"
+                        className="size-full object-cover"
+                    />
+                ) : (
+                    <div
+                        aria-hidden="true"
+                        className="flex size-full items-center justify-center bg-brand-subtle font-display text-6xl font-semibold text-muted-foreground/60"
+                    >
+                        {dish.name.charAt(0).toUpperCase()}
+                    </div>
+                )}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
+
+                <span
+                    role="img"
+                    aria-label={dish.is_veg ? 'Vegetarian' : 'Non-vegetarian'}
+                    className={`absolute bottom-3 left-4 flex size-5 items-center justify-center rounded-[3px] border-2 bg-card shadow-xs ${
+                        dish.is_veg ? 'border-emerald-700' : 'border-red-700'
+                    }`}
                 >
-                    <X className="w-4 h-4" />
-                </button>
+                    <span className={`size-2.5 rounded-full ${dish.is_veg ? 'bg-emerald-700' : 'bg-red-700'}`} />
+                </span>
+            </div>
 
-                {/* Dish Header Image */}
-                <div className="relative w-full h-52 bg-muted shrink-0">
-                    {dish.image_url ? (
-                        <img
-                            src={dish.image_url}
-                            alt={dish.name}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/50 font-bold text-2xl">
+            {/* Details */}
+            <div className="flex-1 space-y-5 overflow-y-auto p-5">
+                <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                        <h2 className="font-display text-2xl leading-tight font-semibold tracking-tight text-balance text-foreground">
                             {dish.name}
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-
-                    {/* Veg/Non-Veg Badge */}
-                    <div className="absolute bottom-3 left-4 flex items-center gap-2">
-                        <span
-                            className={`w-4 h-4 rounded-xs border-2 flex items-center justify-center bg-card shadow-xs ${
-                                dish.is_veg ? 'border-emerald-600' : 'border-rose-600'
-                            }`}
-                        >
-                            <span
-                                className={`w-2 h-2 rounded-full ${
-                                    dish.is_veg ? 'bg-emerald-600' : 'bg-rose-600'
-                                }`}
-                            />
-                        </span>
-                        {dish.is_bestseller && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-amber-950 uppercase tracking-wider shadow-sm">
-                                Bestseller
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Content Area */}
-                <div className="p-5 flex-1 overflow-y-auto space-y-4">
-                    <div>
-                        <div className="flex items-start justify-between gap-2">
-                            <h3 className="text-lg font-bold text-foreground tracking-tight">{dish.name}</h3>
-                            <span className="text-lg font-extrabold text-foreground font-mono">
-                                ₹{unitPrice}
-                            </span>
-                        </div>
-                        {dish.description && (
-                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                                {dish.description}
-                            </p>
-                        )}
+                        </h2>
+                        <p className="pt-1 font-mono text-xl font-bold text-foreground tabular-nums">₹{unitPrice}</p>
                     </div>
 
-                    {/* Spice & Allergen Tags */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                        {dish.spice && dish.spice !== 'NONE' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border border-orange-200/60 dark:border-orange-800/60">
-                                <Flame className="w-3 h-3 text-orange-600 dark:text-orange-400" />
-                                <span className="capitalize">{dish.spice.toLowerCase()} Spice</span>
-                            </span>
-                        )}
-                        {dish.allergens && dish.allergens.length > 0 && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-muted text-muted-foreground border border-border/60">
-                                Allergens: {dish.allergens.join(', ')}
-                            </span>
-                        )}
-                        {dish.prep_time_mins && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-muted text-muted-foreground border border-border/60">
-                                ~{dish.prep_time_mins} mins
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Variants Options */}
-                    {dish.variants && dish.variants.length > 0 && (
-                        <div className="space-y-2 pt-2 border-t border-border/70">
-                            <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
-                                Select Portion / Variant *
-                            </label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {dish.variants.map((v) => {
-                                    const isSelected = selectedVariant?.name === v.name;
-                                    const varPrice = basePrice + Number(v.price_delta);
-
-                                    return (
-                                        <button
-                                            key={v.name}
-                                            type="button"
-                                            onClick={() => setSelectedVariant(v)}
-                                            className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between active:scale-[0.98] ${
-                                                isSelected
-                                                    ? 'border-2 ring-2 ring-orange-500/10 bg-muted/70 font-bold'
-                                                    : 'border-border hover:border-foreground/20 bg-card'
-                                            }`}
-                                            style={{
-                                                borderColor: isSelected ? 'var(--brand-primary)' : undefined,
-                                            }}
-                                        >
-                                            <span className="text-xs font-semibold text-foreground">{v.name}</span>
-                                            <span className="text-xs font-extrabold text-foreground font-mono mt-1">₹{varPrice}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                    {(dish.is_bestseller || hasSpice || dish.prep_time_mins) && (
+                        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground">
+                            {dish.is_bestseller && (
+                                <span className="inline-flex items-center gap-1 font-semibold text-amber-800">
+                                    <Star aria-hidden="true" className="size-3.5 fill-current" />
+                                    Bestseller
+                                </span>
+                            )}
+                            {hasSpice && (
+                                <span className="inline-flex items-center gap-1 text-red-700">
+                                    <Flame aria-hidden="true" className="size-3.5" />
+                                    <span className="capitalize">{dish.spice.toLowerCase()} spice</span>
+                                </span>
+                            )}
+                            {dish.prep_time_mins ? (
+                                <span className="inline-flex items-center gap-1">
+                                    <Clock aria-hidden="true" className="size-3.5" />
+                                    About {dish.prep_time_mins} min
+                                </span>
+                            ) : null}
+                        </p>
                     )}
 
-                    {/* Special Instructions Note */}
-                    <div className="space-y-1.5 pt-2 border-t border-border/70">
-                        <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
-                            Special Instructions (Optional)
-                        </label>
-                        <input
-                            type="text"
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder="e.g. Less spicy, dressing on the side..."
-                            maxLength={100}
-                            className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/20 transition"
-                        />
-                    </div>
+                    {dish.description && (
+                        <p className="text-sm leading-relaxed text-pretty text-muted-foreground">{dish.description}</p>
+                    )}
 
-                    {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{error}</span>
-                        </div>
+                    {hasAllergens && (
+                        <p className="text-xs text-muted-foreground">
+                            <span className="font-semibold text-foreground">Contains:</span>{' '}
+                            {dish.allergens.join(', ')}
+                        </p>
                     )}
                 </div>
 
-                {/* Bottom Sticky Action Bar */}
-                <div className="p-4 pb-safe bg-card border-t border-border flex items-center gap-3 shrink-0 shadow-lg">
-                    {/* Stepper */}
-                    <div className="flex items-center gap-1.5 bg-muted border border-border rounded-xl p-1 shadow-2xs">
-                        <button
-                            type="button"
-                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            disabled={quantity <= 1}
-                            className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground hover:bg-card transition disabled:opacity-30 cursor-pointer active:scale-90"
-                            aria-label="Decrease quantity"
-                        >
-                            <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="w-7 text-center text-sm font-extrabold text-foreground font-mono">
-                            {quantity}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => setQuantity(quantity + 1)}
-                            className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground hover:bg-card transition cursor-pointer active:scale-90"
-                            aria-label="Increase quantity"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
+                {/* Portion options */}
+                {dish.variants && dish.variants.length > 0 && (
+                    <div role="group" aria-labelledby="dish-portion-label" className="space-y-2 border-t border-border/70 pt-4">
+                        <p id="dish-portion-label" className="text-xs font-bold tracking-wider text-foreground uppercase">
+                            Choose a Portion
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                            {dish.variants.map((v) => {
+                                const isSelected = selectedVariant?.name === v.name;
+                                const varPrice = basePrice + Number(v.price_delta);
 
-                    {/* Submit CTA */}
+                                return (
+                                    <button
+                                        key={v.name}
+                                        type="button"
+                                        onClick={() => setSelectedVariant(v)}
+                                        aria-pressed={isSelected}
+                                        className={`flex min-h-14 items-center justify-between gap-2 rounded-xl border-2 px-3.5 py-2.5 text-left transition-colors active:scale-[0.98] ${
+                                            isSelected
+                                                ? 'border-brand bg-brand-subtle'
+                                                : 'border-border bg-card hover:border-foreground/25'
+                                        }`}
+                                    >
+                                        <span className="min-w-0">
+                                            <span className="block text-sm font-semibold text-foreground">{v.name}</span>
+                                            <span className="block font-mono text-xs font-bold text-muted-foreground tabular-nums">
+                                                ₹{varPrice}
+                                            </span>
+                                        </span>
+                                        {isSelected && <Check aria-hidden="true" className="size-4 shrink-0 text-foreground" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Kitchen note */}
+                <div className="space-y-1.5 border-t border-border/70 pt-4">
+                    <label htmlFor="dish-notes" className="block text-xs font-bold tracking-wider text-foreground uppercase">
+                        Note for the Kitchen (Optional)
+                    </label>
+                    <input
+                        id="dish-notes"
+                        name="notes"
+                        type="text"
+                        autoComplete="off"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="e.g. Less spicy, dressing on the side…"
+                        maxLength={100}
+                        className="h-11 w-full rounded-xl border border-border bg-muted/40 px-3.5 text-base text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/30"
+                    />
+                </div>
+
+                {error && (
+                    <div
+                        role="alert"
+                        className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-700"
+                    >
+                        <AlertCircle aria-hidden="true" className="size-4 shrink-0" />
+                        <span>{error}</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Sticky action bar */}
+            <div className="flex shrink-0 items-center gap-3 border-t border-border bg-card p-4 pb-safe shadow-lg">
+                <div className="flex items-center rounded-xl border border-border bg-muted p-1">
                     <button
                         type="button"
-                        onClick={handleAddToCart}
-                        disabled={isPending}
-                        className="flex-1 py-3.5 px-4 rounded-xl font-bold text-sm text-white shadow-md active:scale-[0.98] transition flex items-center justify-between cursor-pointer disabled:opacity-50"
-                        style={{ backgroundColor: 'var(--brand-primary)' }}
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        disabled={quantity <= 1}
+                        className="flex size-11 items-center justify-center rounded-lg text-foreground transition hover:bg-card active:scale-90 disabled:opacity-30"
+                        aria-label="Decrease quantity"
                     >
-                        <span>Add to Table Cart</span>
-                        <span className="font-mono">₹{totalPrice}</span>
+                        <Minus aria-hidden="true" className="size-4" />
+                    </button>
+                    <span
+                        aria-live="polite"
+                        className="w-8 text-center font-mono text-base font-extrabold text-foreground tabular-nums"
+                    >
+                        {quantity}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="flex size-11 items-center justify-center rounded-lg text-foreground transition hover:bg-card active:scale-90"
+                        aria-label="Increase quantity"
+                    >
+                        <Plus aria-hidden="true" className="size-4" />
                     </button>
                 </div>
+
+                <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={isPending}
+                    className="flex h-12 flex-1 items-center justify-between rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-60"
+                >
+                    <span>{isPending ? 'Adding…' : 'Add to Table Cart'}</span>
+                    <span className="font-mono tabular-nums">₹{totalPrice}</span>
+                </button>
+            </div>
         </BottomSheet>
     );
 }

@@ -35,78 +35,70 @@ export function GuestHeader({
 
     return (
         <>
-            <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border/80 px-4 py-2.5 flex items-center justify-between shadow-xs">
-                {/* Left: Brand & Table */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                    <div
-                        className="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 text-sm overflow-hidden ring-1 ring-black/5"
-                        style={{ backgroundColor: 'var(--brand-primary)' }}
-                    >
+            <header className="sticky top-0 z-30 flex h-[var(--guest-header-h)] items-center justify-between gap-2 border-b border-border/80 bg-card/95 px-4 backdrop-blur-md">
+                {/* Left: brand and table */}
+                <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand font-display text-lg font-semibold text-brand-foreground ring-1 ring-black/5">
                         {restaurant.logo_url ? (
                             <img
                                 src={restaurant.logo_url}
-                                alt={restaurant.name}
-                                className="w-full h-full object-cover"
+                                alt=""
+                                width={40}
+                                height={40}
+                                className="size-full object-cover"
                             />
                         ) : (
                             restaurant.name.charAt(0).toUpperCase()
                         )}
                     </div>
                     <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                            <h1 className="text-sm font-bold text-foreground truncate tracking-tight">
-                                {restaurant.name}
-                            </h1>
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 ring-2 ring-emerald-500/20" />
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium mt-0.5">
-                            <span className="bg-muted text-foreground font-semibold px-1.5 py-0.5 rounded-md font-mono border border-border/60">
-                                {table.table_code}
-                            </span>
+                        <h1 className="truncate font-display text-[17px] leading-tight font-semibold tracking-tight text-foreground">
+                            {restaurant.name}
+                        </h1>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                            <span className="font-mono font-semibold text-foreground">{table.table_code}</span>
                             {currentGuestName && (
-                                <span className="truncate">Hi, {currentGuestName}</span>
+                                <>
+                                    <span aria-hidden="true">·</span>
+                                    <span className="truncate">Hi, {currentGuestName}</span>
+                                </>
                             )}
-                        </div>
+                        </p>
                     </div>
                 </div>
 
-                {/* Right: Actions (Wi-Fi, Diners, Service) */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                    {/* Wi-Fi Pill (if configured) */}
+                {/* Right: Wi-Fi, diners, service. Every control is at least 44px. */}
+                <div className="flex shrink-0 items-center gap-1.5">
                     {restaurant.wifi_ssid && (
                         <button
                             type="button"
                             onClick={() => setShowWifi(true)}
-                            className="p-2 rounded-xl text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition cursor-pointer active:scale-95"
-                            title="Restaurant Wi-Fi"
+                            className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground active:scale-95"
                             aria-label="View restaurant Wi-Fi password"
                         >
-                            <Wifi className="w-4 h-4" />
+                            <Wifi aria-hidden="true" className="size-[18px]" />
                         </button>
                     )}
 
-                    {/* Tablemates Button */}
                     <button
                         type="button"
                         onClick={() => setShowGuests(true)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground transition cursor-pointer active:scale-95"
-                        title="Table Guests"
+                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl bg-muted px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70 active:scale-95"
                         aria-label="View seated table guests"
                     >
-                        <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span>{guests.length || 1}</span>
+                        <Users aria-hidden="true" className="size-[18px] text-muted-foreground" />
+                        <span className="font-mono tabular-nums">{guests.length || 1}</span>
                     </button>
 
-                    {/* Call Waiter Button */}
                     <button
                         type="button"
                         onClick={() => setShowService(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition shadow-xs cursor-pointer active:scale-95"
-                        style={{ backgroundColor: 'var(--brand-primary)' }}
+                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl bg-brand px-3 text-sm font-bold text-brand-foreground shadow-xs transition-transform active:scale-95 min-[400px]:px-4"
                         aria-label="Call waiter or request service"
                     >
-                        <Bell className="w-3.5 h-3.5" />
-                        <span>Service</span>
+                        <Bell aria-hidden="true" className="size-[18px]" />
+                        {/* Icon-only below 400px so the restaurant name keeps room on small phones */}
+                        <span className="hidden min-[400px]:inline">Service</span>
                     </button>
                 </div>
             </header>

@@ -163,7 +163,7 @@ test.describe('DineOS E2E Test Suite', () => {
 
         // 3. Verify Menu Explorer Loaded
         await expect(guestNameInput).toBeHidden({ timeout: 10000 });
-        await expect(page.getByPlaceholder('Search appetizing dishes, drinks...')).toBeVisible();
+        await expect(page.getByPlaceholder('Search the menu…')).toBeVisible();
 
         // Layout check on Menu Explorer
         await assertNoHorizontalOverflow(page);

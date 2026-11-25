@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingBag, Sparkles, ArrowRight, Utensils } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import {
     Restaurant,
     RestaurantTable,
@@ -218,7 +218,7 @@ export function GuestAppShell({
     return (
         <div className="min-h-screen bg-background md:bg-zinc-100/70 dark:md:bg-zinc-950 flex justify-center items-start md:py-8 md:px-4">
             {/* Desktop Elevated Mobile Phone Container (max-w-[440px]) */}
-            <div className="w-full max-w-[440px] min-h-screen md:min-h-[calc(100vh-4rem)] bg-background flex flex-col pb-32 relative md:rounded-[36px] md:border md:border-zinc-200/90 dark:md:border-zinc-800 md:shadow-2xl md:shadow-zinc-950/10 overflow-x-hidden border-x border-border/60 md:border-x-0 selection:bg-orange-500 selection:text-white">
+            <div className="w-full max-w-[440px] min-h-screen md:min-h-[calc(100vh-4rem)] bg-background flex flex-col pb-32 relative md:rounded-[36px] md:border md:border-zinc-200/90 dark:md:border-zinc-800 md:shadow-2xl md:shadow-zinc-950/10 overflow-x-hidden border-x border-border/60 md:border-x-0">
                 {/* Top Navigation */}
                 <GuestHeader
                     restaurant={restaurant}
@@ -249,8 +249,9 @@ export function GuestAppShell({
 
                 {/* Floating Bottom Sticky Bar */}
                 {cartCount > 0 ? (
-                    <aside aria-label="Shared Table Cart" className="fixed bottom-0 left-0 right-0 max-w-[440px] mx-auto p-4 pb-safe z-40 pointer-events-none">
-                        <div
+                    <aside aria-label="Shared Table Cart" className="pointer-events-none fixed right-0 bottom-0 left-0 z-40 mx-auto max-w-[440px] p-4 pb-safe">
+                        <button
+                            type="button"
                             onClick={() => {
                                 if (!currentGuestId) {
                                     setIsJoinModalOpen(true);
@@ -258,57 +259,50 @@ export function GuestAppShell({
                                     setIsCartOpen(true);
                                 }
                             }}
-                            className="pointer-events-auto p-3.5 sm:p-4 rounded-2xl text-white shadow-xl shadow-orange-950/20 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all duration-200 animate-slideUp ring-1 ring-white/20"
-                            style={{ backgroundColor: 'var(--brand-primary)' }}
+                            className="pointer-events-auto animate-slideUp flex min-h-14 w-full items-center justify-between gap-3 rounded-2xl bg-brand px-4 py-2.5 text-left text-brand-foreground shadow-xl shadow-black/15 ring-1 ring-black/10 transition-transform active:scale-[0.98]"
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-white/25 backdrop-blur-xs flex items-center justify-center font-extrabold text-sm shadow-inner">
+                            <span className="flex min-w-0 items-center gap-3">
+                                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-current/15 font-mono text-sm font-extrabold tabular-nums">
                                     {cartCount}
-                                </div>
-                                <div>
-                                    <div className="text-xs font-bold tracking-tight leading-tight flex items-center gap-1.5">
-                                        <span>Shared Table Cart</span>
-                                        <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-ping" />
-                                    </div>
-                                    <div className="text-[11px] text-white/90 font-mono font-medium mt-0.5">₹{cartSubtotal} <span className="opacity-75 text-[10px]">+ taxes</span></div>
-                                </div>
-                            </div>
+                                </span>
+                                <span className="min-w-0">
+                                    <span className="block text-sm leading-tight font-bold">Shared Table Cart</span>
+                                    <span className="block font-mono text-xs font-medium tabular-nums opacity-80">
+                                        ₹{cartSubtotal} + taxes
+                                    </span>
+                                </span>
+                            </span>
 
-                            <div className="flex items-center gap-1.5 font-bold text-xs bg-white/20 hover:bg-white/30 backdrop-blur-xs px-3 py-1.5 rounded-xl transition shadow-xs">
+                            <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold">
                                 <span>View Cart</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                            </div>
-                        </div>
+                                <ArrowRight aria-hidden="true" className="size-4" />
+                            </span>
+                        </button>
                     </aside>
                 ) : orders.length > 0 ? (
-                    <aside aria-label="Live Order Status" className="fixed bottom-0 left-0 right-0 max-w-[440px] mx-auto p-4 pb-safe z-40 pointer-events-none">
-                        <div
+                    <aside aria-label="Live Order Status" className="pointer-events-none fixed right-0 bottom-0 left-0 z-40 mx-auto max-w-[440px] p-4 pb-safe">
+                        <button
+                            type="button"
                             onClick={() => setIsTrackerOpen(true)}
-                            className="pointer-events-auto p-3.5 rounded-2xl bg-zinc-900/95 backdrop-blur-md text-white shadow-xl shadow-zinc-950/30 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all duration-200 animate-slideUp border border-zinc-800"
+                            className="pointer-events-auto animate-slideUp flex min-h-14 w-full items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/95 px-4 py-2.5 text-left text-white shadow-xl shadow-black/25 backdrop-blur-md transition-transform active:scale-[0.98]"
                         >
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="w-3 h-3 rounded-full animate-pulse shadow-sm"
-                                    style={{ backgroundColor: 'var(--brand-primary)' }}
-                                />
-                                <div>
-                                    <div className="text-xs font-bold tracking-tight">
+                            <span className="flex min-w-0 items-center gap-3">
+                                <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full bg-brand ring-4 ring-white/10" />
+                                <span className="min-w-0">
+                                    <span className="block text-sm leading-tight font-bold">
                                         {activeOrders.length > 0 ? 'Cooking in Kitchen' : 'Orders Placed'}
-                                    </div>
-                                    <div className="text-[11px] text-zinc-400 font-medium">
-                                        {orders.length} order{orders.length > 1 ? 's' : ''} • Tap to track live
-                                    </div>
-                                </div>
-                            </div>
+                                    </span>
+                                    <span className="block text-xs font-medium text-zinc-300">
+                                        {orders.length} {orders.length === 1 ? 'order' : 'orders'} · Tap to track live
+                                    </span>
+                                </span>
+                            </span>
 
-                            <div
-                                className="flex items-center gap-1 font-bold text-xs bg-zinc-800 hover:bg-zinc-700/80 px-2.5 py-1.5 rounded-xl transition"
-                                style={{ color: 'var(--brand-primary)' }}
-                            >
+                            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-zinc-800 px-3 py-2 text-sm font-bold text-white">
                                 <span>Track</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                            </div>
-                        </div>
+                                <ArrowRight aria-hidden="true" className="size-4" />
+                            </span>
+                        </button>
                     </aside>
                 ) : null}
 
