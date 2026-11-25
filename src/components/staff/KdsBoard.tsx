@@ -13,9 +13,6 @@ import {
     UtensilsCrossed,
     Check,
     AlertTriangle,
-    Layers,
-    ArrowRight,
-    X,
 } from 'lucide-react';
 import {
     Restaurant,
@@ -178,7 +175,8 @@ export function KdsBoard({
         });
     };
 
-    // Timer color calculation
+    // Timer state for a ticket. Thresholds follow the PRD: under 8 min on time, 8 to 15 slow, 15+ overdue.
+    // State is carried by color, an icon and a word, never by color alone.
     const getTimerConf = (startTime: string) => {
         const start = new Date(startTime).getTime();
         const mins = Math.max(0, Math.floor((now - start) / 60000));
@@ -186,154 +184,174 @@ export function KdsBoard({
         if (mins < 8) {
             return {
                 mins,
-                border: 'border-emerald-500/80',
-                badge: 'bg-emerald-950/60 text-emerald-400 border-emerald-800',
-                text: 'text-emerald-400',
-                pulse: false,
+                label: 'On time',
+                Icon: Clock,
+                border: 'border-emerald-500/70',
+                text: 'text-emerald-300',
+                overdue: false,
             };
         } else if (mins < 15) {
             return {
                 mins,
-                border: 'border-amber-500',
-                badge: 'bg-amber-950/60 text-amber-400 border-amber-800',
-                text: 'text-amber-400',
-                pulse: false,
+                label: 'Getting late',
+                Icon: Clock,
+                border: 'border-amber-400',
+                text: 'text-amber-300',
+                overdue: false,
             };
         } else {
             return {
                 mins,
-                border: 'border-red-500 shadow-lg shadow-red-950/40',
-                badge: 'bg-red-950/80 text-red-400 border-red-700',
-                text: 'text-red-400 font-extrabold',
-                pulse: true,
+                label: 'Overdue',
+                Icon: AlertTriangle,
+                border: 'border-red-500',
+                text: 'text-red-300',
+                overdue: true,
             };
         }
     };
 
+    const ITEM_STATUS: Record<
+        ItemPrepStatus,
+        { label: string; next: string; chip: string; Icon: React.ElementType }
+    > = {
+        QUEUED: { label: 'Queued', next: 'start cooking', chip: 'border-zinc-600 bg-zinc-800 text-zinc-200', Icon: Clock },
+        PREPARING: { label: 'Cooking', next: 'mark ready', chip: 'border-amber-400/60 bg-amber-500/15 text-amber-200', Icon: Flame },
+        READY: { label: 'Ready', next: '', chip: 'border-emerald-500/60 bg-emerald-500/15 text-emerald-200', Icon: Check },
+        SERVED: { label: 'Served', next: '', chip: 'border-zinc-600 bg-zinc-800 text-zinc-300', Icon: Check },
+    };
+
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-            {/* Top Operational Header */}
-            <header className="sticky top-0 z-30 bg-zinc-900/90 border-b border-zinc-800 backdrop-blur-md px-4 lg:px-8 py-3 flex items-center justify-between">
+        <div className="dark flex min-h-screen flex-col bg-background font-sans text-foreground selection:bg-primary selection:text-primary-foreground">
+            {/* Top operational header */}
+            <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur-md lg:px-8">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white shadow-md shadow-orange-600/30">
-                        <ChefHat className="w-6 h-6" />
+                    <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                        <ChefHat aria-hidden="true" className="size-7" />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-base font-bold text-white tracking-tight">{restaurant.name}</h1>
-                            <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                KDS • {kitchenOrders.length} Active Tickets
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <h1 className="text-xl font-bold tracking-tight text-foreground">{restaurant.name}</h1>
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-0.5 text-sm font-semibold text-emerald-300">
+                                KDS · {kitchenOrders.length} Active Tickets
                             </span>
                         </div>
-                        <p className="text-xs text-zinc-400">
-                            Chef in charge: <strong className="text-zinc-200">{staffName}</strong>
+                        <p className="text-sm text-muted-foreground">
+                            Chef in charge: <strong className="font-semibold text-foreground">{staffName}</strong>
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Audio Unlock */}
                     <button
                         type="button"
                         onClick={() => {
                             setAudioUnlocked(true);
                             playOrderChime();
                         }}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                        className={`inline-flex min-h-14 items-center gap-2 rounded-xl border px-4 text-base font-semibold transition-colors ${
                             audioUnlocked
-                                ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400'
-                                : 'bg-amber-950/60 border-amber-800 text-amber-400 animate-pulse'
+                                ? 'border-emerald-600/60 bg-emerald-950/60 text-emerald-300'
+                                : 'border-amber-500/60 bg-amber-950/60 text-amber-200'
                         }`}
-                        title={audioUnlocked ? 'Audio Active' : 'Tap to Enable Audio'}
                     >
-                        {audioUnlocked ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                        <span className="hidden sm:inline">
-                            {audioUnlocked ? 'Chime Active' : 'Enable Chime'}
-                        </span>
+                        {audioUnlocked ? (
+                            <Volume2 aria-hidden="true" className="size-5" />
+                        ) : (
+                            <VolumeX aria-hidden="true" className="size-5" />
+                        )}
+                        <span className="hidden sm:inline">{audioUnlocked ? 'Sound On' : 'Sound Off'}</span>
                     </button>
 
-                    {/* Switch to Floor */}
                     <a
                         href={`/staff/${restaurant.slug}/floor`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 transition"
+                        className="inline-flex min-h-14 items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 text-base font-medium text-zinc-100 transition-colors hover:bg-zinc-700"
                     >
-                        <UtensilsCrossed className="w-3.5 h-3.5 text-blue-400" />
+                        <UtensilsCrossed aria-hidden="true" className="size-5 text-blue-300" />
                         <span className="hidden sm:inline">Floor Map</span>
+                        <span className="sr-only sm:hidden">Floor Map</span>
                     </a>
 
                     <button
+                        type="button"
                         onClick={handleLogout}
                         disabled={isActionPending}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition cursor-pointer"
+                        className="inline-flex min-h-14 items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 text-base font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
                     >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <LogOut aria-hidden="true" className="size-5" />
                         <span>Sign Out</span>
                     </button>
                 </div>
             </header>
 
-            {/* Station Filter Ribbon */}
-            <div className="bg-zinc-900/60 border-b border-zinc-800/80 px-4 lg:px-8 py-2.5 overflow-x-auto scrollbar-none flex items-center gap-2">
+            {/* Sound must be enabled once per session, or browsers block the order chime */}
+            {!audioUnlocked && (
                 <button
                     type="button"
-                    onClick={() => setActiveStationId('ALL')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-                        activeStationId === 'ALL'
-                            ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30'
-                            : 'bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700'
-                    }`}
+                    onClick={() => {
+                        setAudioUnlocked(true);
+                        playOrderChime();
+                    }}
+                    className="flex min-h-14 w-full items-center justify-center gap-2 border-b border-amber-500/40 bg-amber-950/50 px-4 text-base font-semibold text-amber-200 transition-colors hover:bg-amber-950/70"
                 >
-                    All Stations ({kitchenOrders.length})
+                    <VolumeX aria-hidden="true" className="size-5" />
+                    <span>Order chime is muted. Tap here to turn it on.</span>
                 </button>
+            )}
 
-                {stations.map((st) => {
-                    const count = kitchenOrders.filter((o) =>
+            {/* Station filter */}
+            <nav
+                aria-label="Kitchen stations"
+                className="scrollbar-none flex items-center gap-2 overflow-x-auto border-b border-border bg-card/60 px-4 py-2.5 lg:px-8"
+            >
+                {[{ id: 'ALL', name: 'All Stations', count: kitchenOrders.length }, ...stations.map((st) => ({
+                    id: st.id,
+                    name: st.name,
+                    count: kitchenOrders.filter((o) =>
                         (o.order_items || []).some((item) => item.station_id === st.id)
-                    ).length;
-
+                    ).length,
+                }))].map((st) => {
                     const isActive = activeStationId === st.id;
-
                     return (
                         <button
                             key={st.id}
                             type="button"
                             onClick={() => setActiveStationId(st.id)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                            aria-pressed={isActive}
+                            className={`inline-flex min-h-14 shrink-0 items-center gap-2 rounded-xl px-5 text-base font-semibold whitespace-nowrap transition-colors ${
                                 isActive
-                                    ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30'
-                                    : 'bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'border border-zinc-700 bg-zinc-800 text-zinc-100 hover:bg-zinc-700'
                             }`}
                         >
                             <span>{st.name}</span>
-                            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/40">
-                                {count}
-                            </span>
+                            <span className="font-mono text-sm tabular-nums">({st.count})</span>
                         </button>
                     );
                 })}
-            </div>
+            </nav>
 
-            {/* Main KOT Ticket Board */}
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
+            {/* Ticket board */}
+            <main className="mx-auto w-full max-w-[1800px] flex-1 px-4 py-6 lg:px-8">
                 {kitchenOrders.length === 0 ? (
-                    <div className="h-96 flex flex-col items-center justify-center text-center space-y-3">
-                        <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-600">
-                            <ChefHat className="w-8 h-8" />
+                    <div className="flex h-96 flex-col items-center justify-center space-y-3 text-center">
+                        <div className="flex size-20 items-center justify-center rounded-2xl border border-border bg-card text-zinc-500">
+                            <ChefHat aria-hidden="true" className="size-10" />
                         </div>
-                        <h2 className="text-lg font-bold text-zinc-300">No Active Kitchen Tickets</h2>
-                        <p className="text-xs text-zinc-500 max-w-xs">
+                        <h2 className="text-2xl font-bold text-zinc-200">No Active Kitchen Tickets</h2>
+                        <p className="max-w-sm text-base text-muted-foreground">
                             Approved guest orders from the Floor Staff will appear here in real-time.
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                         {kitchenOrders.map((order) => {
                             const orderTable = tables.find((t) => t.id === order.table_id);
                             const timer = getTimerConf(order.approved_at || order.created_at);
 
-                            // Filter items if specific station selected
+                            // Items for the selected station only
                             const relevantItems = (order.order_items || []).filter((item) => {
                                 if (activeStationId === 'ALL') return true;
                                 return item.station_id === activeStationId;
@@ -342,130 +360,125 @@ export function KdsBoard({
                             if (relevantItems.length === 0) return null;
 
                             const isAllReady = relevantItems.every((i) => i.prep_status === 'READY');
+                            const TimerIcon = timer.Icon;
 
                             return (
-                                <div
+                                <li
                                     key={order.id}
-                                    className={`bg-zinc-900 rounded-3xl border-2 transition-all p-4 flex flex-col justify-between shadow-xl space-y-3 relative overflow-hidden ${
-                                        timer.border
-                                    } ${timer.pulse ? 'animate-pulse' : ''}`}
+                                    className={`relative flex flex-col gap-4 rounded-2xl border-4 bg-card p-4 shadow-xl ${timer.border}`}
                                 >
-                                    {/* Ticket Header */}
-                                    <div className="space-y-1.5">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-lg font-mono font-black text-white bg-zinc-800 px-2.5 py-0.5 rounded-xl border border-zinc-700">
-                                                    {orderTable?.table_code || 'T?'}
-                                                </span>
-                                                <span className="text-xs font-bold text-zinc-300">
-                                                    {orderTable?.display_name || 'Table'}
-                                                </span>
-                                            </div>
+                                    {/* Overdue: only this border overlay beats, never the ticket text */}
+                                    {timer.overdue && (
+                                        <span
+                                            aria-hidden="true"
+                                            className="animate-borderBeat pointer-events-none absolute -inset-1 rounded-2xl border-4 border-red-400"
+                                        />
+                                    )}
 
-                                            {/* Timer Badge */}
-                                            <span
-                                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold border ${timer.badge}`}
-                                            >
-                                                <Clock className="w-3 h-3" />
-                                                <span>{timer.mins}m</span>
-                                            </span>
+                                    {/* Ticket header: the elapsed timer is the biggest thing on the ticket */}
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0 space-y-1">
+                                            <p className="inline-block rounded-xl border border-zinc-600 bg-zinc-800 px-3 py-1 font-mono text-2xl font-black text-white">
+                                                {orderTable?.table_code || 'T?'}
+                                            </p>
+                                            <p className="truncate text-base font-semibold text-zinc-200">
+                                                {orderTable?.display_name || 'Table'}
+                                            </p>
                                         </div>
 
-                                        <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-0.5">
-                                            <span>KOT #{order.order_number || 1}</span>
-                                            <span>Guest: <strong>{order.placed_by_name}</strong></span>
+                                        <div className={`text-right ${timer.text}`}>
+                                            <p className="flex items-baseline justify-end gap-1.5">
+                                                <span className="font-mono text-6xl leading-none font-black tabular-nums">{timer.mins}</span>
+                                                <span className="text-lg font-bold">min</span>
+                                            </p>
+                                            <p className="mt-1 inline-flex items-center justify-end gap-1.5 text-base font-semibold">
+                                                <TimerIcon aria-hidden="true" className="size-4" />
+                                                <span>{timer.label}</span>
+                                            </p>
                                         </div>
                                     </div>
 
-                                    {/* Items List */}
-                                    <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800/80 divide-y divide-zinc-800/60 space-y-2">
+                                    <p className="flex flex-wrap items-center justify-between gap-x-3 text-base text-zinc-300">
+                                        <span className="font-mono tabular-nums">KOT #{order.order_number || 1}</span>
+                                        <span>
+                                            Guest: <strong className="font-semibold text-white">{order.placed_by_name}</strong>
+                                        </span>
+                                    </p>
+
+                                    {/* Items: each whole row is one big tap target that advances its status */}
+                                    <ul className="divide-y divide-zinc-800 rounded-2xl border border-zinc-800 bg-background">
                                         {relevantItems.map((item) => {
+                                            const status = ITEM_STATUS[item.prep_status];
+                                            const StatusIcon = status.Icon;
                                             const isReady = item.prep_status === 'READY';
-                                            const isPrep = item.prep_status === 'PREPARING';
+                                            const stationName = item.station_id ? stationMap.get(item.station_id) : null;
 
                                             return (
-                                                <div
-                                                    key={item.id}
-                                                    onClick={() => handleAdvanceItem(item.id, item.prep_status)}
-                                                    className="pt-2 first:pt-0 flex items-start justify-between gap-2 cursor-pointer hover:bg-zinc-900/50 p-1 rounded-xl transition"
-                                                >
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="font-mono font-black text-white text-sm">
-                                                                {item.quantity}x
-                                                            </span>
-                                                            <span
-                                                                className={`text-xs font-bold truncate ${
-                                                                    isReady
-                                                                        ? 'line-through text-zinc-500'
-                                                                        : 'text-zinc-200'
-                                                                }`}
-                                                            >
-                                                                {item.item_name}
-                                                            </span>
-                                                        </div>
-                                                        {item.variant_name && (
-                                                            <div className="text-[10px] text-zinc-400 ml-5">
-                                                                Portion: {item.variant_name}
-                                                            </div>
-                                                        )}
-                                                        {item.notes && (
-                                                            <div className="text-[10px] text-amber-300 font-medium bg-amber-500/10 px-1.5 py-0.5 rounded mt-0.5 ml-5 border border-amber-500/20">
-                                                                ★ {item.notes}
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Status Tap Indicator (Min 44px target) */}
+                                                <li key={item.id}>
                                                     <button
                                                         type="button"
-                                                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0 transition flex items-center gap-1 ${
-                                                            isReady
-                                                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                                                : isPrep
-                                                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                                                                : 'bg-zinc-800 text-zinc-400 hover:text-white'
-                                                        }`}
+                                                        onClick={() => handleAdvanceItem(item.id, item.prep_status)}
+                                                        aria-label={`${item.quantity} ${item.item_name}, ${status.label}.${status.next ? ` Tap to ${status.next}.` : ""}`}
+                                                        className="flex min-h-16 w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors hover:bg-zinc-900 active:bg-zinc-800"
                                                     >
-                                                        {isReady ? (
-                                                            <>
-                                                                <Check className="w-3 h-3 text-emerald-400" />
-                                                                <span>Ready</span>
-                                                            </>
-                                                        ) : isPrep ? (
-                                                            <>
-                                                                <Flame className="w-3 h-3 text-amber-400" />
-                                                                <span>Cooking</span>
-                                                            </>
-                                                        ) : (
-                                                            <span>Queued</span>
-                                                        )}
+                                                        <span className="min-w-0 flex-1">
+                                                            <span className="flex items-baseline gap-2">
+                                                                <span className="font-mono text-xl font-black text-white tabular-nums">
+                                                                    {item.quantity}×
+                                                                </span>
+                                                                <span
+                                                                    className={`text-lg leading-snug font-semibold ${
+                                                                        isReady ? 'text-zinc-500 line-through' : 'text-zinc-100'
+                                                                    }`}
+                                                                >
+                                                                    {item.item_name}
+                                                                </span>
+                                                            </span>
+                                                            {item.variant_name && (
+                                                                <span className="block pl-9 text-base text-zinc-400">
+                                                                    Portion: {item.variant_name}
+                                                                </span>
+                                                            )}
+                                                            {activeStationId === 'ALL' && stationName && (
+                                                                <span className="block pl-9 text-sm text-zinc-400">{stationName}</span>
+                                                            )}
+                                                            {item.notes && (
+                                                                <span className="mt-1 ml-9 block rounded-lg border border-amber-400/30 bg-amber-500/15 px-2 py-1 text-base font-medium text-amber-200">
+                                                                    ★ {item.notes}
+                                                                </span>
+                                                            )}
+                                                        </span>
+
+                                                        <span
+                                                            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-bold tracking-wide uppercase ${status.chip}`}
+                                                        >
+                                                            <StatusIcon aria-hidden="true" className="size-4" />
+                                                            {status.label}
+                                                        </span>
                                                     </button>
-                                                </div>
+                                                </li>
                                             );
                                         })}
-                                    </div>
+                                    </ul>
 
-                                    {/* Bump Ticket Ready CTA */}
-                                    <div className="pt-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleBumpReady(order.id)}
-                                            disabled={isActionPending || isAllReady}
-                                            className={`w-full py-3 px-3 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.98] ${
-                                                isAllReady
-                                                    ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-400 cursor-default'
-                                                    : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white'
-                                            }`}
-                                        >
-                                            <CheckCircle2 className="w-4 h-4" />
-                                            <span>{isAllReady ? 'Order Ready for Pickup' : 'Bump Entire Order Ready'}</span>
-                                        </button>
-                                    </div>
-                                </div>
+                                    {/* Bump the whole ticket */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleBumpReady(order.id)}
+                                        disabled={isActionPending || isAllReady}
+                                        className={`flex min-h-16 w-full items-center justify-center gap-2 rounded-xl px-4 text-lg font-bold transition-colors active:scale-[0.98] disabled:cursor-default ${
+                                            isAllReady
+                                                ? 'border border-emerald-700 bg-emerald-950/60 text-emerald-300'
+                                                : 'bg-emerald-700 text-white hover:bg-emerald-600 disabled:opacity-60'
+                                        }`}
+                                    >
+                                        <CheckCircle2 aria-hidden="true" className="size-6" />
+                                        <span>{isAllReady ? 'Order Ready for Pickup' : 'Bump Entire Order Ready'}</span>
+                                    </button>
+                                </li>
                             );
                         })}
-                    </div>
+                    </ul>
                 )}
             </main>
         </div>

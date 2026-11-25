@@ -168,10 +168,11 @@ Every mobile bottom drawer must include an explicit top grab bar to signal touch
 - Instant glanceable table status badges with pulsing alerts on `PENDING_APPROVAL` and `HELP`.
 - Synthesized Web Audio API bell chimes with mute/unmute toggle.
 - KDS ticket cards with station filtering (`GRILL`, `TANDOOR`, `BEVERAGE`, `MAIN`).
-- Elapsed timer color escalation:
-  - `< 10 mins`: White / Neutral Zinc
-  - `10 - 20 mins`: Amber Warning
-  - `> 20 mins`: Urgent Red Pulse
+- Elapsed timer escalation (matches PRD and the code in `KdsBoard.tsx`):
+  - `< 8 mins`: Emerald, "On time"
+  - `8 - 15 mins`: Amber, "Getting late"
+  - `15+ mins`: Red, "Overdue", with a border-only beat (an overlay's opacity pulses; ticket text never fades)
+  - The elapsed minutes are the largest element on a ticket; state is always icon + word + color.
 - Quick item bump checkboxes and large single-tap "Mark Order Ready" CTA.
 
 ---

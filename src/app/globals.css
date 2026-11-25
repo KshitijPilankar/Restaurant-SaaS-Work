@@ -213,6 +213,22 @@
   }
 }
 
+/* Overdue KDS ticket: only a border overlay beats (opacity, compositor-friendly), never the ticket text.
+   Under reduced motion it stays a solid red border. */
+@keyframes borderBeat {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.animate-borderBeat {
+  animation: borderBeat 1.2s ease-in-out infinite;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

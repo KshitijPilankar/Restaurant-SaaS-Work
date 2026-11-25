@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Delete, ArrowRight, ChefHat, Bell, KeyRound, Sparkles } from 'lucide-react';
+import { ShieldCheck, Delete, ChefHat, Bell, KeyRound } from 'lucide-react';
 import { StaffRole } from '@/types/database';
 import { verifyStaffPin } from '@/app/staff/[slug]/actions';
 
@@ -13,6 +13,16 @@ interface StaffPinGateProps {
     surfaceTitle: string; // e.g., 'Floor Captain & Waiter Map' or 'Kitchen Display System (KDS)'
     onSuccess?: () => void;
 }
+
+// Public demo PINs. The live URL is the sales demo, so these are shown on purpose.
+const DEMO_CREDENTIALS: { pin: string; label: string; role: StaffRole; tone: string }[] = [
+    { pin: '1111', label: 'Owner', role: 'OWNER', tone: 'text-amber-300' },
+    { pin: '2222', label: 'Waiter', role: 'WAITER', tone: 'text-orange-300' },
+    { pin: '3333', label: 'Kitchen', role: 'KITCHEN', tone: 'text-emerald-300' },
+];
+
+const KEY_BASE =
+    'flex h-16 select-none items-center justify-center rounded-2xl border text-2xl font-bold transition-colors active:scale-95 disabled:opacity-50';
 
 export function StaffPinGate({
     slug,
@@ -68,72 +78,75 @@ export function StaffPinGate({
         submitPin(presetPin);
     };
 
-    return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center px-4 selection:bg-orange-500 selection:text-white">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-zinc-800/20 rounded-full blur-3xl pointer-events-none" />
+    // Highlight the demo PIN that matches this screen (waiter PIN for the floor, kitchen PIN for the KDS)
+    const matchingRole: StaffRole = targetRole ?? 'WAITER';
 
-            <div className="relative w-full max-w-sm bg-zinc-900/90 border border-zinc-800 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 z-10 text-center">
-                {/* Header Info */}
-                <div className="space-y-2">
-                    <div className="w-14 h-14 rounded-2xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center mx-auto text-orange-400 shadow-md">
+    return (
+        <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 text-foreground selection:bg-primary selection:text-primary-foreground">
+            <div className="w-full max-w-sm space-y-6 rounded-3xl border border-border bg-card p-6 text-center shadow-2xl sm:p-8">
+                {/* Header */}
+                <div className="space-y-3">
+                    <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-border bg-secondary text-primary">
                         {targetRole === 'KITCHEN' ? (
-                            <ChefHat className="w-7 h-7" />
+                            <ChefHat aria-hidden="true" className="size-8" />
                         ) : targetRole === 'OWNER' ? (
-                            <ShieldCheck className="w-7 h-7 text-amber-400" />
+                            <ShieldCheck aria-hidden="true" className="size-8" />
                         ) : (
-                            <Bell className="w-7 h-7" />
+                            <Bell aria-hidden="true" className="size-8" />
                         )}
                     </div>
-                    <div>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700 mb-1">
+                    <div className="space-y-1.5">
+                        <p className="inline-flex max-w-full flex-wrap items-center justify-center gap-x-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-sm font-semibold text-secondary-foreground">
                             <span>{restaurantName}</span>
-                            <span>•</span>
-                            <span className={targetRole === 'OWNER' ? 'text-amber-400' : 'text-orange-400'}>{surfaceTitle}</span>
-                        </div>
-                        <h1 className="text-xl font-bold text-white tracking-tight">
+                            <span aria-hidden="true">·</span>
+                            <span className="text-primary">{surfaceTitle}</span>
+                        </p>
+                        <h1 className="text-2xl font-bold tracking-tight text-foreground">
                             {targetRole === 'OWNER' ? 'Owner Portal Access' : 'Staff PIN Access'}
                         </h1>
-                        <p className="text-xs text-zinc-400 mt-0.5">
+                        <p className="text-base text-muted-foreground">
                             {targetRole === 'OWNER'
                                 ? 'Enter your 4-digit Owner PIN to manage menu, view revenue & print QR codes.'
-                                : 'Enter your 4-digit PIN on the tablet keypad to unlock this station.'}
+                                : 'Enter your 4-digit PIN to unlock this station.'}
                         </p>
                     </div>
                 </div>
 
-                {/* 4 PIN Dots */}
-                <div className="flex items-center justify-center gap-4 py-2">
-                    {[0, 1, 2, 3].map((idx) => {
-                        const isFilled = pin.length > idx;
-                        return (
-                            <div
-                                key={idx}
-                                className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                                    isFilled
-                                        ? 'bg-orange-500 border-orange-400 scale-110 shadow-lg shadow-orange-500/50'
-                                        : 'border-zinc-700 bg-zinc-950'
-                                }`}
-                            />
-                        );
-                    })}
+                {/* PIN progress (digits are never shown) */}
+                <div
+                    role="status"
+                    aria-label={`${pin.length} of 4 digits entered`}
+                    className="flex items-center justify-center gap-4 py-1"
+                >
+                    {[0, 1, 2, 3].map((idx) => (
+                        <span
+                            key={idx}
+                            aria-hidden="true"
+                            className={`size-5 rounded-full border-2 transition-colors ${
+                                pin.length > idx ? 'border-primary bg-primary' : 'border-zinc-600 bg-transparent'
+                            }`}
+                        />
+                    ))}
                 </div>
 
                 {error && (
-                    <div className="p-2.5 bg-red-950/40 border border-red-800/60 rounded-xl text-red-400 text-xs animate-shake">
+                    <div
+                        role="alert"
+                        className="animate-shake rounded-xl border border-red-500/50 bg-red-950/50 p-3 text-base font-medium text-red-300"
+                    >
                         {error}
                     </div>
                 )}
 
-                {/* 3x4 Numeric Touch Keypad (min 48px targets for wet/busy kitchen fingers) */}
-                <div className="grid grid-cols-3 gap-2.5 max-w-[280px] mx-auto">
+                {/* Keypad: 64px keys for gloves and wet hands */}
+                <div className="mx-auto grid max-w-[300px] grid-cols-3 gap-3">
                     {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                         <button
                             key={digit}
                             type="button"
                             disabled={isPending}
                             onClick={() => handleDigitClick(digit)}
-                            className="h-14 rounded-2xl bg-zinc-800/80 hover:bg-zinc-700/80 active:bg-zinc-600 border border-zinc-700/60 text-xl font-bold text-white transition cursor-pointer flex items-center justify-center select-none shadow-sm disabled:opacity-50"
+                            className={`${KEY_BASE} border-zinc-700 bg-zinc-800 text-white hover:bg-zinc-700 active:bg-zinc-600`}
                         >
                             {digit}
                         </button>
@@ -142,15 +155,16 @@ export function StaffPinGate({
                         type="button"
                         disabled={isPending}
                         onClick={handleClear}
-                        className="h-14 rounded-2xl bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 border border-zinc-800 text-xs font-semibold text-zinc-400 hover:text-white transition cursor-pointer flex items-center justify-center select-none"
+                        aria-label="Clear PIN"
+                        className={`${KEY_BASE} border-zinc-800 bg-zinc-900 text-base font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white`}
                     >
-                        CLEAR
+                        Clear
                     </button>
                     <button
                         type="button"
                         disabled={isPending}
                         onClick={() => handleDigitClick('0')}
-                        className="h-14 rounded-2xl bg-zinc-800/80 hover:bg-zinc-700/80 active:bg-zinc-600 border border-zinc-700/60 text-xl font-bold text-white transition cursor-pointer flex items-center justify-center select-none shadow-sm disabled:opacity-50"
+                        className={`${KEY_BASE} border-zinc-700 bg-zinc-800 text-white hover:bg-zinc-700 active:bg-zinc-600`}
                     >
                         0
                     </button>
@@ -158,48 +172,47 @@ export function StaffPinGate({
                         type="button"
                         disabled={isPending}
                         onClick={handleBackspace}
-                        className="h-14 rounded-2xl bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 border border-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer flex items-center justify-center select-none"
+                        aria-label="Delete last digit"
+                        className={`${KEY_BASE} border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white`}
                     >
-                        <Delete className="w-5 h-5" />
+                        <Delete aria-hidden="true" className="size-6" />
                     </button>
                 </div>
 
-                {/* Quick Presets for Demo Pitches */}
-                <div className="pt-2 border-t border-zinc-800/80 space-y-2">
-                    <span className="text-[10px] uppercase font-semibold text-zinc-400 tracking-wider">
-                        Quick Demo PINs
-                    </span>
-                    <div className="grid grid-cols-3 gap-1.5 text-xs">
-                        <button
-                            type="button"
-                            onClick={() => handleQuickPreset('1111')}
-                            className={`p-2 rounded-xl border transition text-center ${
-                                targetRole === 'OWNER'
-                                    ? 'bg-amber-950/60 border-amber-500/80 text-amber-200 ring-1 ring-amber-500/50'
-                                    : 'bg-zinc-800/60 hover:bg-zinc-700/60 border-zinc-700/40 text-zinc-300'
-                            }`}
-                        >
-                            <span className="font-mono font-bold block text-amber-400">1111</span>
-                            <span className="text-[10px] text-zinc-400 block">Owner</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleQuickPreset('2222')}
-                            className="p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/40 text-zinc-300 hover:text-white transition text-center"
-                        >
-                            <span className="font-mono font-bold block text-orange-400">2222</span>
-                            <span className="text-[10px] text-zinc-400 block">Waiter</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleQuickPreset('3333')}
-                            className="p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/40 text-zinc-300 hover:text-white transition text-center"
-                        >
-                            <span className="font-mono font-bold block text-emerald-400">3333</span>
-                            <span className="text-[10px] text-zinc-400 block">Kitchen</span>
-                        </button>
+                {/* Interactive Demo Credentials (public on purpose: this URL is the sales demo) */}
+                <section
+                    aria-labelledby="demo-credentials-heading"
+                    className="space-y-3 rounded-2xl border border-dashed border-zinc-700 bg-background/60 p-3.5 text-left"
+                >
+                    <div className="flex items-center gap-2">
+                        <KeyRound aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                        <h2 id="demo-credentials-heading" className="text-sm font-semibold text-foreground">
+                            Interactive Demo Credentials
+                        </h2>
                     </div>
-                </div>
+                    <div className="grid grid-cols-3 gap-2">
+                        {DEMO_CREDENTIALS.map(({ pin: demoPin, label, role, tone }) => {
+                            const isMatch = role === matchingRole;
+                            return (
+                                <button
+                                    key={demoPin}
+                                    type="button"
+                                    disabled={isPending}
+                                    onClick={() => handleQuickPreset(demoPin)}
+                                    className={`flex min-h-16 flex-col items-center justify-center rounded-xl border px-2 py-2 transition-colors active:scale-95 disabled:opacity-50 ${
+                                        isMatch
+                                            ? 'border-primary bg-primary/10 text-foreground'
+                                            : 'border-zinc-700 bg-zinc-800/60 text-zinc-200 hover:bg-zinc-700/60'
+                                    }`}
+                                >
+                                    <span className={`font-mono text-lg font-bold tabular-nums ${tone}`}>{demoPin}</span>
+                                    <span className="text-sm text-zinc-300">{label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Demo restaurant only. Tap a PIN to sign in instantly.</p>
+                </section>
             </div>
         </div>
     );
