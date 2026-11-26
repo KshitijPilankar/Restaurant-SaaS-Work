@@ -222,7 +222,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-orange-500 selection:text-zinc-950">
             {/* Top Navigation */}
             <header className="sticky top-0 z-30 bg-zinc-900/90 border-b border-zinc-800 backdrop-blur-md px-4 lg:px-8 py-3.5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -232,7 +232,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                     <div>
                         <div className="flex items-center gap-2">
                             <h1 className="text-base font-bold text-white tracking-tight">DineOS</h1>
-                            <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                            <span className="text-xs font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">
                                 Super Admin
                             </span>
                         </div>
@@ -248,7 +248,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                     <button
                         onClick={handleLogout}
                         disabled={isActionPending}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 transition cursor-pointer"
+                        className="min-h-11 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 transition cursor-pointer"
                     >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
@@ -314,14 +314,14 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setQrModalTenant({ restaurant: successTenant, tableCode: 'T1' })}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition shadow cursor-pointer"
+                                        className="min-h-11 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition shadow cursor-pointer"
                                     >
                                         <QrCode className="w-3.5 h-3.5" />
                                         <span>Show Table 1 QR</span>
                                     </button>
                                     <button
                                         onClick={() => setSuccessTenant(null)}
-                                        className="text-zinc-400 hover:text-white p-1"
+                                        className="min-h-11 text-zinc-400 hover:text-white p-1"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -337,7 +337,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                 <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
                                 <span>{errorMessage}</span>
                             </div>
-                            <button onClick={() => setErrorMessage(null)} className="text-zinc-400 hover:text-white">
+                            <button onClick={() => setErrorMessage(null)} className="min-h-11 text-zinc-400 hover:text-white">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
@@ -347,28 +347,28 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                         {/* Row 1: Name & Slug */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                                <label htmlFor="sa-1" className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
                                     Restaurant Name *
                                 </label>
-                                <input
+                                <input id="sa-1"
                                     type="text"
                                     required
                                     value={name}
                                     onChange={(e) => handleNameChange(e.target.value)}
                                     placeholder="e.g. Copper Chimney or Blue Tokai"
-                                    className="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-700/80 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                                    className="min-h-11 w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-700/80 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                                <label htmlFor="sa-2" className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
                                     Tenant Slug (URL Path) *
                                 </label>
                                 <div className="flex items-center rounded-xl bg-zinc-950 border border-zinc-700/80 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500">
                                     <span className="px-3 text-xs text-zinc-400 select-none bg-zinc-900 py-2.5 border-r border-zinc-800">
                                         /r/
                                     </span>
-                                    <input
+                                    <input id="sa-2"
                                         type="text"
                                         required
                                         value={slug}
@@ -377,7 +377,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                             setSlugManuallyEdited(true);
                                         }}
                                         placeholder="copper-chimney"
-                                        className="w-full px-3 py-2 bg-transparent text-white placeholder-zinc-500 focus:outline-none text-sm font-mono"
+                                        className="min-h-11 w-full px-3 py-2 bg-transparent text-white placeholder-zinc-500 focus:outline-none text-sm font-mono"
                                     />
                                     <span className="px-3 text-xs text-zinc-400 select-none bg-zinc-900 py-2.5 border-l border-zinc-800">
                                         /t/T1
@@ -411,14 +411,14 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                 <div
                                                     className={`w-9 h-9 rounded-lg flex items-center justify-center ${
                                                         isSelected
-                                                            ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                                                            ? 'bg-orange-500 text-zinc-950 shadow-md shadow-orange-500/20'
                                                             : 'bg-zinc-800 text-zinc-400'
                                                     }`}
                                                 >
                                                     <IconComponent className="w-5 h-5" />
                                                 </div>
                                                 <span
-                                                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                                                         isSelected
                                                             ? 'bg-orange-500/20 text-orange-300'
                                                             : 'bg-zinc-800 text-zinc-400'
@@ -429,7 +429,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-semibold text-white">{preset.label}</h4>
-                                                <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1">
+                                                <p className="text-xs text-zinc-400 mt-1 line-clamp-1">
                                                     Stations: {preset.stations.join(', ')}
                                                 </p>
                                             </div>
@@ -442,17 +442,17 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                         {/* Row 3: Brand Color & Table Count */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                                <label htmlFor="sa-3" className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
                                     Primary Brand Color
                                 </label>
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                         <div className="relative">
-                                            <input
+                                            <input id="sa-3"
                                                 type="color"
                                                 value={primaryColor}
                                                 onChange={(e) => setPrimaryColor(e.target.value)}
-                                                className="w-10 h-10 rounded-lg border border-zinc-700 bg-zinc-950 cursor-pointer overflow-hidden p-0"
+                                                className="min-h-11 w-10 h-10 rounded-lg border border-zinc-700 bg-zinc-950 cursor-pointer overflow-hidden p-0"
                                             />
                                         </div>
                                         <input
@@ -460,7 +460,9 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                             value={primaryColor}
                                             onChange={(e) => setPrimaryColor(e.target.value)}
                                             placeholder="#EA580C"
-                                            className="w-32 px-3 py-2 bg-zinc-950 border border-zinc-700/80 rounded-xl text-white font-mono text-xs uppercase"
+                                            aria-label="Brand color hex code"
+                                            spellCheck={false}
+                                            className="min-h-11 w-32 px-3 py-2 bg-zinc-950 border border-zinc-700/80 rounded-xl text-white font-mono text-xs uppercase"
                                         />
                                         <div
                                             className="h-9 px-3 rounded-xl flex items-center justify-center text-xs font-semibold text-white shadow"
@@ -475,9 +477,10 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                 key={pal.hex}
                                                 type="button"
                                                 onClick={() => setPrimaryColor(pal.hex)}
-                                                className="w-6 h-6 rounded-md border border-zinc-700 hover:scale-110 transition cursor-pointer"
+                                                className="size-11 rounded-lg border border-zinc-700 hover:scale-105 transition cursor-pointer"
                                                 style={{ backgroundColor: pal.hex }}
                                                 title={pal.label}
+                                                aria-label={`Use ${pal.label} (${pal.hex})`}
                                             />
                                         ))}
                                     </div>
@@ -486,20 +489,20 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
 
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
-                                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+                                    <label htmlFor="sa-4" className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
                                         Table Count: <span className="text-orange-400 font-mono">{tableCount}</span> (T1..T{tableCount})
                                     </label>
                                 </div>
                                 <div className="space-y-2">
-                                    <input
+                                    <input id="sa-4"
                                         type="range"
                                         min="1"
                                         max="30"
                                         value={tableCount}
                                         onChange={(e) => setTableCount(Number(e.target.value))}
-                                        className="w-full accent-orange-500 cursor-pointer"
+                                        className="min-h-11 w-full accent-orange-500 cursor-pointer"
                                     />
-                                    <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+                                    <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
                                         <span>1 Table</span>
                                         <span>8 Tables (Default)</span>
                                         <span>30 Tables</span>
@@ -513,7 +516,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                             <button
                                 type="button"
                                 onClick={() => setShowAdvanced(!showAdvanced)}
-                                className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
+                                className="min-h-11 flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
                             >
                                 <Sliders className="w-3.5 h-3.5" />
                                 <span>Optional Tenant Settings (Wi-Fi, UPI, Reviews, Logo)</span>
@@ -523,53 +526,53 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                             {showAdvanced && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 animate-fadeIn">
                                     <div>
-                                        <label className="block text-xs text-zinc-400 mb-1">Logo URL (Optional)</label>
-                                        <input
+                                        <label htmlFor="sa-5" className="block text-xs text-zinc-400 mb-1">Logo URL (Optional)</label>
+                                        <input id="sa-5"
                                             type="url"
                                             value={logoUrl}
                                             onChange={(e) => setLogoUrl(e.target.value)}
                                             placeholder="https://example.com/logo.png"
-                                            className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs"
+                                            className="min-h-11 w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-zinc-400 mb-1">UPI ID (Optional)</label>
-                                        <input
+                                        <label htmlFor="sa-6" className="block text-xs text-zinc-400 mb-1">UPI ID (Optional)</label>
+                                        <input id="sa-6"
                                             type="text"
                                             value={upiId}
                                             onChange={(e) => setUpiId(e.target.value)}
                                             placeholder="copperchimney@okhdfcbank"
-                                            className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs font-mono"
+                                            className="min-h-11 w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs font-mono"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-zinc-400 mb-1">Wi-Fi SSID</label>
-                                        <input
+                                        <label htmlFor="sa-7" className="block text-xs text-zinc-400 mb-1">Wi-Fi SSID</label>
+                                        <input id="sa-7"
                                             type="text"
                                             value={wifiSsid}
                                             onChange={(e) => setWifiSsid(e.target.value)}
                                             placeholder="CopperChimney_Guest"
-                                            className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs"
+                                            className="min-h-11 w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-zinc-400 mb-1">Wi-Fi Password</label>
-                                        <input
+                                        <label htmlFor="sa-8" className="block text-xs text-zinc-400 mb-1">Wi-Fi Password</label>
+                                        <input id="sa-8"
                                             type="text"
                                             value={wifiPassword}
                                             onChange={(e) => setWifiPassword(e.target.value)}
                                             placeholder="ButterChicken2026"
-                                            className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs font-mono"
+                                            className="min-h-11 w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs font-mono"
                                         />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs text-zinc-400 mb-1">Google Review URL</label>
-                                        <input
+                                        <label htmlFor="sa-9" className="block text-xs text-zinc-400 mb-1">Google Review URL</label>
+                                        <input id="sa-9"
                                             type="url"
                                             value={googleReviewUrl}
                                             onChange={(e) => setGoogleReviewUrl(e.target.value)}
                                             placeholder="https://g.page/r/example/review"
-                                            className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs"
+                                            className="min-h-11 w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white text-xs"
                                         />
                                     </div>
                                 </div>
@@ -581,7 +584,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                             <button
                                 type="submit"
                                 disabled={isCreating}
-                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-[0.99] transition shadow-lg shadow-orange-600/25 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                                className="min-h-11 flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-[0.99] transition shadow-lg shadow-orange-600/25 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                             >
                                 {isCreating ? (
                                     <>
@@ -620,15 +623,17 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Filter by name/slug..."
-                                    className="pl-8 pr-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                    placeholder="Filter by name/slug…"
+                                    aria-label="Filter tenants by name or slug"
+                                    className="min-h-11 pl-8 pr-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                 />
                             </div>
 
                             <select
+                                aria-label="Filter tenants by status"
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-300 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
+                                className="min-h-11 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-300 px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                             >
                                 <option value="ALL">All Statuses</option>
                                 <option value="DEMO">DEMO</option>
@@ -642,7 +647,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                     {/* Tenants Grid / Table */}
                     {filteredRestaurants.length === 0 ? (
                         <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-12 text-center text-zinc-400">
-                            <UtensilsCrossed className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+                            <UtensilsCrossed className="w-10 h-10 mx-auto mb-3 text-zinc-400" />
                             <p className="text-sm font-medium text-zinc-300">No restaurants found</p>
                             <p className="text-xs text-zinc-400 mt-1">
                                 {restaurants.length === 0
@@ -718,11 +723,12 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                             {/* Status Selector & Delete */}
                                             <div className="flex items-center gap-2 self-start sm:self-center">
                                                 <select
+                                                    aria-label={`Status for ${restaurant.name}`}
                                                     value={restaurant.status}
                                                     onChange={(e) =>
                                                         handleStatusChange(restaurant.id, e.target.value as TenantStatus)
                                                     }
-                                                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg border cursor-pointer focus:outline-none ${
+                                                    className={`min-h-11 text-xs font-semibold px-3 py-1.5 rounded-lg border cursor-pointer focus:outline-none ${
                                                         restaurant.status === 'ACTIVE'
                                                             ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
                                                             : restaurant.status === 'DEMO'
@@ -740,8 +746,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
 
                                                 <button
                                                     onClick={() => handleDelete(restaurant.id, restaurant.name)}
-                                                    className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition"
-                                                    title="Delete Tenant"
+                                                    className="min-w-11 min-h-11 p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition"
+                                                    title="Delete Tenant" aria-label="Delete Tenant"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -764,8 +770,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                                 `guest-${restaurant.id}`
                                                             )
                                                         }
-                                                        className="p-1 hover:text-white text-zinc-400 rounded"
-                                                        title="Copy URL"
+                                                        className="min-w-11 min-h-11 p-1 hover:text-white text-zinc-400 rounded"
+                                                        title="Copy URL" aria-label="Copy URL"
                                                     >
                                                         {copiedKey === `guest-${restaurant.id}` ? (
                                                             <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -777,8 +783,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                         href={`/r/${restaurant.slug}/t/T1`}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="p-1 hover:text-white text-zinc-400 rounded"
-                                                        title="Open in new tab"
+                                                        className="min-h-11 min-w-11 inline-flex items-center justify-center p-1 hover:text-white text-zinc-400 rounded"
+                                                        title="Open in new tab" aria-label="Open in new tab"
                                                     >
                                                         <ExternalLink className="w-3.5 h-3.5" />
                                                     </a>
@@ -791,7 +797,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                     <ChefHat className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                                                     <div className="truncate">
                                                         <span className="text-zinc-300 font-medium">Floor Staff</span>
-                                                        <span className="text-[10px] text-zinc-400 ml-1">PIN: 2222</span>
+                                                        <span className="text-sm text-zinc-300 ml-1 font-mono tabular-nums">PIN: 2222</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 shrink-0 ml-2">
@@ -802,8 +808,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                                 `floor-${restaurant.id}`
                                                             )
                                                         }
-                                                        className="p-1 hover:text-white text-zinc-400 rounded"
-                                                        title="Copy URL"
+                                                        className="min-w-11 min-h-11 p-1 hover:text-white text-zinc-400 rounded"
+                                                        title="Copy URL" aria-label="Copy URL"
                                                     >
                                                         {copiedKey === `floor-${restaurant.id}` ? (
                                                             <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -815,8 +821,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                         href={`/staff/${restaurant.slug}/floor`}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="p-1 hover:text-white text-zinc-400 rounded"
-                                                        title="Open in new tab"
+                                                        className="min-h-11 min-w-11 inline-flex items-center justify-center p-1 hover:text-white text-zinc-400 rounded"
+                                                        title="Open in new tab" aria-label="Open in new tab"
                                                     >
                                                         <ExternalLink className="w-3.5 h-3.5" />
                                                     </a>
@@ -829,7 +835,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                     <Flame className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                                                     <div className="truncate">
                                                         <span className="text-zinc-300 font-medium">Kitchen (KDS)</span>
-                                                        <span className="text-[10px] text-zinc-400 ml-1">PIN: 3333</span>
+                                                        <span className="text-sm text-zinc-300 ml-1 font-mono tabular-nums">PIN: 3333</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 shrink-0 ml-2">
@@ -840,8 +846,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                                 `kds-${restaurant.id}`
                                                             )
                                                         }
-                                                        className="p-1 hover:text-white text-zinc-400 rounded"
-                                                        title="Copy URL"
+                                                        className="min-w-11 min-h-11 p-1 hover:text-white text-zinc-400 rounded"
+                                                        title="Copy URL" aria-label="Copy URL"
                                                     >
                                                         {copiedKey === `kds-${restaurant.id}` ? (
                                                             <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -853,8 +859,8 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                         href={`/staff/${restaurant.slug}/kds`}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="p-1 hover:text-white text-zinc-400 rounded"
-                                                        title="Open in new tab"
+                                                        className="min-h-11 min-w-11 inline-flex items-center justify-center p-1 hover:text-white text-zinc-400 rounded"
+                                                        title="Open in new tab" aria-label="Open in new tab"
                                                     >
                                                         <ExternalLink className="w-3.5 h-3.5" />
                                                     </a>
@@ -866,7 +872,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                                 onClick={() =>
                                                     setQrModalTenant({ restaurant, tableCode: 'T1' })
                                                 }
-                                                className="flex items-center justify-center gap-2 p-2 rounded-lg bg-orange-600/10 hover:bg-orange-600/20 text-orange-400 border border-orange-500/20 transition cursor-pointer font-medium"
+                                                className="min-h-11 flex items-center justify-center gap-2 p-2 rounded-lg bg-orange-600/10 hover:bg-orange-600/20 text-orange-400 border border-orange-500/20 transition cursor-pointer font-medium"
                                             >
                                                 <QrCode className="w-4 h-4" />
                                                 <span>Scan Table 1 QR</span>
@@ -886,7 +892,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative">
                         <button
                             onClick={() => setQrModalTenant(null)}
-                            className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1"
+                            className="min-h-11 absolute top-4 right-4 text-zinc-400 hover:text-white p-1"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -936,7 +942,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                         'modal-qr'
                                     )
                                 }
-                                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-white transition"
+                                className="min-h-11 flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-white transition"
                             >
                                 {copiedKey === 'modal-qr' ? (
                                     <>
@@ -955,7 +961,7 @@ export function SuperAdminDashboard({ initialRestaurants }: SuperAdminDashboardP
                                 href={`/r/${qrModalTenant.restaurant.slug}/t/${qrModalTenant.tableCode}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-medium bg-orange-600 hover:bg-orange-500 text-white transition shadow"
+                                className="min-h-11 flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-medium bg-orange-600 hover:bg-orange-500 text-zinc-950 transition shadow"
                             >
                                 <ExternalLink className="w-3.5 h-3.5" />
                                 <span>Open Menu</span>

@@ -31,7 +31,7 @@ export function SuperAdminLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center px-4 selection:bg-orange-500 selection:text-white">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center px-4 selection:bg-orange-500 selection:text-zinc-950">
             {/* Ambient background glow */}
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -68,7 +68,7 @@ export function SuperAdminLogin() {
                                 placeholder="••••••••••••••••"
                                 autoFocus
                                 required
-                                className="w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-700/80 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-sm font-mono"
+                                className="min-h-11 w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-700/80 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-sm font-mono"
                             />
                         </div>
                     </div>
@@ -83,7 +83,7 @@ export function SuperAdminLogin() {
                     <button
                         type="submit"
                         disabled={isPending}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-medium text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-[0.99] transition-all duration-150 shadow-lg shadow-orange-600/20 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                        className="min-h-11 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-medium text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-[0.99] transition-all duration-150 shadow-lg shadow-orange-600/20 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                     >
                         {isPending ? (
                             <>
@@ -101,7 +101,7 @@ export function SuperAdminLogin() {
 
                 <div className="mt-6 pt-6 border-t border-zinc-800/80 text-center">
                     <p className="text-xs text-zinc-400">
-                        Configured via <code className="text-zinc-400 bg-zinc-800/60 px-1 py-0.5 rounded text-[11px]">SUPER_ADMIN_PASSKEY</code> in your environment.
+                        Configured via <code className="text-zinc-400 bg-zinc-800/60 px-1 py-0.5 rounded text-xs">SUPER_ADMIN_PASSKEY</code> in your environment.
                     </p>
                 </div>
             </div>

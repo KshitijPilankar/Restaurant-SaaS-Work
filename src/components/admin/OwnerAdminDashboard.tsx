@@ -343,28 +343,28 @@ export function OwnerAdminDashboard({
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://dineos.app';
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-orange-500 selection:text-white pb-20">
+        <div className="min-h-screen bg-background text-foreground selection:bg-brand selection:text-brand-foreground pb-20">
             {/* Top Navigation Bar */}
-            <header className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 print:hidden">
+            <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border print:hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     {/* Brand / Logo */}
                     <div className="flex items-center gap-3">
                         <div
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-white text-lg shadow-md"
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-foreground text-lg shadow-md"
                             style={{ backgroundColor: restaurant.primary_color || '#EA580C' }}
                         >
                             {restaurant.name.charAt(0)}
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h1 className="font-extrabold text-base text-white tracking-tight leading-none">
+                                <h1 className="font-extrabold text-base text-foreground tracking-tight leading-none">
                                     {restaurant.name}
                                 </h1>
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800/60 uppercase">
+                                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase">
                                     Owner Portal
                                 </span>
                             </div>
-                            <p className="text-xs text-zinc-400 font-mono mt-0.5">
+                            <p className="text-xs text-muted-foreground font-mono mt-0.5">
                                 slug: /{restaurant.slug} • Logged in as {adminName}
                             </p>
                         </div>
@@ -376,9 +376,9 @@ export function OwnerAdminDashboard({
                             href={`/r/${restaurant.slug}/t/T1`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-300 border border-zinc-800 transition"
+                            className="min-h-11 hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card hover:bg-muted text-xs font-semibold text-zinc-700 border border-border transition"
                         >
-                            <ExternalLink className="w-3.5 h-3.5 text-orange-400" />
+                            <ExternalLink className="w-3.5 h-3.5 text-orange-700" />
                             <span>Preview T1 Menu</span>
                         </a>
 
@@ -386,9 +386,9 @@ export function OwnerAdminDashboard({
                             href={`/staff/${restaurant.slug}/floor`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-300 border border-zinc-800 transition"
+                            className="min-h-11 hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card hover:bg-muted text-xs font-semibold text-zinc-700 border border-border transition"
                         >
-                            <ChefHat className="w-3.5 h-3.5 text-emerald-400" />
+                            <ChefHat className="w-3.5 h-3.5 text-emerald-700" />
                             <span>Staff Floor Map</span>
                         </a>
 
@@ -396,7 +396,7 @@ export function OwnerAdminDashboard({
                             type="button"
                             onClick={handleLogout}
                             disabled={isPending}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/40 text-xs font-semibold text-red-300 border border-red-800/60 transition cursor-pointer"
+                            className="min-h-11 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-xs font-semibold text-red-700 border border-red-200 transition cursor-pointer"
                         >
                             <LogOut className="w-3.5 h-3.5" />
                             <span>Lock</span>
@@ -405,32 +405,32 @@ export function OwnerAdminDashboard({
                 </div>
 
                 {/* Subnav Tabs */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto border-t border-zinc-900 py-2 scrollbar-none">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto border-t border-border py-2 scrollbar-none">
                     <button
                         type="button"
                         onClick={() => setActiveTab('overview')}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                        className={`min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                             activeTab === 'overview'
-                                ? 'bg-zinc-800 text-white shadow-sm'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                                ? 'bg-muted text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-card'
                         }`}
                     >
-                        <LayoutDashboard className="w-4 h-4 text-orange-400" />
+                        <LayoutDashboard className="w-4 h-4 text-orange-700" />
                         <span>Overview & Revenue</span>
                     </button>
 
                     <button
                         type="button"
                         onClick={() => setActiveTab('menu')}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                        className={`min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                             activeTab === 'menu'
-                                ? 'bg-zinc-800 text-white shadow-sm'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                                ? 'bg-muted text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-card'
                         }`}
                     >
-                        <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
+                        <UtensilsCrossed className="w-4 h-4 text-emerald-700" />
                         <span>Menu & Live Stock</span>
-                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-700 text-zinc-300">
+                        <span className="px-1.5 rounded-full text-xs bg-muted text-zinc-700">
                             {menuItems.length}
                         </span>
                     </button>
@@ -438,15 +438,15 @@ export function OwnerAdminDashboard({
                     <button
                         type="button"
                         onClick={() => setActiveTab('qrs')}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                        className={`min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                             activeTab === 'qrs'
-                                ? 'bg-zinc-800 text-white shadow-sm'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                                ? 'bg-muted text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-card'
                         }`}
                     >
-                        <QrCode className="w-4 h-4 text-blue-400" />
+                        <QrCode className="w-4 h-4 text-blue-700" />
                         <span>QR Standees & Tables</span>
-                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-700 text-zinc-300">
+                        <span className="px-1.5 rounded-full text-xs bg-muted text-zinc-700">
                             {tables.length}
                         </span>
                     </button>
@@ -454,13 +454,13 @@ export function OwnerAdminDashboard({
                     <button
                         type="button"
                         onClick={() => setActiveTab('settings')}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                        className={`min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                             activeTab === 'settings'
-                                ? 'bg-zinc-800 text-white shadow-sm'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                                ? 'bg-muted text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-card'
                         }`}
                     >
-                        <Settings className="w-4 h-4 text-purple-400" />
+                        <Settings className="w-4 h-4 text-purple-700" />
                         <span>Restaurant Settings</span>
                     </button>
                 </div>
@@ -472,14 +472,14 @@ export function OwnerAdminDashboard({
                     <div
                         className={`px-4 py-3 rounded-2xl shadow-2xl border flex items-center gap-2 text-xs font-bold ${
                             actionMessage.type === 'success'
-                                ? 'bg-emerald-950 text-emerald-200 border-emerald-800'
-                                : 'bg-red-950 text-red-200 border-red-800'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                : 'bg-red-50 text-red-800 border-red-200'
                         }`}
                     >
                         {actionMessage.type === 'success' ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                         ) : (
-                            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
                         )}
                         <span>{actionMessage.text}</span>
                     </div>
@@ -496,72 +496,72 @@ export function OwnerAdminDashboard({
                         {/* 4 KPI Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             {/* Today's Revenue */}
-                            <div className="p-5 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur shadow-sm space-y-2">
-                                <div className="flex items-center justify-between text-zinc-400 text-xs font-semibold">
+                            <div className="p-5 rounded-3xl bg-card/80 border border-border backdrop-blur shadow-sm space-y-2">
+                                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
                                     <span>Today&apos;s Revenue</span>
-                                    <div className="w-8 h-8 rounded-xl bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400">
+                                    <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
                                         <DollarSign className="w-4 h-4" />
                                     </div>
                                 </div>
-                                <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+                                <div className="text-3xl font-extrabold text-foreground tracking-tight font-mono">
                                     ₹{todayRevenue.toLocaleString('en-IN')}
                                 </div>
-                                <p className="text-[11px] text-zinc-400">
+                                <p className="text-xs text-muted-foreground">
                                     {todayPaidPayments.length} paid bills settled today
                                 </p>
                             </div>
 
                             {/* All-Time Paid Revenue */}
-                            <div className="p-5 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur shadow-sm space-y-2">
-                                <div className="flex items-center justify-between text-zinc-400 text-xs font-semibold">
+                            <div className="p-5 rounded-3xl bg-card/80 border border-border backdrop-blur shadow-sm space-y-2">
+                                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
                                     <span>Total Settled Revenue</span>
-                                    <div className="w-8 h-8 rounded-xl bg-orange-950/60 border border-orange-800/60 flex items-center justify-center text-orange-400">
+                                    <div className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-700">
                                         <TrendingUp className="w-4 h-4" />
                                     </div>
                                 </div>
-                                <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+                                <div className="text-3xl font-extrabold text-foreground tracking-tight font-mono">
                                     ₹{totalRevenueAllTime.toLocaleString('en-IN')}
                                 </div>
-                                <p className="text-[11px] text-zinc-400">
+                                <p className="text-xs text-muted-foreground">
                                     Across {allPaidPayments.length} all-time paid payments
                                 </p>
                             </div>
 
                             {/* Total Orders */}
-                            <div className="p-5 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur shadow-sm space-y-2">
-                                <div className="flex items-center justify-between text-zinc-400 text-xs font-semibold">
+                            <div className="p-5 rounded-3xl bg-card/80 border border-border backdrop-blur shadow-sm space-y-2">
+                                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
                                     <span>Total Orders</span>
-                                    <div className="w-8 h-8 rounded-xl bg-blue-950/60 border border-blue-800/60 flex items-center justify-center text-blue-400">
+                                    <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
                                         <ShoppingBag className="w-4 h-4" />
                                     </div>
                                 </div>
-                                <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+                                <div className="text-3xl font-extrabold text-foreground tracking-tight font-mono">
                                     {validOrdersCount}
                                 </div>
-                                <p className="text-[11px] text-zinc-400">
+                                <p className="text-xs text-muted-foreground">
                                     Active / completed kitchen orders
                                 </p>
                             </div>
 
                             {/* Average Rating & Feedback */}
-                            <div className="p-5 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur shadow-sm space-y-2">
-                                <div className="flex items-center justify-between text-zinc-400 text-xs font-semibold">
+                            <div className="p-5 rounded-3xl bg-card/80 border border-border backdrop-blur shadow-sm space-y-2">
+                                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
                                     <span>Guest Satisfaction</span>
-                                    <div className="w-8 h-8 rounded-xl bg-amber-950/60 border border-amber-800/60 flex items-center justify-center text-amber-400">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800">
                                         <Star className="w-4 h-4 fill-amber-400" />
                                     </div>
                                 </div>
-                                <div className="text-3xl font-extrabold text-white tracking-tight flex items-baseline gap-2">
+                                <div className="text-3xl font-extrabold text-foreground tracking-tight flex items-baseline gap-2">
                                     <span>{averageRating ? `${averageRating} ★` : 'No ratings'}</span>
                                     {reviews.length > 0 && (
-                                        <span className="text-xs text-zinc-400 font-normal">
+                                        <span className="text-xs text-muted-foreground font-normal">
                                             ({reviews.length} reviews)
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-[11px] text-zinc-400">
+                                <p className="text-xs text-muted-foreground">
                                     {privateFeedbackCount > 0 ? (
-                                        <span className="text-rose-400 font-semibold">
+                                        <span className="text-rose-700 font-semibold">
                                             {privateFeedbackCount} private feedback items
                                         </span>
                                     ) : (
@@ -574,26 +574,26 @@ export function OwnerAdminDashboard({
                         {/* Two Columns: Recent Payments Ledger & Private Feedback Inbox */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Payments Ledger */}
-                            <div className="p-6 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur space-y-4">
+                            <div className="p-6 rounded-3xl bg-card/80 border border-border backdrop-blur space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Receipt className="w-5 h-5 text-emerald-400" />
-                                        <h2 className="font-bold text-base text-white">Recent Payments Ledger</h2>
+                                        <Receipt className="w-5 h-5 text-emerald-700" />
+                                        <h2 className="font-bold text-base text-foreground">Recent Payments Ledger</h2>
                                     </div>
-                                    <span className="text-xs text-zinc-400 font-mono">
+                                    <span className="text-xs text-muted-foreground font-mono">
                                         {payments.length} transactions
                                     </span>
                                 </div>
 
                                 {payments.length === 0 ? (
-                                    <div className="p-8 text-center border border-dashed border-zinc-800 rounded-2xl text-zinc-400 text-xs">
+                                    <div className="p-8 text-center border border-dashed border-border rounded-2xl text-muted-foreground text-xs">
                                         No payment transactions recorded yet. Payments will populate automatically as diners settle bills.
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left text-xs">
                                             <thead>
-                                                <tr className="border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
+                                                <tr className="border-b border-border text-muted-foreground uppercase text-xs tracking-wider">
                                                     <th className="py-2.5">Time</th>
                                                     <th className="py-2.5">Guest / Table</th>
                                                     <th className="py-2.5">Method</th>
@@ -601,35 +601,35 @@ export function OwnerAdminDashboard({
                                                     <th className="py-2.5 text-right">Amount</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-zinc-800/60 font-mono">
+                                            <tbody className="divide-y divide-border font-mono">
                                                 {payments.slice(0, 10).map((p) => (
-                                                    <tr key={p.id} className="hover:bg-zinc-800/30 transition">
-                                                        <td className="py-3 text-zinc-400">
+                                                    <tr key={p.id} className="hover:bg-muted/30 transition">
+                                                        <td className="py-3 text-muted-foreground">
                                                             {new Date(p.created_at).toLocaleTimeString('en-IN', {
                                                                 hour: '2-digit',
                                                                 minute: '2-digit',
                                                             })}
                                                         </td>
-                                                        <td className="py-3 font-sans font-medium text-white">
+                                                        <td className="py-3 font-sans font-medium text-foreground">
                                                             {p.paid_by_name || 'Guest'}
                                                         </td>
                                                         <td className="py-3">
-                                                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-800 text-zinc-300">
+                                                            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-muted text-zinc-700">
                                                                 {p.method}
                                                             </span>
                                                         </td>
                                                         <td className="py-3 font-sans">
                                                             <span
-                                                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                                                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                                                                     p.status === 'PAID'
-                                                                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60'
-                                                                        : 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
+                                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                                        : 'bg-amber-50 text-amber-800 border border-amber-200'
                                                                 }`}
                                                             >
                                                                 {p.status}
                                                             </span>
                                                         </td>
-                                                        <td className="py-3 text-right font-bold text-white">
+                                                        <td className="py-3 text-right font-bold text-foreground">
                                                             ₹{Number(p.total_amount).toLocaleString('en-IN')}
                                                         </td>
                                                     </tr>
@@ -641,19 +641,19 @@ export function OwnerAdminDashboard({
                             </div>
 
                             {/* Private Feedback & Google Review Funnel Inbox */}
-                            <div className="p-6 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur space-y-4">
+                            <div className="p-6 rounded-3xl bg-card/80 border border-border backdrop-blur space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <MessageSquare className="w-5 h-5 text-amber-400" />
-                                        <h2 className="font-bold text-base text-white">Guest Feedback & Reviews</h2>
+                                        <MessageSquare className="w-5 h-5 text-amber-800" />
+                                        <h2 className="font-bold text-base text-foreground">Guest Feedback & Reviews</h2>
                                     </div>
-                                    <span className="text-xs text-zinc-400 font-mono">
+                                    <span className="text-xs text-muted-foreground font-mono">
                                         {reviews.length} entries
                                     </span>
                                 </div>
 
                                 {reviews.length === 0 ? (
-                                    <div className="p-8 text-center border border-dashed border-zinc-800 rounded-2xl text-zinc-400 text-xs">
+                                    <div className="p-8 text-center border border-dashed border-border rounded-2xl text-muted-foreground text-xs">
                                         No reviews submitted yet. When guests rate 4–5★ they are redirected to Google Reviews; 1–3★ ratings appear privately here for your review.
                                     </div>
                                 ) : (
@@ -665,24 +665,24 @@ export function OwnerAdminDashboard({
                                                     key={rev.id}
                                                     className={`p-4 rounded-2xl border transition ${
                                                         isNegative
-                                                            ? 'bg-rose-950/20 border-rose-800/40 text-rose-200'
-                                                            : 'bg-zinc-800/40 border-zinc-700/40 text-zinc-300'
+                                                            ? 'bg-rose-50 border-rose-200 text-rose-800'
+                                                            : 'bg-muted/40 border-border text-zinc-700'
                                                     }`}
                                                 >
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="font-bold text-white text-xs">
+                                                                <span className="font-bold text-foreground text-xs">
                                                                     {rev.guest_name || 'Anonymous Guest'}
                                                                 </span>
-                                                                <span className="text-amber-400 text-xs tracking-wider">
+                                                                <span className="text-amber-800 text-xs tracking-wider">
                                                                     {'★'.repeat(rev.rating)}
-                                                                    <span className="text-zinc-600">
+                                                                    <span className="text-muted-foreground">
                                                                         {'★'.repeat(5 - rev.rating)}
                                                                     </span>
                                                                 </span>
                                                             </div>
-                                                            <span className="text-[10px] text-zinc-400">
+                                                            <span className="text-xs text-muted-foreground">
                                                                 {new Date(rev.created_at).toLocaleDateString('en-IN', {
                                                                     day: 'numeric',
                                                                     month: 'short',
@@ -694,12 +694,12 @@ export function OwnerAdminDashboard({
                                                         </div>
 
                                                         {rev.redirected_to_google ? (
-                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-950/70 text-blue-300 border border-blue-800/60 inline-flex items-center gap-1">
+                                                            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1">
                                                                 <Globe className="w-3 h-3" />
                                                                 <span>Google Redirected</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800/60 inline-flex items-center gap-1">
+                                                            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 inline-flex items-center gap-1">
                                                                 <AlertCircle className="w-3 h-3" />
                                                                 <span>Private Feedback</span>
                                                             </span>
@@ -707,11 +707,11 @@ export function OwnerAdminDashboard({
                                                     </div>
 
                                                     {rev.comment ? (
-                                                        <p className="mt-2 text-xs italic text-zinc-200 bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-800/50">
+                                                        <p className="mt-2 text-xs italic text-foreground bg-background/40 p-2.5 rounded-xl border border-border">
                                                             &ldquo;{rev.comment}&rdquo;
                                                         </p>
                                                     ) : (
-                                                        <p className="mt-1 text-[11px] text-zinc-400">
+                                                        <p className="mt-1 text-xs text-muted-foreground">
                                                             No written comment provided.
                                                         </p>
                                                     )}
@@ -733,10 +733,10 @@ export function OwnerAdminDashboard({
                         {/* Header Actions */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div>
-                                <h2 className="text-xl font-bold text-white tracking-tight">
+                                <h2 className="text-xl font-bold text-foreground tracking-tight">
                                     Menu & 86&apos;d Stock Manager
                                 </h2>
-                                <p className="text-xs text-zinc-400">
+                                <p className="text-xs text-muted-foreground">
                                     1-tap toggle dishes in/out of stock or update pricing in real-time.
                                 </p>
                             </div>
@@ -744,7 +744,7 @@ export function OwnerAdminDashboard({
                             <button
                                 type="button"
                                 onClick={() => setIsAddDishModalOpen(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition shadow-lg shadow-orange-600/30 cursor-pointer"
+                                className="min-h-11 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand hover:bg-brand text-brand-foreground font-bold text-xs transition shadow-lg shadow-black/10 cursor-pointer"
                             >
                                 <Plus className="w-4 h-4" />
                                 <span>Add New Dish</span>
@@ -752,17 +752,17 @@ export function OwnerAdminDashboard({
                         </div>
 
                         {/* Search & Filters */}
-                        <div className="p-4 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 space-y-3">
+                        <div className="p-4 rounded-3xl bg-card/80 border border-border space-y-3">
                             <div className="flex flex-col sm:flex-row gap-3">
                                 {/* Search Bar */}
                                 <div className="relative flex-1">
-                                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         type="text"
-                                        placeholder="Search dish by name or description..."
+                                        placeholder="Search dish by name or description..." aria-label="Search dish by name or description"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white placeholder-zinc-400 focus:outline-none focus:border-orange-500"
+                                        className="min-h-11 w-full bg-background border border-border rounded-2xl pl-10 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-brand"
                                     />
                                 </div>
 
@@ -770,10 +770,10 @@ export function OwnerAdminDashboard({
                                 <button
                                     type="button"
                                     onClick={() => setVegOnlyFilter(!vegOnlyFilter)}
-                                    className={`px-3 py-2 rounded-2xl text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer ${
+                                    className={`min-h-11 px-3 py-2 rounded-2xl text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer ${
                                         vegOnlyFilter
-                                            ? 'bg-emerald-950 border-emerald-600 text-emerald-300'
-                                            : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                                            ? 'bg-emerald-50 border-emerald-600 text-emerald-700'
+                                            : 'bg-background border-border text-muted-foreground hover:text-foreground'
                                     }`}
                                 >
                                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
@@ -786,10 +786,10 @@ export function OwnerAdminDashboard({
                                 <button
                                     type="button"
                                     onClick={() => setSelectedCategoryFilter('ALL')}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                                    className={`min-h-11 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                                         selectedCategoryFilter === 'ALL'
-                                            ? 'bg-orange-500 text-white shadow-sm'
-                                            : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                                            ? 'bg-brand text-brand-foreground shadow-sm'
+                                            : 'bg-background text-muted-foreground hover:text-brand-foreground border border-border'
                                     }`}
                                 >
                                     All Dishes ({menuItems.length})
@@ -802,10 +802,10 @@ export function OwnerAdminDashboard({
                                             key={cat.id}
                                             type="button"
                                             onClick={() => setSelectedCategoryFilter(cat.id)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                                            className={`min-h-11 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                                                 selectedCategoryFilter === cat.id
-                                                    ? 'bg-orange-500 text-white shadow-sm'
-                                                    : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                                                    ? 'bg-brand text-brand-foreground shadow-sm'
+                                                    : 'bg-background text-muted-foreground hover:text-brand-foreground border border-border'
                                             }`}
                                         >
                                             {cat.name} ({count})
@@ -817,8 +817,8 @@ export function OwnerAdminDashboard({
 
                         {/* Dish List */}
                         {filteredMenuItems.length === 0 ? (
-                            <div className="p-12 text-center border border-dashed border-zinc-800 rounded-3xl text-zinc-400 text-xs space-y-2">
-                                <p className="font-semibold text-zinc-300">No menu items match your filter.</p>
+                            <div className="p-12 text-center border border-dashed border-border rounded-3xl text-muted-foreground text-xs space-y-2">
+                                <p className="font-semibold text-zinc-700">No menu items match your filter.</p>
                                 <p>Try clearing search queries or switch to another category.</p>
                             </div>
                         ) : (
@@ -833,8 +833,8 @@ export function OwnerAdminDashboard({
                                             key={item.id}
                                             className={`p-4 rounded-3xl border transition flex flex-col justify-between gap-3 ${
                                                 item.is_available
-                                                    ? 'bg-zinc-900/90 border-zinc-800/90'
-                                                    : 'bg-zinc-950 border-rose-950/60 opacity-75'
+                                                    ? 'bg-card/90 border-border'
+                                                    : 'bg-background border-rose-200 opacity-75'
                                             }`}
                                         >
                                             <div className="flex items-start justify-between gap-3">
@@ -847,30 +847,30 @@ export function OwnerAdminDashboard({
                                                             }`}
                                                             title={item.is_veg ? 'Vegetarian' : 'Non-Vegetarian'}
                                                         />
-                                                        <h3 className="font-bold text-sm text-white">
+                                                        <h3 className="font-bold text-sm text-foreground">
                                                             {item.name}
                                                         </h3>
                                                     </div>
 
                                                     {item.description && (
-                                                        <p className="text-xs text-zinc-400 line-clamp-2">
+                                                        <p className="text-xs text-muted-foreground line-clamp-2">
                                                             {item.description}
                                                         </p>
                                                     )}
 
-                                                    <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[10px]">
+                                                    <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
                                                         {cat && (
-                                                            <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300">
+                                                            <span className="px-2 py-0.5 rounded-md bg-muted text-zinc-700">
                                                                 {cat.name}
                                                             </span>
                                                         )}
                                                         {station && (
-                                                            <span className="px-2 py-0.5 rounded-md bg-blue-950/60 text-blue-300 border border-blue-900/40">
+                                                            <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-900/40">
                                                                 {station.name}
                                                             </span>
                                                         )}
                                                         {item.spice !== 'NONE' && (
-                                                            <span className="px-2 py-0.5 rounded-md bg-amber-950/60 text-amber-300 border border-amber-900/40">
+                                                            <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-900/40">
                                                                 {item.spice}
                                                             </span>
                                                         )}
@@ -880,10 +880,10 @@ export function OwnerAdminDashboard({
                                                 {/* Stock Status Badge */}
                                                 <div>
                                                     <span
-                                                        className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider inline-flex items-center gap-1 ${
+                                                        className={`px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider inline-flex items-center gap-1 ${
                                                             item.is_available
-                                                                ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60'
-                                                                : 'bg-rose-950/80 text-rose-300 border border-rose-800/60'
+                                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                                : 'bg-rose-50 text-rose-700 border border-rose-200'
                                                         }`}
                                                     >
                                                         {item.is_available ? (
@@ -902,30 +902,30 @@ export function OwnerAdminDashboard({
                                             </div>
 
                                             {/* Bottom Controls: Inline Price + Stock Toggle + Delete */}
-                                            <div className="pt-3 border-t border-zinc-800/70 flex items-center justify-between gap-2">
+                                            <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
                                                 {/* Inline Price Editor */}
                                                 <div className="flex items-center gap-1.5">
                                                     {isEditingPrice ? (
                                                         <div className="flex items-center gap-1">
-                                                            <span className="text-zinc-400 text-xs font-mono">₹</span>
+                                                            <span className="text-muted-foreground text-xs font-mono">₹</span>
                                                             <input
                                                                 type="number"
                                                                 value={tempPrice}
                                                                 onChange={(e) => setTempPrice(e.target.value)}
-                                                                className="w-20 bg-zinc-950 border border-orange-500 rounded-lg px-2 py-1 text-xs text-white font-mono focus:outline-none"
+                                                                className="min-h-11 w-20 bg-background border border-brand/50 rounded-lg px-2 py-1 text-xs text-foreground font-mono focus:outline-none"
                                                                 autoFocus
                                                             />
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleSavePrice(item)}
-                                                                className="p-1 rounded-lg bg-orange-600 text-white hover:bg-orange-500 transition"
+                                                                className="min-h-11 p-1 rounded-lg bg-brand text-brand-foreground hover:bg-brand transition"
                                                             >
                                                                 <Check className="w-3.5 h-3.5" />
                                                             </button>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setEditingPriceId(null)}
-                                                                className="p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white transition"
+                                                                className="min-h-11 p-1 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition"
                                                             >
                                                                 ✕
                                                             </button>
@@ -937,11 +937,11 @@ export function OwnerAdminDashboard({
                                                                 setEditingPriceId(item.id);
                                                                 setTempPrice(String(item.base_price));
                                                             }}
-                                                            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-800/80 hover:bg-zinc-800 text-xs font-mono font-bold text-white transition cursor-pointer group"
-                                                            title="Click to edit price"
+                                                            className="min-w-11 min-h-11 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-muted/80 hover:bg-muted text-xs font-mono font-bold text-foreground transition cursor-pointer group"
+                                                            title="Click to edit price" aria-label="Click to edit price"
                                                         >
                                                             <span>₹{item.base_price}</span>
-                                                            <Edit2 className="w-3 h-3 text-zinc-400 group-hover:text-orange-400" />
+                                                            <Edit2 className="w-3 h-3 text-muted-foreground group-hover:text-orange-700" />
                                                         </button>
                                                     )}
                                                 </div>
@@ -952,10 +952,10 @@ export function OwnerAdminDashboard({
                                                         type="button"
                                                         disabled={isPending}
                                                         onClick={() => handleToggleStock(item)}
-                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
+                                                        className={`min-h-11 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
                                                             item.is_available
-                                                                ? 'bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60'
-                                                                : 'bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-800/60'
+                                                                ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
+                                                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
                                                         }`}
                                                     >
                                                         {item.is_available ? 'Mark 86 / Out' : 'Restore Stock'}
@@ -965,8 +965,8 @@ export function OwnerAdminDashboard({
                                                         type="button"
                                                         disabled={isPending}
                                                         onClick={() => handleDeleteDish(item)}
-                                                        className="p-2 rounded-xl bg-zinc-950 hover:bg-red-950/50 text-zinc-500 hover:text-red-400 border border-zinc-800/80 transition cursor-pointer"
-                                                        title="Delete Dish"
+                                                        className="min-w-11 min-h-11 p-2 rounded-xl bg-background hover:bg-red-50 text-muted-foreground hover:text-red-700 border border-border transition cursor-pointer"
+                                                        title="Delete Dish" aria-label="Delete Dish"
                                                     >
                                                         <Trash2 className="w-3.5 h-3.5" />
                                                     </button>
@@ -981,13 +981,13 @@ export function OwnerAdminDashboard({
                         {/* Add Dish Modal */}
                         {isAddDishModalOpen && (
                             <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-                                    <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                                        <h3 className="font-bold text-base text-white">Add New Menu Dish</h3>
+                                <div className="bg-card border border-border rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between border-b border-border pb-3">
+                                        <h3 className="font-bold text-base text-foreground">Add New Menu Dish</h3>
                                         <button
                                             type="button"
                                             onClick={() => setIsAddDishModalOpen(false)}
-                                            className="text-zinc-400 hover:text-white p-1"
+                                            className="min-h-11 text-muted-foreground hover:text-foreground p-1"
                                         >
                                             ✕
                                         </button>
@@ -995,25 +995,25 @@ export function OwnerAdminDashboard({
 
                                     <form onSubmit={handleCreateDish} className="space-y-4 text-xs">
                                         <div>
-                                            <label className="block text-zinc-300 font-semibold mb-1">
+                                            <label htmlFor="oa-1" className="block text-zinc-700 font-semibold mb-1">
                                                 Dish Name *
                                             </label>
-                                            <input
+                                            <input id="oa-1"
                                                 type="text"
                                                 required
                                                 placeholder="e.g. Paneer Tikka Masala"
                                                 value={newDishName}
                                                 onChange={(e) => setNewDishName(e.target.value)}
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                             />
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-zinc-300 font-semibold mb-1">
+                                                <label htmlFor="oa-2" className="block text-zinc-700 font-semibold mb-1">
                                                     Base Price (₹) *
                                                 </label>
-                                                <input
+                                                <input id="oa-2"
                                                     type="number"
                                                     required
                                                     min="0"
@@ -1021,22 +1021,22 @@ export function OwnerAdminDashboard({
                                                     placeholder="e.g. 320"
                                                     value={newDishPrice}
                                                     onChange={(e) => setNewDishPrice(e.target.value)}
-                                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-orange-500"
+                                                    className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground font-mono focus:outline-none focus:border-brand"
                                                 />
                                             </div>
 
                                             <div>
-                                                <label className="block text-zinc-300 font-semibold mb-1">
+                                                <label className="block text-zinc-700 font-semibold mb-1">
                                                     Diet Type
                                                 </label>
                                                 <div className="flex items-center gap-2 pt-1">
                                                     <button
                                                         type="button"
                                                         onClick={() => setNewDishIsVeg(true)}
-                                                        className={`flex-1 py-1.5 rounded-xl font-bold transition ${
+                                                        className={`min-h-11 flex-1 py-1.5 rounded-xl font-bold transition ${
                                                             newDishIsVeg
-                                                                ? 'bg-emerald-600 text-white'
-                                                                : 'bg-zinc-950 text-zinc-400 border border-zinc-800'
+                                                                ? 'bg-emerald-600 text-foreground'
+                                                                : 'bg-background text-muted-foreground border border-border'
                                                         }`}
                                                     >
                                                         Veg
@@ -1044,10 +1044,10 @@ export function OwnerAdminDashboard({
                                                     <button
                                                         type="button"
                                                         onClick={() => setNewDishIsVeg(false)}
-                                                        className={`flex-1 py-1.5 rounded-xl font-bold transition ${
+                                                        className={`min-h-11 flex-1 py-1.5 rounded-xl font-bold transition ${
                                                             !newDishIsVeg
-                                                                ? 'bg-red-600 text-white'
-                                                                : 'bg-zinc-950 text-zinc-400 border border-zinc-800'
+                                                                ? 'bg-red-600 text-foreground'
+                                                                : 'bg-background text-muted-foreground border border-border'
                                                         }`}
                                                     >
                                                         Non-Veg
@@ -1058,13 +1058,13 @@ export function OwnerAdminDashboard({
 
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-zinc-300 font-semibold mb-1">
+                                                <label htmlFor="oa-3" className="block text-zinc-700 font-semibold mb-1">
                                                     Category *
                                                 </label>
-                                                <select
+                                                <select id="oa-3"
                                                     value={newDishCategory}
                                                     onChange={(e) => setNewDishCategory(e.target.value)}
-                                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                    className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                                 >
                                                     {categories.map((c) => (
                                                         <option key={c.id} value={c.id}>
@@ -1075,13 +1075,13 @@ export function OwnerAdminDashboard({
                                             </div>
 
                                             <div>
-                                                <label className="block text-zinc-300 font-semibold mb-1">
+                                                <label htmlFor="oa-4" className="block text-zinc-700 font-semibold mb-1">
                                                     Kitchen Station
                                                 </label>
-                                                <select
+                                                <select id="oa-4"
                                                     value={newDishStation}
                                                     onChange={(e) => setNewDishStation(e.target.value)}
-                                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                    className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                                 >
                                                     <option value="">No Station (Floor Only)</option>
                                                     {stations.map((s) => (
@@ -1094,13 +1094,13 @@ export function OwnerAdminDashboard({
                                         </div>
 
                                         <div>
-                                            <label className="block text-zinc-300 font-semibold mb-1">
+                                            <label htmlFor="oa-5" className="block text-zinc-700 font-semibold mb-1">
                                                 Spice Level
                                             </label>
-                                            <select
+                                            <select id="oa-5"
                                                 value={newDishSpice}
                                                 onChange={(e) => setNewDishSpice(e.target.value as SpiceLevel)}
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                             >
                                                 <option value="NONE">None / Sweet</option>
                                                 <option value="MILD">Mild</option>
@@ -1110,41 +1110,41 @@ export function OwnerAdminDashboard({
                                         </div>
 
                                         <div>
-                                            <label className="block text-zinc-300 font-semibold mb-1">
+                                            <label htmlFor="oa-6" className="block text-zinc-700 font-semibold mb-1">
                                                 Description
                                             </label>
-                                            <textarea
+                                            <textarea id="oa-6"
                                                 rows={2}
                                                 placeholder="Fresh cottage cheese simmered in roasted tomato gravy..."
                                                 value={newDishDesc}
                                                 onChange={(e) => setNewDishDesc(e.target.value)}
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-zinc-300 font-semibold mb-1">
+                                            <label htmlFor="oa-7" className="block text-zinc-700 font-semibold mb-1">
                                                 Allergens (comma separated)
                                             </label>
-                                            <input
+                                            <input id="oa-7"
                                                 type="text"
                                                 placeholder="Dairy, Nuts, Gluten"
                                                 value={newDishAllergens}
                                                 onChange={(e) => setNewDishAllergens(e.target.value)}
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-zinc-300 font-semibold mb-1">
+                                            <label htmlFor="oa-8" className="block text-zinc-700 font-semibold mb-1">
                                                 Image URL (optional)
                                             </label>
-                                            <input
+                                            <input id="oa-8"
                                                 type="url"
                                                 placeholder="https://images.unsplash.com/..."
                                                 value={newDishImageUrl}
                                                 onChange={(e) => setNewDishImageUrl(e.target.value)}
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                                className="min-h-11 w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                             />
                                         </div>
 
@@ -1152,14 +1152,14 @@ export function OwnerAdminDashboard({
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddDishModalOpen(false)}
-                                                className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition"
+                                                className="min-h-11 px-4 py-2 rounded-xl bg-muted text-zinc-700 hover:bg-muted transition"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={isPending}
-                                                className="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition disabled:opacity-50"
+                                                className="min-h-11 px-5 py-2 rounded-xl bg-brand hover:bg-brand text-brand-foreground font-bold transition disabled:opacity-50"
                                             >
                                                 {isPending ? 'Adding...' : 'Add Dish'}
                                             </button>
@@ -1179,10 +1179,10 @@ export function OwnerAdminDashboard({
                         {/* Header Action */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
                             <div>
-                                <h2 className="text-xl font-bold text-white tracking-tight">
+                                <h2 className="text-xl font-bold text-foreground tracking-tight">
                                     Table QR Standees ({tables.length} Tables)
                                 </h2>
-                                <p className="text-xs text-zinc-400">
+                                <p className="text-xs text-muted-foreground">
                                     Print ready high-contrast QR codes formatted for table acrylic standees or tent cards.
                                 </p>
                             </div>
@@ -1190,9 +1190,9 @@ export function OwnerAdminDashboard({
                             <button
                                 type="button"
                                 onClick={() => window.print()}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs border border-zinc-700 transition shadow cursor-pointer"
+                                className="min-h-11 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-muted hover:bg-muted text-foreground font-bold text-xs border border-border transition shadow cursor-pointer"
                             >
-                                <Printer className="w-4 h-4 text-orange-400" />
+                                <Printer className="w-4 h-4 text-orange-700" />
                                 <span>Print All Table QRs</span>
                             </button>
                         </div>
@@ -1216,19 +1216,19 @@ export function OwnerAdminDashboard({
                                 return (
                                     <div
                                         key={table.id}
-                                        className="p-6 rounded-3xl bg-zinc-900/90 border border-zinc-800/80 flex flex-col items-center text-center justify-between shadow-lg print:border-2 print:border-black print:bg-white print:text-black print:p-8 print:break-inside-avoid"
+                                        className="p-6 rounded-3xl bg-card/90 border border-border flex flex-col items-center text-center justify-between shadow-lg print:border-2 print:border-black print:bg-white print:text-black print:p-8 print:break-inside-avoid"
                                     >
                                         <div className="space-y-1 mb-4">
                                             <div
-                                                className="w-10 h-10 rounded-2xl mx-auto flex items-center justify-center font-bold text-white text-sm mb-2 shadow print:border print:border-black print:text-black print:bg-transparent"
+                                                className="w-10 h-10 rounded-2xl mx-auto flex items-center justify-center font-bold text-foreground text-sm mb-2 shadow print:border print:border-black print:text-black print:bg-transparent"
                                                 style={{ backgroundColor: restaurant.primary_color || '#EA580C' }}
                                             >
                                                 {table.table_code}
                                             </div>
-                                            <h3 className="font-extrabold text-lg text-white print:text-black">
+                                            <h3 className="font-extrabold text-lg text-foreground print:text-black">
                                                 {table.display_name}
                                             </h3>
-                                            <p className="text-xs text-zinc-400 print:text-gray-600 font-medium">
+                                            <p className="text-xs text-muted-foreground print:text-gray-600 font-medium">
                                                 Capacity: {table.capacity} Diners • {restaurant.name}
                                             </p>
                                         </div>
@@ -1243,20 +1243,20 @@ export function OwnerAdminDashboard({
                                             />
                                         </div>
 
-                                        <p className="text-[11px] text-zinc-400 print:text-black font-semibold mb-4">
+                                        <p className="text-xs text-muted-foreground print:text-black font-semibold mb-4">
                                             Point phone camera to view menu &amp; order
                                         </p>
 
                                         {/* Screen Only Action Buttons */}
-                                        <div className="w-full flex items-center justify-center gap-2 print:hidden border-t border-zinc-800 pt-3">
+                                        <div className="w-full flex items-center justify-center gap-2 print:hidden border-t border-border pt-3">
                                             <button
                                                 type="button"
                                                 onClick={() => handleCopy(tableUrl, table.id)}
-                                                className="flex-1 py-2 px-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-300 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                                className="min-h-11 flex-1 py-2 px-2 rounded-xl bg-muted hover:bg-muted text-xs font-semibold text-zinc-700 transition flex items-center justify-center gap-1.5 cursor-pointer"
                                             >
                                                 {isCopied ? (
                                                     <>
-                                                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                                        <Check className="w-3.5 h-3.5 text-emerald-700" />
                                                         <span>Copied</span>
                                                     </>
                                                 ) : (
@@ -1271,10 +1271,10 @@ export function OwnerAdminDashboard({
                                                 href={tableUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
-                                                title="Open in new tab"
+                                                className="min-h-11 min-w-11 inline-flex items-center justify-center p-2 rounded-xl bg-muted hover:bg-muted text-zinc-700 transition"
+                                                title="Open in new tab" aria-label="Open in new tab"
                                             >
-                                                <ExternalLink className="w-4 h-4 text-orange-400" />
+                                                <ExternalLink className="w-4 h-4 text-orange-700" />
                                             </a>
                                         </div>
                                     </div>
@@ -1290,42 +1290,42 @@ export function OwnerAdminDashboard({
                 {activeTab === 'settings' && (
                     <div className="max-w-2xl mx-auto space-y-6">
                         <div>
-                            <h2 className="text-xl font-bold text-white tracking-tight">
+                            <h2 className="text-xl font-bold text-foreground tracking-tight">
                                 Restaurant Operational Settings
                             </h2>
-                            <p className="text-xs text-zinc-400">
+                            <p className="text-xs text-muted-foreground">
                                 Update branding, tax percentage, Wi-Fi credentials, and Google review link.
                             </p>
                         </div>
 
                         <form
                             onSubmit={handleSaveSettings}
-                            className="p-6 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 backdrop-blur space-y-5 text-xs"
+                            className="p-6 rounded-3xl bg-card/80 border border-border backdrop-blur space-y-5 text-xs"
                         >
                             {/* Restaurant Name */}
                             <div>
-                                <label className="block text-zinc-300 font-semibold mb-1.5">
+                                <label htmlFor="oa-9" className="block text-zinc-700 font-semibold mb-1.5">
                                     Restaurant Name *
                                 </label>
-                                <input
+                                <input id="oa-9"
                                     type="text"
                                     required
                                     value={settingsForm.name}
                                     onChange={(e) =>
                                         setSettingsForm((prev) => ({ ...prev, name: e.target.value }))
                                     }
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 font-medium"
+                                    className="min-h-11 w-full bg-background border border-border rounded-2xl px-4 py-2.5 text-foreground focus:outline-none focus:border-brand font-medium"
                                 />
                             </div>
 
                             {/* Brand Color & Tax */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-zinc-300 font-semibold mb-1.5">
+                                    <label htmlFor="oa-10" className="block text-zinc-700 font-semibold mb-1.5">
                                         Brand Primary Color (Hex) *
                                     </label>
                                     <div className="flex items-center gap-2">
-                                        <input
+                                        <input id="oa-10"
                                             type="color"
                                             value={settingsForm.primaryColor}
                                             onChange={(e) =>
@@ -1334,10 +1334,12 @@ export function OwnerAdminDashboard({
                                                     primaryColor: e.target.value,
                                                 }))
                                             }
-                                            className="w-10 h-10 rounded-xl bg-transparent border-0 cursor-pointer"
+                                            className="min-h-11 w-10 h-10 rounded-xl bg-transparent border-0 cursor-pointer"
                                         />
                                         <input
                                             type="text"
+                                            aria-label="Brand color hex code"
+                                            spellCheck={false}
                                             required
                                             value={settingsForm.primaryColor}
                                             onChange={(e) =>
@@ -1346,16 +1348,16 @@ export function OwnerAdminDashboard({
                                                     primaryColor: e.target.value,
                                                 }))
                                             }
-                                            className="flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-2 text-white font-mono uppercase focus:outline-none focus:border-orange-500"
+                                            className="min-h-11 flex-1 bg-background border border-border rounded-2xl px-4 py-2 text-foreground font-mono uppercase focus:outline-none focus:border-brand"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-zinc-300 font-semibold mb-1.5">
+                                    <label htmlFor="oa-11" className="block text-zinc-700 font-semibold mb-1.5">
                                         GST / Tax Percentage (%) *
                                     </label>
-                                    <input
+                                    <input id="oa-11"
                                         type="number"
                                         step="0.1"
                                         min="0"
@@ -1368,37 +1370,37 @@ export function OwnerAdminDashboard({
                                                 taxPercentage: parseFloat(e.target.value) || 0,
                                             }))
                                         }
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-2.5 text-white font-mono focus:outline-none focus:border-orange-500"
+                                        className="min-h-11 w-full bg-background border border-border rounded-2xl px-4 py-2.5 text-foreground font-mono focus:outline-none focus:border-brand"
                                     />
                                 </div>
                             </div>
 
                             {/* Wi-Fi Settings */}
-                            <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800/60 space-y-3">
-                                <div className="flex items-center gap-2 text-zinc-300 font-bold">
-                                    <Wifi className="w-4 h-4 text-blue-400" />
+                            <div className="p-4 rounded-2xl bg-background/60 border border-border space-y-3">
+                                <div className="flex items-center gap-2 text-zinc-700 font-bold">
+                                    <Wifi className="w-4 h-4 text-blue-700" />
                                     <span>Guest Wi-Fi Auto-Share</span>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-zinc-400 text-[11px] mb-1">
+                                        <label htmlFor="oa-12" className="block text-muted-foreground text-xs mb-1">
                                             Wi-Fi SSID (Network Name)
                                         </label>
-                                        <input
+                                        <input id="oa-12"
                                             type="text"
                                             placeholder="e.g. Garnish_Guest_WiFi"
                                             value={settingsForm.wifiSsid || ''}
                                             onChange={(e) =>
                                                 setSettingsForm((prev) => ({ ...prev, wifiSsid: e.target.value }))
                                             }
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                                            className="min-h-11 w-full bg-card border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-brand"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-zinc-400 text-[11px] mb-1">
+                                        <label htmlFor="oa-13" className="block text-muted-foreground text-xs mb-1">
                                             Wi-Fi Password
                                         </label>
-                                        <input
+                                        <input id="oa-13"
                                             type="text"
                                             placeholder="e.g. Welcome@2026"
                                             value={settingsForm.wifiPassword || ''}
@@ -1408,7 +1410,7 @@ export function OwnerAdminDashboard({
                                                     wifiPassword: e.target.value,
                                                 }))
                                             }
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-orange-500"
+                                            className="min-h-11 w-full bg-card border border-border rounded-xl px-3 py-2 text-foreground font-mono focus:outline-none focus:border-brand"
                                         />
                                     </div>
                                 </div>
@@ -1417,25 +1419,25 @@ export function OwnerAdminDashboard({
                             {/* UPI ID & Google Review */}
                             <div className="space-y-3">
                                 <div>
-                                    <label className="block text-zinc-300 font-semibold mb-1">
+                                    <label htmlFor="oa-14" className="block text-zinc-700 font-semibold mb-1">
                                         UPI ID / VPA (Instant Settlement)
                                     </label>
-                                    <input
+                                    <input id="oa-14"
                                         type="text"
                                         placeholder="e.g. restaurant@okaxis or paytmqr..."
                                         value={settingsForm.upiId || ''}
                                         onChange={(e) =>
                                             setSettingsForm((prev) => ({ ...prev, upiId: e.target.value }))
                                         }
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-2.5 text-white font-mono focus:outline-none focus:border-orange-500"
+                                        className="min-h-11 w-full bg-background border border-border rounded-2xl px-4 py-2.5 text-foreground font-mono focus:outline-none focus:border-brand"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-zinc-300 font-semibold mb-1">
+                                    <label htmlFor="oa-15" className="block text-zinc-700 font-semibold mb-1">
                                         Google Review Direct URL (for 4–5★ redirect funnel)
                                     </label>
-                                    <input
+                                    <input id="oa-15"
                                         type="url"
                                         placeholder="https://g.page/r/..."
                                         value={settingsForm.googleReviewUrl || ''}
@@ -1445,9 +1447,9 @@ export function OwnerAdminDashboard({
                                                 googleReviewUrl: e.target.value,
                                             }))
                                         }
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-2.5 text-white focus:outline-none focus:border-orange-500"
+                                        className="min-h-11 w-full bg-background border border-border rounded-2xl px-4 py-2.5 text-foreground focus:outline-none focus:border-brand"
                                     />
-                                    <p className="text-[10px] text-zinc-400 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         When diners leave a 4 or 5 star review, they are seamlessly prompted to post it on this link.
                                     </p>
                                 </div>
@@ -1458,7 +1460,7 @@ export function OwnerAdminDashboard({
                                 <button
                                     type="submit"
                                     disabled={isPending}
-                                    className="w-full py-3.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-sm transition shadow-lg shadow-orange-600/30 cursor-pointer disabled:opacity-50"
+                                    className="min-h-11 w-full py-3.5 rounded-2xl bg-brand hover:bg-brand text-brand-foreground font-extrabold text-sm transition shadow-lg shadow-black/10 cursor-pointer disabled:opacity-50"
                                 >
                                     {isPending ? 'Saving Settings...' : 'Save Restaurant Settings'}
                                 </button>

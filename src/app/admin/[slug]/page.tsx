@@ -48,6 +48,7 @@ export default async function RestaurantAdminPage({ params }: AdminPageProps) {
                 restaurantName={rest.name}
                 targetRole="OWNER"
                 surfaceTitle="Owner Admin Portal"
+                theme="light"
             />
         );
     }
