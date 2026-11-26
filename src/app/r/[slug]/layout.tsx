@@ -4,6 +4,7 @@ import { AlertCircle, Clock, UtensilsCrossed } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { Restaurant } from '@/types/database';
 import { getBrandCssVars } from '@/lib/brand';
+import { TenantGate } from '@/components/guest/TenantGate';
 
 // Serif display face for guest headings (restaurant name, categories, dish names).
 // Loaded here, not in the root layout, so staff, admin and landing pages never download it.
@@ -29,41 +30,39 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
 
     if (error || !restaurant) {
         return (
-            <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6">
-                <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
-                    <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-                        <UtensilsCrossed className="w-7 h-7" />
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-bold text-white">Restaurant Not Found</h1>
-                        <p className="text-xs text-zinc-400 mt-1">
-                            The restaurant slug <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-orange-400 font-mono">/r/{slug}</code> does not exist on DineOS.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <TenantGate
+                fontClassName={fraunces.variable}
+                icon={<UtensilsCrossed aria-hidden="true" className="size-7" />}
+                title="Restaurant Not Found"
+                showHomeLink
+            >
+                <p>
+                    There is no restaurant at{' '}
+                    <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground">/r/{slug}</code>. Check the
+                    QR code or link and try again.
+                </p>
+            </TenantGate>
         );
     }
 
     const rest = restaurant as Restaurant;
 
+    // Dynamic white-label tokens (--brand-primary plus readable foreground and subtle tint)
+    const brandVars = getBrandCssVars(rest.primary_color);
+
     // Guard 1: Status PAUSED
     if (rest.status === 'PAUSED') {
         return (
-            <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6">
-                <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
-                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center mx-auto">
-                        <AlertCircle className="w-7 h-7" />
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-bold text-white">{rest.name}</h1>
-                        <h2 className="text-sm font-semibold text-amber-400 mt-1">Dine-In Orders Temporarily Paused</h2>
-                        <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                            This restaurant is currently not accepting digital table orders. Please contact your floor server for assistance.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <TenantGate
+                fontClassName={fraunces.variable}
+                style={brandVars as React.CSSProperties}
+                icon={<AlertCircle aria-hidden="true" className="size-7" />}
+                tone="warning"
+                title={rest.name}
+                status="Dine-In Orders Temporarily Paused"
+            >
+                <p>This restaurant is not taking digital table orders right now. Please ask your floor server for help.</p>
+            </TenantGate>
         );
     }
 
@@ -72,27 +71,19 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
         const isExpired = new Date(rest.demo_expires_at).getTime() < Date.now();
         if (isExpired) {
             return (
-                <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6">
-                    <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
-                        <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/20 flex items-center justify-center mx-auto">
-                            <Clock className="w-7 h-7" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-white">{rest.name}</h1>
-                            <h2 className="text-sm font-semibold text-red-400 mt-1">Demo Period Expired</h2>
-                            <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                                This 7-day sales demo has concluded. Contact your DineOS sales representative to activate this restaurant.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <TenantGate
+                    fontClassName={fraunces.variable}
+                    style={brandVars as React.CSSProperties}
+                    icon={<Clock aria-hidden="true" className="size-7" />}
+                    tone="danger"
+                    title={rest.name}
+                    status="Demo Period Expired"
+                >
+                    <p>This 7-day sales demo has ended. Contact your DineOS sales representative to activate this restaurant.</p>
+                </TenantGate>
             );
         }
     }
-
-    // Dynamic White-Label Token Injection
-    // --brand-primary plus derived companions (readable foreground, subtle tint)
-    const brandVars = getBrandCssVars(rest.primary_color);
 
     return (
         <div
