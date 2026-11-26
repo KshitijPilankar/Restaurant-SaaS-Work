@@ -8,19 +8,16 @@ import {
     ChefHat,
     Users,
     CheckCircle2,
-    XCircle,
     RotateCcw,
     LogOut,
-    Sparkles,
     Volume2,
     VolumeX,
-    ExternalLink,
     AlertCircle,
-    Check,
     Clock,
     X,
     Receipt,
     Flame,
+    Circle,
 } from 'lucide-react';
 import {
     Restaurant,
@@ -33,6 +30,7 @@ import {
     StaffRole,
 } from '@/types/database';
 import { createClient } from '@/lib/supabase/client';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import {
     approveOrder,
     rejectOrder,
@@ -56,16 +54,31 @@ interface FloorDashboardProps {
     staffRole: StaffRole;
 }
 
+// Table states on the floor map. Every state is carried by an icon, a word and a color, never color alone.
+// Only the urgent state (HELP, a service call) animates, and only its border.
 const TABLE_STATUS_COLORS: Record<
     TableStatus,
-    { label: string; border: string; bg: string; text: string; dot: string; pulse: boolean }
+    { label: string; border: string; bg: string; text: string; Icon: React.ElementType; urgent: boolean }
 > = {
-    FREE: { label: 'Free', border: 'border-zinc-800', bg: 'bg-zinc-900/40', text: 'text-zinc-400', dot: 'bg-zinc-500', pulse: false },
-    ORDERING: { label: 'Ordering', border: 'border-blue-600/80', bg: 'bg-blue-950/20', text: 'text-blue-400', dot: 'bg-blue-400', pulse: false },
-    PENDING_APPROVAL: { label: 'New Order', border: 'border-amber-500', bg: 'bg-amber-950/30', text: 'text-amber-400', dot: 'bg-amber-400', pulse: true },
-    EATING: { label: 'Eating', border: 'border-emerald-600/80', bg: 'bg-emerald-950/20', text: 'text-emerald-400', dot: 'bg-emerald-400', pulse: false },
-    HELP: { label: 'Service Call', border: 'border-red-500', bg: 'bg-red-950/40', text: 'text-red-400', dot: 'bg-red-500', pulse: true },
-    BILL: { label: 'BILL PAID', border: 'border-purple-500 shadow-lg shadow-purple-950/50', bg: 'bg-purple-950/40', text: 'text-purple-300', dot: 'bg-purple-400', pulse: true },
+    FREE: { label: 'Free', border: 'border-zinc-700', bg: 'bg-zinc-900/50', text: 'text-zinc-300', Icon: Circle, urgent: false },
+    ORDERING: { label: 'Ordering', border: 'border-blue-500/70', bg: 'bg-blue-950/30', text: 'text-blue-300', Icon: Clock, urgent: false },
+    PENDING_APPROVAL: { label: 'New Order', border: 'border-amber-400', bg: 'bg-amber-950/40', text: 'text-amber-300', Icon: AlertCircle, urgent: false },
+    EATING: { label: 'Eating', border: 'border-emerald-500/70', bg: 'bg-emerald-950/30', text: 'text-emerald-300', Icon: UtensilsCrossed, urgent: false },
+    HELP: { label: 'Service Call', border: 'border-red-500', bg: 'bg-red-950/50', text: 'text-red-300', Icon: Bell, urgent: true },
+    BILL: { label: 'Bill Paid', border: 'border-purple-400', bg: 'bg-purple-950/40', text: 'text-purple-300', Icon: Receipt, urgent: false },
+};
+
+const REQUEST_LABELS: Record<string, string> = {
+    WATER: 'Water',
+    NAPKINS: 'Napkins & cutlery',
+    WAITER: 'Call server',
+    BILL: 'Bring bill',
+};
+
+const ORDER_STATUS_LABELS: Record<string, { label: string; chip: string }> = {
+    READY: { label: 'Ready', chip: 'border-emerald-600 bg-emerald-950 text-emerald-300' },
+    IN_KITCHEN: { label: 'In kitchen', chip: 'border-blue-600 bg-blue-950 text-blue-300' },
+    PENDING_APPROVAL: { label: 'Needs approval', chip: 'border-amber-500 bg-amber-950 text-amber-300' },
 };
 
 export function FloorDashboard({
@@ -264,169 +277,187 @@ export function FloorDashboard({
         });
     };
 
+    const selectedSession = selectedTable
+        ? sessions.find((s) => s.id === selectedTable.active_session_id && s.is_active)
+        : undefined;
+    const selectedGuests = selectedSession?.guests || [];
+    const selectedOrders = selectedTable ? orders.filter((o) => o.table_id === selectedTable.id) : [];
+
+    const toggleChime = () => {
+        setAudioUnlocked(true);
+        playChime('order');
+    };
+
     return (
-        <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-            {/* Top Navigation */}
-            <header className="sticky top-0 z-30 bg-zinc-900/90 border-b border-zinc-800 backdrop-blur-md px-4 lg:px-8 py-3 flex items-center justify-between">
+        <div className="dark flex min-h-screen flex-col bg-background font-sans text-foreground selection:bg-primary selection:text-primary-foreground">
+            {/* Top navigation */}
+            <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur-md lg:px-8">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-md shadow-orange-600/30 font-bold">
-                        <UtensilsCrossed className="w-5 h-5" />
+                    <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                        <UtensilsCrossed aria-hidden="true" className="size-6" />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-base font-bold text-white tracking-tight">{restaurant.name}</h1>
-                            <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <h1 className="text-xl font-bold tracking-tight text-foreground">{restaurant.name}</h1>
+                            <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-0.5 text-sm font-semibold text-blue-300">
                                 Floor Service
                             </span>
                         </div>
-                        <p className="text-xs text-zinc-400">
-                            Logged in as <strong className="text-zinc-200">{staffName}</strong> ({staffRole})
+                        <p className="text-sm text-muted-foreground">
+                            Logged in as <strong className="font-semibold text-foreground">{staffName}</strong> ({staffRole})
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Audio Unlock Button */}
                     <button
                         type="button"
-                        onClick={() => {
-                            setAudioUnlocked(true);
-                            playChime('order');
-                        }}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${audioUnlocked
-                                ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400'
-                                : 'bg-amber-950/60 border-amber-800 text-amber-400 animate-pulse'
-                            }`}
-                        title={audioUnlocked ? 'Audio Chime Enabled' : 'Tap to Enable Audio Chimes'}
+                        onClick={toggleChime}
+                        className={`inline-flex min-h-12 items-center gap-2 rounded-xl border px-4 text-base font-semibold transition-colors ${
+                            audioUnlocked
+                                ? 'border-emerald-600/60 bg-emerald-950/60 text-emerald-300'
+                                : 'border-amber-500/60 bg-amber-950/60 text-amber-200'
+                        }`}
                     >
-                        {audioUnlocked ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                        <span className="hidden sm:inline">
-                            {audioUnlocked ? 'Audio Active' : 'Enable Chime'}
-                        </span>
+                        {audioUnlocked ? (
+                            <Volume2 aria-hidden="true" className="size-5" />
+                        ) : (
+                            <VolumeX aria-hidden="true" className="size-5" />
+                        )}
+                        <span className="hidden sm:inline">{audioUnlocked ? 'Sound On' : 'Sound Off'}</span>
                     </button>
 
-                    {/* Switch to KDS */}
                     <a
                         href={`/staff/${restaurant.slug}/kds`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 transition"
+                        className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 text-base font-medium text-zinc-100 transition-colors hover:bg-zinc-700"
                     >
-                        <ChefHat className="w-3.5 h-3.5 text-orange-400" />
+                        <ChefHat aria-hidden="true" className="size-5 text-primary" />
                         <span className="hidden sm:inline">Kitchen (KDS)</span>
+                        <span className="sr-only sm:hidden">Kitchen (KDS)</span>
                     </a>
 
                     <button
+                        type="button"
                         onClick={handleLogout}
                         disabled={isActionPending}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition cursor-pointer"
+                        className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 text-base font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
                     >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <LogOut aria-hidden="true" className="size-5" />
                         <span>Sign Out</span>
                     </button>
                 </div>
             </header>
 
-            {/* Live Service Requests Alert Bar */}
-            {openRequests.length > 0 && (
-                <div className="bg-red-950/80 border-b border-red-800 px-4 lg:px-8 py-2.5 animate-fadeIn">
-                    <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-red-400 animate-ping" />
-                            <Bell className="w-4 h-4 text-red-400" />
-                            <span className="text-xs font-bold text-red-200">
-                                {openRequests.length} Open Service Request{openRequests.length > 1 ? 's' : ''}:
-                            </span>
-                            <div className="flex flex-wrap items-center gap-2">
-                                {openRequests.map((req) => {
-                                    const reqTable = tables.find((t) => t.id === req.table_id);
-                                    return (
-                                        <span
-                                            key={req.id}
-                                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-900/60 border border-red-700 text-xs font-medium text-red-200"
-                                        >
-                                            <strong>{reqTable?.display_name || 'Table'}:</strong>
-                                            <span>{req.type}</span>
-                                            <button
-                                                onClick={() => handleResolveRequest(req.id)}
-                                                className="ml-1 text-[11px] underline hover:text-white font-bold cursor-pointer"
-                                            >
-                                                Resolve
-                                            </button>
-                                        </span>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Sound must be enabled once per session, or browsers block the chime */}
+            {!audioUnlocked && (
+                <button
+                    type="button"
+                    onClick={toggleChime}
+                    className="flex min-h-12 w-full items-center justify-center gap-2 border-b border-amber-500/40 bg-amber-950/50 px-4 text-base font-semibold text-amber-200 transition-colors hover:bg-amber-950/70"
+                >
+                    <VolumeX aria-hidden="true" className="size-5" />
+                    <span>Order chime is muted. Tap here to turn it on.</span>
+                </button>
             )}
 
-            {/* Main Operational Container */}
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-                {/* 1. Incoming Order Approval Queue - Compact Horizontal Scroll Row */}
-                {pendingOrders.length > 0 && (
-                    <section className="bg-amber-950/20 border-2 border-amber-500/80 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl space-y-3 animate-slideUp">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0" />
-                                <h2 className="text-sm sm:text-base font-extrabold text-amber-300 truncate">
-                                    New Guest Orders Waiting for Approval ({pendingOrders.length})
-                                </h2>
-                            </div>
-                            <span className="text-[11px] sm:text-xs text-amber-400/80 font-medium shrink-0">
-                                {pendingOrders.length > 2 ? 'Swipe / Scroll →' : 'Tap Approve to send to Kitchen KDS'}
+            {/* Open service requests: the one urgent strip, a single scrolling row */}
+            {openRequests.length > 0 && (
+                <section aria-label="Open service requests" className="border-b border-red-800 bg-red-950/70 px-4 py-3 lg:px-8">
+                    <div className="mx-auto flex max-w-[1800px] items-center gap-3">
+                        <p className="flex shrink-0 items-center gap-2 text-base font-bold text-red-200">
+                            <Bell aria-hidden="true" className="size-5 text-red-300" />
+                            <span>
+                                {openRequests.length} Open Service Request{openRequests.length > 1 ? 's' : ''}
                             </span>
+                        </p>
+                        <ul className="scrollbar-none flex flex-1 items-center gap-2 overflow-x-auto">
+                            {openRequests.map((req) => {
+                                const reqTable = tables.find((t) => t.id === req.table_id);
+                                return (
+                                    <li
+                                        key={req.id}
+                                        className="flex shrink-0 items-center gap-2 rounded-xl border border-red-700 bg-red-900/60 py-1 pr-1 pl-3 text-base text-red-100"
+                                    >
+                                        <span>
+                                            <strong className="font-semibold">{reqTable?.display_name || 'Table'}</strong>
+                                            {' · '}
+                                            {REQUEST_LABELS[req.type] || req.type}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleResolveRequest(req.id)}
+                                            className="min-h-12 rounded-lg bg-red-100 px-4 text-base font-bold text-red-950 transition-colors hover:bg-white"
+                                        >
+                                            Resolve
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                </section>
+            )}
+
+            <main className="mx-auto w-full max-w-[1800px] flex-1 space-y-6 px-4 py-5 lg:px-8">
+                {/* 1. Approval queue: a fixed-height row that scrolls sideways, so the map stays on screen */}
+                {pendingOrders.length > 0 && (
+                    <section
+                        aria-labelledby="approval-queue-heading"
+                        className="space-y-3 rounded-2xl border-2 border-amber-400 bg-amber-950/25 p-4 shadow-xl"
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <h2 id="approval-queue-heading" className="text-xl font-extrabold text-amber-200">
+                                New Guest Orders Waiting for Approval ({pendingOrders.length})
+                            </h2>
+                            {pendingOrders.length > 2 && (
+                                <span className="hidden shrink-0 text-base font-medium text-amber-300 sm:inline">Scroll sideways →</span>
+                            )}
                         </div>
 
-                        {/* Compact Horizontal Scroll Row */}
-                        <div className="flex gap-3 overflow-x-auto pb-2 pt-0.5 -mx-1 px-1 scroll-smooth">
+                        <ul className="flex snap-x gap-3 overflow-x-auto pb-1">
                             {pendingOrders.map((order) => {
                                 const orderTable = tables.find((t) => t.id === order.table_id);
 
                                 return (
-                                    <div
+                                    <li
                                         key={order.id}
-                                        className="w-[280px] sm:w-[320px] shrink-0 bg-zinc-900/95 border border-amber-500/40 rounded-2xl p-3.5 flex flex-col justify-between space-y-2.5 shadow-lg"
+                                        className="flex w-[300px] shrink-0 snap-start flex-col gap-2.5 rounded-2xl border border-amber-500/50 bg-card p-3.5 shadow-lg sm:w-[340px]"
                                     >
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">
-                                                    {orderTable?.display_name || 'Table'}
-                                                </span>
-                                                <span className="text-xs font-extrabold text-white font-mono">
-                                                    ₹{order.subtotal}
-                                                </span>
-                                            </div>
-
-                                            <div className="text-xs text-zinc-400 truncate">
-                                                Placed by: <strong className="text-zinc-200">{order.placed_by_name}</strong>
-                                            </div>
-
-                                            {/* Itemized preview */}
-                                            {order.order_items && order.order_items.length > 0 && (
-                                                <div className="p-2.5 bg-zinc-950 rounded-xl space-y-1 text-xs divide-y divide-zinc-800 max-h-24 overflow-y-auto">
-                                                    {order.order_items.map((oi) => (
-                                                        <div key={oi.id} className="pt-1 first:pt-0 flex justify-between text-zinc-300 gap-2">
-                                                            <span className="truncate">
-                                                                {oi.quantity}x {oi.item_name} {oi.variant_name && `(${oi.variant_name})`}
-                                                            </span>
-                                                            <span className="font-mono text-zinc-400 shrink-0">
-                                                                ₹{Number(oi.unit_price) * oi.quantity}
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="rounded-lg border border-amber-500/50 bg-amber-500/15 px-2.5 py-0.5 font-mono text-lg font-bold text-amber-200">
+                                                {orderTable?.display_name || 'Table'}
+                                            </span>
+                                            <span className="font-mono text-lg font-extrabold text-white tabular-nums">₹{order.subtotal}</span>
                                         </div>
 
-                                        {/* Action Buttons */}
-                                        <div className="flex items-center gap-2 pt-1">
+                                        <p className="truncate text-base text-zinc-300">
+                                            Placed by <strong className="font-semibold text-white">{order.placed_by_name}</strong>
+                                        </p>
+
+                                        {order.order_items && order.order_items.length > 0 && (
+                                            <ul className="max-h-24 divide-y divide-zinc-800 overflow-y-auto rounded-xl bg-background px-3 py-1 text-base">
+                                                {order.order_items.map((oi) => (
+                                                    <li key={oi.id} className="flex justify-between gap-2 py-1 text-zinc-200">
+                                                        <span className="truncate">
+                                                            <span className="font-mono tabular-nums">{oi.quantity}×</span> {oi.item_name}
+                                                            {oi.variant_name && ` (${oi.variant_name})`}
+                                                        </span>
+                                                        <span className="shrink-0 font-mono text-zinc-400 tabular-nums">
+                                                            ₹{Number(oi.unit_price) * oi.quantity}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+
+                                        <div className="mt-auto flex items-center gap-2 pt-1">
                                             <button
                                                 type="button"
                                                 onClick={() => handleReject(order.id)}
                                                 disabled={isActionPending}
-                                                className="py-2 px-3 rounded-xl text-xs font-bold text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 border border-red-800/60 transition cursor-pointer shrink-0"
+                                                className="min-h-14 shrink-0 rounded-xl border border-red-700 bg-red-950/60 px-4 text-base font-bold text-red-300 transition-colors hover:bg-red-950 disabled:opacity-50"
                                             >
                                                 Reject
                                             </button>
@@ -434,271 +465,257 @@ export function FloorDashboard({
                                                 type="button"
                                                 onClick={() => handleApprove(order.id)}
                                                 disabled={isActionPending}
-                                                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 transition shadow-md cursor-pointer flex items-center justify-center gap-1.5 min-w-0"
+                                                className="flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 text-lg font-bold text-white transition-colors hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
                                             >
-                                                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                                                <CheckCircle2 aria-hidden="true" className="size-5 shrink-0" />
                                                 <span className="truncate">Approve & Send</span>
                                             </button>
                                         </div>
-                                    </div>
+                                    </li>
                                 );
                             })}
-                        </div>
+                        </ul>
                     </section>
                 )}
 
-                {/* 2. Visual Table Grid */}
-                <section className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* 2. Live floor map */}
+                <section aria-labelledby="floor-map-heading" className="space-y-4">
+                    <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
                         <div>
-                            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                                <span>Live Floor Map ({tables.length} Tables)</span>
+                            <h2 id="floor-map-heading" className="text-2xl font-bold text-white">
+                                Live Floor Map ({tables.length} Tables)
                             </h2>
-                            <p className="text-xs text-zinc-400">
-                                Realtime status colors: tap any table to view diners, orders, or mark served.
-                            </p>
+                            <p className="text-base text-muted-foreground">Tap a table to see its diners and orders, or to mark food served.</p>
                         </div>
 
-                        {/* Status Legend */}
-                        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                            {Object.entries(TABLE_STATUS_COLORS).map(([key, conf]) => (
-                                <span
-                                    key={key}
-                                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300"
-                                >
-                                    <span className={`w-2 h-2 rounded-full ${conf.dot}`} />
-                                    <span>{conf.label}</span>
-                                </span>
-                            ))}
-                        </div>
+                        <ul className="flex flex-wrap items-center gap-2" aria-label="Status key">
+                            {Object.entries(TABLE_STATUS_COLORS).map(([key, conf]) => {
+                                const LegendIcon = conf.Icon;
+                                return (
+                                    <li
+                                        key={key}
+                                        className={`inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-sm font-semibold ${conf.text}`}
+                                    >
+                                        <LegendIcon aria-hidden="true" className="size-4" />
+                                        <span>{conf.label}</span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
                     </div>
 
-                    {/* Tables Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                         {sortedTables.map((table) => {
                             const conf = TABLE_STATUS_COLORS[table.status] || TABLE_STATUS_COLORS.FREE;
+                            const StatusIcon = conf.Icon;
                             const tableSession = sessions.find((s) => s.id === table.active_session_id && s.is_active);
                             const dinersCount = tableSession?.guests?.length || 0;
                             const tableOrders = orders.filter((o) => o.table_id === table.id && o.status !== 'SERVED' && o.status !== 'CANCELLED');
                             const hasReadyOrder = tableOrders.some((o) => o.status === 'READY');
+                            const statusLabel = hasReadyOrder ? 'Food Ready' : conf.label;
 
                             return (
-                                <div
-                                    key={table.id}
-                                    onClick={() => setSelectedTable(table)}
-                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between h-36 relative select-none hover:scale-[1.02] ${conf.border} ${conf.bg}`}
-                                >
-                                    {/* Top Row: Table Code + Pulse Dot */}
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-base font-extrabold text-white font-mono">
-                                            {table.table_code}
-                                        </span>
-                                        <div className="flex items-center gap-1.5">
-                                            {hasReadyOrder && (
-                                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" title="Food Ready for Pickup" />
-                                            )}
+                                <li key={table.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedTable(table)}
+                                        aria-label={`${table.table_code}, ${table.display_name}, ${statusLabel}, ${dinersCount} ${dinersCount === 1 ? 'diner' : 'diners'}`}
+                                        className={`relative flex min-h-36 w-full select-none flex-col justify-between rounded-2xl border-2 p-4 text-left transition-colors hover:brightness-110 active:scale-[0.98] ${conf.border} ${conf.bg}`}
+                                    >
+                                        {/* Only a service call animates, and only its border */}
+                                        {conf.urgent && (
                                             <span
-                                                className={`w-2.5 h-2.5 rounded-full ${conf.dot} ${conf.pulse ? 'animate-ping' : ''}`}
+                                                aria-hidden="true"
+                                                className="animate-borderBeat pointer-events-none absolute -inset-0.5 rounded-2xl border-4 border-red-400"
                                             />
-                                        </div>
-                                    </div>
+                                        )}
 
-                                    {/* Middle: Diners & Active Orders */}
-                                    <div className="space-y-1">
-                                        <div className="text-xs font-semibold text-zinc-200">
-                                            {table.display_name}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                                            <span className="flex items-center gap-1">
-                                                <Users className="w-3 h-3" />
-                                                {dinersCount}
-                                            </span>
-                                            {tableOrders.length > 0 && (
-                                                <span className="flex items-center gap-1 text-orange-400 font-medium">
-                                                    <Flame className="w-3 h-3" />
-                                                    {tableOrders.length}
+                                        <span className="flex items-start justify-between gap-2">
+                                            <span className="font-mono text-3xl leading-none font-black text-white">{table.table_code}</span>
+                                            <span className="flex items-center gap-3 text-base font-semibold text-zinc-200">
+                                                <span className="flex items-center gap-1">
+                                                    <Users aria-hidden="true" className="size-4 text-zinc-400" />
+                                                    <span className="font-mono tabular-nums">{dinersCount}</span>
                                                 </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Bottom: Status Pill */}
-                                    <div className="pt-1">
-                                        <span
-                                            className={`inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${conf.text} bg-black/40`}
-                                        >
-                                            {hasReadyOrder ? 'FOOD READY' : conf.label}
+                                                {tableOrders.length > 0 && (
+                                                    <span className="flex items-center gap-1 text-orange-300">
+                                                        <Flame aria-hidden="true" className="size-4" />
+                                                        <span className="font-mono tabular-nums">{tableOrders.length}</span>
+                                                    </span>
+                                                )}
+                                            </span>
                                         </span>
-                                    </div>
-                                </div>
+
+                                        <span className="block text-base font-medium text-zinc-300">{table.display_name}</span>
+
+                                        <span
+                                            className={`inline-flex items-center gap-2 self-start rounded-lg bg-black/40 px-2.5 py-1 text-base font-bold ${
+                                                hasReadyOrder ? 'text-emerald-300' : conf.text
+                                            }`}
+                                        >
+                                            {hasReadyOrder ? (
+                                                <CheckCircle2 aria-hidden="true" className="size-5" />
+                                            ) : (
+                                                <StatusIcon aria-hidden="true" className="size-5" />
+                                            )}
+                                            <span>{statusLabel}</span>
+                                        </span>
+                                    </button>
+                                </li>
                             );
                         })}
-                    </div>
+                    </ul>
                 </section>
             </main>
 
-            {/* Table Detail Drawer */}
-            {selectedTable && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-                    <div className="w-full sm:max-w-md bg-zinc-900 border-t sm:border-l border-zinc-800 rounded-t-[28px] sm:rounded-3xl p-6 pb-safe shadow-2xl flex flex-col space-y-5 animate-slideUp sm:animate-slideLeft relative overflow-y-auto max-h-[92vh] sm:max-h-[95vh]">
-                        {/* Tactile Grab Handle for Mobile */}
-                        <div className="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto -mt-2 mb-2 sm:hidden shrink-0" />
-
+            {/* Table detail sheet */}
+            <BottomSheet
+                open={!!selectedTable}
+                onClose={() => setSelectedTable(null)}
+                label="Table details"
+                placement="adaptive"
+                className="max-h-[92vh] max-w-lg"
+                contentClassName="space-y-5 overflow-y-auto px-6 pt-1 pb-6 pb-safe sm:pt-6"
+            >
+                {selectedTable && (
+                    <>
                         <button
+                            type="button"
                             onClick={() => setSelectedTable(null)}
-                            className="absolute top-5 right-5 p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+                            className="absolute top-2 right-2 flex size-12 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
                             aria-label="Close table details drawer"
                         >
-                            <X className="w-5 h-5" />
+                            <X aria-hidden="true" className="size-6" />
                         </button>
 
-                        {/* Table Header */}
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+                        <div className="pr-12">
+                            <div className="flex items-center gap-3">
+                                <span className="rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-lg font-bold text-primary">
                                     {selectedTable.table_code}
                                 </span>
-                                <h3 className="text-lg font-bold text-white">{selectedTable.display_name}</h3>
+                                <h3 className="text-2xl font-bold text-white">{selectedTable.display_name}</h3>
                             </div>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400">
-                                <span>Status: <strong className="text-white uppercase">{selectedTable.status === 'BILL' ? 'BILL PAID / SETTLE' : selectedTable.status}</strong></span>
-                                <span>•</span>
+                            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-base text-zinc-300">
+                                <span>
+                                    Status:{' '}
+                                    <strong className="font-semibold text-white">
+                                        {(TABLE_STATUS_COLORS[selectedTable.status] || TABLE_STATUS_COLORS.FREE).label}
+                                    </strong>
+                                </span>
+                                <span aria-hidden="true">·</span>
                                 <span>Capacity: {selectedTable.capacity} Seats</span>
-                            </div>
+                            </p>
                         </div>
 
-                        {/* Bill Paid Alert Banner */}
                         {selectedTable.status === 'BILL' && (
-                            <div className="p-3 bg-purple-950/60 border border-purple-800 rounded-2xl flex items-center gap-2.5 text-xs text-purple-200">
-                                <Receipt className="w-5 h-5 text-purple-400 shrink-0" />
+                            <div className="flex items-center gap-3 rounded-2xl border border-purple-700 bg-purple-950/60 p-3.5 text-base text-purple-100">
+                                <Receipt aria-hidden="true" className="size-6 shrink-0 text-purple-300" />
                                 <div>
                                     <strong className="block text-white">Table Payment Settled</strong>
-                                    <span>Guests have completed payment or requested physical bill. Reset table when ready.</span>
+                                    <span>Guests have paid or asked for the bill. Reset the table when they leave.</span>
                                 </div>
                             </div>
                         )}
 
-                        {/* Seated Diners */}
-                        {(() => {
-                            const sess = sessions.find((s) => s.id === selectedTable.active_session_id && s.is_active);
-                            const guests = sess?.guests || [];
+                        {/* Seated diners */}
+                        <div className="space-y-2 rounded-2xl border border-zinc-800 bg-background p-4">
+                            <p className="flex items-center gap-2 text-base font-semibold text-zinc-200">
+                                <Users aria-hidden="true" className="size-4 text-zinc-400" />
+                                <span>Active Diners ({selectedGuests.length})</span>
+                            </p>
+                            {selectedGuests.length > 0 ? (
+                                <ul className="flex flex-wrap gap-2">
+                                    {selectedGuests.map((g) => (
+                                        <li
+                                            key={g.guest_id}
+                                            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-800 px-3 py-1 text-base font-medium text-zinc-100"
+                                        >
+                                            <span aria-hidden="true" className="size-2 rounded-full bg-emerald-400" />
+                                            {g.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-base text-zinc-400 italic">No diners currently seated.</p>
+                            )}
+                        </div>
 
-                            return (
-                                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="font-semibold text-zinc-300 flex items-center gap-1.5">
-                                            <Users className="w-3.5 h-3.5 text-zinc-500" />
-                                            <span>Active Diners ({guests.length})</span>
-                                        </span>
-                                    </div>
-                                    {guests.length > 0 ? (
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {guests.map((g) => (
-                                                <span
-                                                    key={g.guest_id}
-                                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-200 border border-zinc-700"
-                                                >
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                                    {g.name}
+                        {/* Orders */}
+                        <div className="space-y-3">
+                            <h4 className="text-sm font-bold tracking-wider text-zinc-300 uppercase">
+                                Table Orders ({selectedOrders.length})
+                            </h4>
+                            {selectedOrders.length === 0 ? (
+                                <p className="rounded-xl border border-zinc-800 bg-background p-3 text-base text-zinc-400 italic">
+                                    No orders placed yet.
+                                </p>
+                            ) : (
+                                selectedOrders.map((ord) => {
+                                    const st = ORDER_STATUS_LABELS[ord.status];
+                                    return (
+                                        <div key={ord.id} className="space-y-2 rounded-2xl border border-zinc-800 bg-background p-4 text-base">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="font-bold text-white">
+                                                    <span className="font-mono tabular-nums">Order #{ord.order_number || 1}</span> · {ord.placed_by_name}
                                                 </span>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-xs text-zinc-500 italic">No diners currently seated.</p>
-                                    )}
-                                </div>
-                            );
-                        })()}
-
-                        {/* Orders List for this Table */}
-                        {(() => {
-                            const tableOrders = orders.filter((o) => o.table_id === selectedTable.id);
-
-                            return (
-                                <div className="space-y-3">
-                                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                                        Table Orders ({tableOrders.length})
-                                    </h4>
-                                    {tableOrders.length === 0 ? (
-                                        <p className="text-xs text-zinc-500 italic p-3 bg-zinc-950 rounded-xl border border-zinc-800">
-                                            No orders placed yet.
-                                        </p>
-                                    ) : (
-                                        tableOrders.map((ord) => (
-                                            <div
-                                                key={ord.id}
-                                                className="p-3.5 bg-zinc-950 border border-zinc-800 rounded-2xl space-y-2 text-xs"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <span className="font-bold text-white">
-                                                        Order #{ord.order_number || 1} • {ord.placed_by_name}
-                                                    </span>
-                                                    <span
-                                                        className={`font-semibold px-2 py-0.5 rounded-md ${ord.status === 'READY'
-                                                                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                                                                : ord.status === 'IN_KITCHEN'
-                                                                    ? 'bg-blue-950 text-blue-400 border border-blue-800'
-                                                                    : ord.status === 'PENDING_APPROVAL'
-                                                                        ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                                                                        : 'bg-zinc-800 text-zinc-400'
-                                                            }`}
-                                                    >
-                                                        {ord.status}
-                                                    </span>
-                                                </div>
-
-                                                {ord.order_items && (
-                                                    <div className="divide-y divide-zinc-800 pt-1">
-                                                        {ord.order_items.map((oi) => (
-                                                            <div key={oi.id} className="py-1 flex justify-between text-zinc-300">
-                                                                <span>
-                                                                    {oi.quantity}x {oi.item_name} {oi.variant_name && `(${oi.variant_name})`}
-                                                                </span>
-                                                                <span className="text-[11px] font-mono text-zinc-500">
-                                                                    {oi.prep_status}
-                                                                </span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                {/* Mark Served Button if Ready */}
-                                                {ord.status === 'READY' && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleServeOrder(ord.id)}
-                                                        disabled={isActionPending}
-                                                        className="w-full mt-2 py-2 px-3 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition shadow flex items-center justify-center gap-1.5 cursor-pointer"
-                                                    >
-                                                        <CheckCircle2 className="w-4 h-4" />
-                                                        <span>Food Ready • Mark Served to Table</span>
-                                                    </button>
-                                                )}
+                                                <span
+                                                    className={`shrink-0 rounded-lg border px-2.5 py-0.5 text-sm font-semibold ${
+                                                        st ? st.chip : 'border-zinc-700 bg-zinc-800 text-zinc-300'
+                                                    }`}
+                                                >
+                                                    {st ? st.label : ord.status}
+                                                </span>
                                             </div>
-                                        ))
-                                    )}
-                                </div>
-                            );
-                        })()}
 
-                        {/* Reset / Free Table Button */}
-                        <div className="pt-4 border-t border-zinc-800">
+                                            {ord.order_items && (
+                                                <ul className="divide-y divide-zinc-800">
+                                                    {ord.order_items.map((oi) => (
+                                                        <li key={oi.id} className="flex justify-between gap-2 py-1.5 text-zinc-200">
+                                                            <span>
+                                                                <span className="font-mono tabular-nums">{oi.quantity}×</span> {oi.item_name}
+                                                                {oi.variant_name && ` (${oi.variant_name})`}
+                                                            </span>
+                                                            <span className="shrink-0 text-sm text-zinc-400">{oi.prep_status}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+
+                                            {ord.status === 'READY' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleServeOrder(ord.id)}
+                                                    disabled={isActionPending}
+                                                    className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-lg font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
+                                                >
+                                                    <CheckCircle2 aria-hidden="true" className="size-5" />
+                                                    <span>Food Ready · Mark Served to Table</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        {/* Reset */}
+                        <div className="border-t border-zinc-800 pt-4">
                             <button
                                 type="button"
                                 onClick={() => handleResetTable(selectedTable.id, selectedTable.active_session_id)}
                                 disabled={isActionPending}
-                                className="w-full py-3 px-4 rounded-xl text-xs font-bold text-zinc-300 hover:text-red-400 bg-zinc-950 hover:bg-red-950/30 border border-zinc-800 hover:border-red-900 transition cursor-pointer flex items-center justify-center gap-2"
+                                className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-background px-4 text-base font-bold text-zinc-200 transition-colors hover:border-red-800 hover:bg-red-950/30 hover:text-red-300 disabled:opacity-50"
                             >
-                                <RotateCcw className="w-4 h-4" />
+                                <RotateCcw aria-hidden="true" className="size-5" />
                                 <span>Reset / Free This Table</span>
                             </button>
-                            <p className="text-[10px] text-zinc-500 text-center mt-1.5">
-                                Closes current guest session and resets table to FREE for next party.
+                            <p className="mt-2 text-center text-sm text-zinc-400">
+                                Closes the current guest session and frees the table for the next party.
                             </p>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </BottomSheet>
         </div>
     );
 }

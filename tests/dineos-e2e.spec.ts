@@ -295,7 +295,7 @@ test.describe('DineOS E2E Test Suite', () => {
 
         // 4. Click Table T1 in Floor Map to open Table Detail Drawer
         const floorMapSection = page.locator('section:has-text("Live Floor Map")');
-        const table1Tile = floorMapSection.locator('div.cursor-pointer', { hasText: 'T1' }).first();
+        const table1Tile = floorMapSection.getByRole('button', { name: /^T1,/ });
         await expect(table1Tile).toBeVisible();
         await table1Tile.click();
 
